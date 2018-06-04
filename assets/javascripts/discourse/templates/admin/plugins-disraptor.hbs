@@ -1,0 +1,62 @@
+<h2>{{ i18n 'disraptor.title' }}</h2>
+
+{{#if disallow}}
+
+  <p>{{ i18n 'disraptor.disallowed_message' }}</p>
+
+{{else}}
+
+  <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
+
+  <form {{ action 'createRoute' on='submit' }} class="dr-new-route">
+    <label class="dr-text-field">
+      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
+      {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class="dr-text-field__control" type="text" required=true }}
+    </label>
+
+    <span>→</span>
+
+    <label class="dr-text-field">
+      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
+      {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="text" required=true }}
+    </label>
+
+    <button type="submit" class="btn btn-primary">
+      {{ d-icon 'plus'}}
+      {{ i18n 'disraptor.create_route.button_label' }}
+    </button>
+  </form>
+
+  <h3>{{ i18n 'disraptor.route_table.title' }}</h3>
+
+  {{#if routes}}
+    <table>
+      <thead>
+        <tr>
+          <th>{{ i18n 'disraptor.routes.source_path' }}</th>
+          <th>{{ i18n 'disraptor.routes.target_url' }}</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each routes as |routeRecord|}}
+          <tr>
+            <td>{{ routeRecord.sourcePath }}</td>
+            <td>{{ routeRecord.targetURL }}</td>
+            <td>
+              <button type="button" {{ action 'deleteRoute' routeRecord }} class="btn btn-danger">
+                {{ d-icon 'trash-o' }}
+                {{ i18n 'disraptor.delete_route' }}
+              </button>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else if routesLoading}}
+    <p>{{ i18n 'disraptor.route_table.loading' }}</p>
+  {{else}}
+    <p>{{ i18n 'disraptor.route_table.no_routes' }}</p>
+  {{/if}}
+
+{{/if}}

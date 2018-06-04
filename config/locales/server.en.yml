@@ -1,0 +1,7 @@
+en:
+  site_settings:
+    disraptor_enabled: 'Enable Disraptor'
+
+  disraptor:
+    errors:
+      not_enabled: 'The Disraptor plugin is not enabled.'

@@ -1,0 +1,22 @@
+.dr-new-route {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 9px;
+}
+
+.dr-new-route > :not(:last-child) {
+  margin-right: 5px;
+}
+
+.dr-text-field {
+  margin-bottom: 0;
+}
+
+.dr-text-field__label {
+  display: block;
+}
+
+/* Overqualify the selector in order to have higher specificity that Discourse’s default styles. */
+input.dr-text-field__control {
+  margin-bottom: 0;
+}

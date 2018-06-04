@@ -1,0 +1,23 @@
+en:
+  js:
+    disraptor:
+      title: 'Disraptor'
+      disallowed_message: 'Only administrators are allowed to setup Disraptor.'
+      delete_route: 'Delete'
+
+      routes:
+        source_path: 'Source path'
+        source_path_placeholder: '/disraptor'
+        target_url: 'Target URL'
+        target_url_placeholder: 'http://disraptor.org'
+        create: 'Create'
+        delete: 'Delete'
+
+      create_route:
+        title: 'Create a New Route'
+        button_label: 'Create'
+
+      route_table:
+        title: 'Active Routes'
+        no_routes: 'No routes created, yet. Start by creating a new route above.'
+        loading: 'Loading active routes ...'

@@ -1,0 +1,3 @@
+plugins:
+  disraptor_enabled:
+    default: false
