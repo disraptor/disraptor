@@ -3,7 +3,6 @@ en:
     disraptor:
       title: 'Disraptor'
       disallowed_message: 'Only administrators are allowed to setup Disraptor.'
-      delete_route: 'Delete'
 
       routes:
         source_path: 'Source path'
@@ -11,13 +10,18 @@ en:
         target_url: 'Target URL'
         target_url_placeholder: 'http://disraptor.org'
         create: 'Create'
-        delete: 'Delete'
+        delete_label: 'Delete'
 
       create_route:
         title: 'Create a New Route'
         button_label: 'Create'
 
-      route_table:
+      edit_route:
+        start: 'Edit'
+        save: 'Save'
+        stop: 'Cancel'
+
+      route_list:
         title: 'Active Routes'
         no_routes: 'No routes created, yet. Start by creating a new route above.'
         loading: 'Loading active routes ...'

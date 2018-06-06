@@ -1,0 +1,50 @@
+.btn:focus {
+  box-shadow: shadow("focus");
+}
+
+.btn-danger:focus {
+  box-shadow: shadow("focus-danger");
+}
+
+.dr-new-route {
+  margin-bottom: 20px;
+}
+
+.dr-new-route__inputs {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 9px;
+}
+
+.dr-new-route__inputs > :not(:last-child) {
+  margin-right: 5px;
+}
+
+.dr-text-field {
+  margin-bottom: 0;
+}
+
+.dr-text-field__label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Overqualify the selector in order to have higher specificity that Discourse’s default styles. */
+input[type="text"],
+input[type="url"] {
+  margin-bottom: 0;
+}
+
+.route-list {
+  margin-left: 0;
+  list-style: none;
+}
+
+.route {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.route:not(:last-child) {
+  margin-bottom: 9px;
+}

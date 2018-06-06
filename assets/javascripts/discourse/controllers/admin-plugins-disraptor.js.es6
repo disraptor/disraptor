@@ -24,12 +24,37 @@ export default Ember.Controller.extend({
     this.store.findAll(this.endPoint)
       .then(result => {
         this.set('routesLoading', false);
-        this.set('routes', result.content);
+        for (const routeRecord of result.content) {
+          this.routes.pushObject({
+            sourcePath: routeRecord.sourcePath,
+            record: routeRecord,
+            isBeingEdited: false
+          });
+        }
         this.notifyPropertyChange('routes');
       })
       .catch(error => {
         console.error(error);
       });
+  },
+
+  addRoute(route) {
+    const existingRoute = this.routes.findBy('sourcePath', route.record.sourcePath);
+    if (existingRoute) {
+      this.routes.removeObject(existingRoute);
+    }
+
+    this.routes.pushObject(route);
+
+    // Triggers Ember to rerender
+    this.notifyPropertyChange('routes');
+  },
+
+  removeRoute(route) {
+    this.routes.removeObject(route);
+
+    // Triggers Ember to rerender
+    this.notifyPropertyChange('routes');
   },
 
   actions: {
@@ -55,6 +80,10 @@ export default Ember.Controller.extend({
       const routeRecord = this.store.createRecord(this.endPoint, recordProperties);
       console.log('Creating route', routeRecord.sourcePath, '→', routeRecord.targetURL);
 
+      this.saveRecord(routeRecord);
+    },
+
+    saveRecord(routeRecord) {
       // Sends a PUT request to the HTTP end point
       routeRecord.save()
         .then(result => {
@@ -66,36 +95,49 @@ export default Ember.Controller.extend({
             result.target.set('isNew', false);
           }
 
-          this.routes.pushObject(routeRecord);
-          // Triggers Ember to rerender
-          this.notifyPropertyChange('routes');
-          console.log('Created route', routeRecord.sourcePath, '→', routeRecord.targetURL);
+          this.addRoute({
+            sourcePath: routeRecord.sourcePath,
+            record: routeRecord,
+            isBeingEdited: false
+          });
+          console.log('Saved route', routeRecord.sourcePath, '→', routeRecord.targetURL);
         })
         .catch(error => {
-          console.error('Failed to create route', error);
+          console.error('Failed to save route', error);
         });
     },
 
     /**
      * Deletes an existing route.
      *
-     * @param {*} routeRecord Record of the route to delete
+     * @param {*} route Record of the route to delete
      */
-    deleteRoute(routeRecord) {
-      console.log('Deleting route', routeRecord.sourcePath);
+    deleteRoute(route) {
+      console.log('Deleting route', route.record.sourcePath);
 
       // Sends a DELETE request to the HTTP end point
-      this.store.destroyRecord(this.endPoint, routeRecord)
+      this.store.destroyRecord(this.endPoint, route.record)
         .then(() => {
-          // this.set('routes', this.routes.filter(record => record !== routeRecord));
-          this.routes.removeObject(routeRecord);
-          // Triggers Ember to rerender
-          this.notifyPropertyChange('routes');
-          console.log('Deleted route', routeRecord.sourcePath);
+          this.removeRoute(route);
+          console.log('Deleted route', route.record.sourcePath);
         })
         .catch(error => {
           console.error('Failed to delete route', error);
         });
+    },
+
+    toggleEditingRoute(route) {
+      Ember.set(route, 'isBeingEdited', !route.isBeingEdited);
+    },
+
+    startEditingRoute(route) {
+      Ember.set(route, 'isBeingEdited', true);
+      this.notifyPropertyChange('routes');
+    },
+
+    stopEditingRoute(route) {
+      Ember.set(route, 'isBeingEdited', false);
+      this.notifyPropertyChange('routes');
     }
   }
 });

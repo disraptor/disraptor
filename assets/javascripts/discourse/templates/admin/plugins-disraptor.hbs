@@ -9,17 +9,19 @@
   <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
 
   <form {{ action 'createRoute' on='submit' }} class="dr-new-route">
-    <label class="dr-text-field">
-      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
-      {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class="dr-text-field__control" type="text" required=true }}
-    </label>
+    <div class="dr-new-route__inputs">
+      <label class="dr-text-field">
+        <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
+        {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class="dr-text-field__control" type="text" required=true }}
+      </label>
 
-    <span>→</span>
+      <span>→</span>
 
-    <label class="dr-text-field">
-      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
-      {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="text" required=true }}
-    </label>
+      <label class="dr-text-field">
+        <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
+        {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="url" required=true }}
+      </label>
+    </div>
 
     <button type="submit" class="btn btn-primary">
       {{ d-icon 'plus'}}
@@ -27,36 +29,54 @@
     </button>
   </form>
 
-  <h3>{{ i18n 'disraptor.route_table.title' }}</h3>
+  <h3>{{ i18n 'disraptor.route_list.title' }}</h3>
 
   {{#if routes}}
-    <table>
-      <thead>
-        <tr>
-          <th>{{ i18n 'disraptor.routes.source_path' }}</th>
-          <th>{{ i18n 'disraptor.routes.target_url' }}</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each routes as |routeRecord|}}
-          <tr>
-            <td>{{ routeRecord.sourcePath }}</td>
-            <td>{{ routeRecord.targetURL }}</td>
-            <td>
-              <button type="button" {{ action 'deleteRoute' routeRecord }} class="btn btn-danger">
-                {{ d-icon 'trash-o' }}
-                {{ i18n 'disraptor.delete_route' }}
+    <ul class="route-list">
+      {{#each routes as |route|}}
+        <li class="route">
+          <div class="route__display">
+            {{#if route.isBeingEdited}}
+              {{ input value=route.record.sourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') type="text" required=true }}
+            {{else}}
+              {{ route.record.sourcePath }}
+            {{/if}}
+
+            <span>→</span>
+
+            {{#if route.isBeingEdited}}
+              {{ input value=route.record.targetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') type="url" required=true }}
+            {{else}}
+              {{ route.record.targetURL }}
+            {{/if}}
+          </div>
+
+          <div class="route__controls">
+            {{#if route.isBeingEdited}}
+              <button type="button" {{ action 'saveRecord' route.record }} class="btn btn-primary">
+                {{ i18n 'disraptor.edit_route.save' }}
               </button>
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
+            {{/if}}
+
+            <button type="button" {{ action 'toggleEditingRoute' route }} class="btn">
+              {{#if route.isBeingEdited}}
+                {{ i18n 'disraptor.edit_route.stop' }}
+              {{else}}
+                {{ i18n 'disraptor.edit_route.start' }}
+              {{/if}}
+            </button>
+
+            <button type="button" {{ action 'deleteRoute' route }} class="btn btn-danger">
+              {{ i18n 'disraptor.routes.delete_label' }}
+            </button>
+          </div>
+        </li>
+      {{/each}}
+    </ul>
   {{else if routesLoading}}
-    <p>{{ i18n 'disraptor.route_table.loading' }}</p>
+    <p>{{ i18n 'disraptor.route_list.loading' }}</p>
   {{else}}
-    <p>{{ i18n 'disraptor.route_table.no_routes' }}</p>
+    <p>{{ i18n 'disraptor.route_list.no_routes' }}</p>
   {{/if}}
 
 {{/if}}
