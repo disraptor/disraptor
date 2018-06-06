@@ -10,13 +10,6 @@ class RoutesController < ApplicationController
     render json: { routes: routes }
   end
 
-  # def create
-  #   Rails.logger.info '_________________________________________'
-  #   Rails.logger.info 'Disraptor: Creating new route.'
-
-  #   render json: success_json
-  # end
-
   def update
     Rails.logger.info '_________________________________________'
     Rails.logger.info 'Disraptor: Updating route.'

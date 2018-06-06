@@ -26,7 +26,6 @@ after_initialize do
 
     # Note sure if this is the right place for these routes.
     get '/routes' => 'routes#index', constraints: AdminConstraint.new
-    post '/routes' => 'routes#create', constraints: AdminConstraint.new
     put '/routes/:route_id' => 'routes#update', constraints: AdminConstraint.new
     delete '/routes/:route_id' => 'routes#destroy', constraints: AdminConstraint.new
   end
