@@ -57,6 +57,30 @@ export default Ember.Controller.extend({
     this.notifyPropertyChange('routes');
   },
 
+  saveRecord(routeRecord) {
+    // Sends a PUT request to the HTTP end point
+    routeRecord.save()
+      .then(result => {
+        // The RestModel doesn’t always return a result object including a
+        // reference to the record.
+        if (result.target) {
+          // Once the record was successfully saved, set its isNew property to false.
+          // This is crucial if it should be deleted afterwards.
+          result.target.set('isNew', false);
+        }
+
+        this.addRoute({
+          sourcePath: routeRecord.sourcePath,
+          record: routeRecord,
+          isBeingEdited: false
+        });
+        console.log('Saved route record', routeRecord.sourcePath, '→', routeRecord.targetURL);
+      })
+      .catch(error => {
+        console.error('Failed to save route record', error);
+      });
+  },
+
   actions: {
     /**
      * Creates a new route and stores it in the so-called store (see
@@ -78,33 +102,11 @@ export default Ember.Controller.extend({
       };
 
       const routeRecord = this.store.createRecord(this.endPoint, recordProperties);
-      console.log('Creating route', routeRecord.sourcePath, '→', routeRecord.targetURL);
-
       this.saveRecord(routeRecord);
     },
 
-    saveRecord(routeRecord) {
-      // Sends a PUT request to the HTTP end point
-      routeRecord.save()
-        .then(result => {
-          // The RestModel doesn’t always return a result object including a
-          // reference to the record.
-          if (result.target) {
-            // Once the record was successfully saved, set its isNew property to false.
-            // This is crucial if it should be deleted afterwards.
-            result.target.set('isNew', false);
-          }
-
-          this.addRoute({
-            sourcePath: routeRecord.sourcePath,
-            record: routeRecord,
-            isBeingEdited: false
-          });
-          console.log('Saved route', routeRecord.sourcePath, '→', routeRecord.targetURL);
-        })
-        .catch(error => {
-          console.error('Failed to save route', error);
-        });
+    saveRoute(route) {
+      this.saveRecord(route.record);
     },
 
     /**
@@ -113,16 +115,14 @@ export default Ember.Controller.extend({
      * @param {*} route Record of the route to delete
      */
     deleteRoute(route) {
-      console.log('Deleting route', route.record.sourcePath);
-
       // Sends a DELETE request to the HTTP end point
       this.store.destroyRecord(this.endPoint, route.record)
         .then(() => {
           this.removeRoute(route);
-          console.log('Deleted route', route.record.sourcePath);
+          console.log('Deleted route record', route.record.sourcePath);
         })
         .catch(error => {
-          console.error('Failed to delete route', error);
+          console.error('Failed to delete route record', error);
         });
     },
 

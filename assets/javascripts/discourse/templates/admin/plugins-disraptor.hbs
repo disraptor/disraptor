@@ -53,7 +53,7 @@
 
           <div class="route__controls">
             {{#if route.isBeingEdited}}
-              <button type="button" {{ action 'saveRecord' route.record }} class="btn btn-primary">
+              <button type="button" {{ action 'saveRoute' route }} class="btn btn-primary">
                 {{ i18n 'disraptor.edit_route.save' }}
               </button>
             {{/if}}
