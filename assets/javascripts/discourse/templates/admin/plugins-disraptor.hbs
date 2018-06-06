@@ -12,7 +12,7 @@
     <div class="dr-new-route__inputs">
       <label class="dr-text-field">
         <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
-        {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class="dr-text-field__control" type="text" required=true }}
+        {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class="dr-text-field__control" type="text" pattern="^/.*" required=true }}
       </label>
 
       <span>→</span>
@@ -37,7 +37,7 @@
         <li class="route">
           <div class="route__display">
             {{#if route.isBeingEdited}}
-              {{ input value=route.record.sourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') type="text" required=true }}
+              {{ input value=route.record.sourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') type="text" pattern="^/.*" required=true }}
             {{else}}
               {{ route.record.sourcePath }}
             {{/if}}
