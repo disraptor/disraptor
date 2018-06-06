@@ -35,6 +35,11 @@ input[type="url"] {
   margin-bottom: 0;
 }
 
+input[type="text"]:required:invalid,
+input[type="url"]:required:invalid {
+  box-shadow: none;
+}
+
 .route-list {
   margin-left: 0;
   list-style: none;
