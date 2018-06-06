@@ -1,41 +1,45 @@
 class Disraptor::Route
-  def self.find_all
-    routes = Disraptor::RouteStore.get_routes()
+  class << self
 
-    return [] if routes.blank?
-    routes.values
-  end
+    def find_all
+      routes = Disraptor::RouteStore.get_routes()
 
-  def self.add(route_id, source_path, target_url)
-    route = create_route_object(route_id, source_path, target_url)
+      return [] if routes.blank?
+      routes.values
+    end
 
-    Disraptor::RouteStore.add_route(route_id, route)
+    def add(route_id, source_path, target_url)
+      route = create_route_object(route_id, source_path, target_url)
 
-    route
-  end
+      Disraptor::RouteStore.add_route(route_id, route)
 
-  def self.edit(route_id, source_path, target_url)
-    route = create_route_object(route_id, source_path, target_url)
+      route
+    end
 
-    # Remove the existing route
-    Disraptor::RouteStore.remove_route(route_id)
-    # And add the new one
-    Disraptor::RouteStore.add_route(route_id, route)
+    def edit(route_id, source_path, target_url)
+      route = create_route_object(route_id, source_path, target_url)
 
-    route
-  end
+      # Remove the existing route
+      Disraptor::RouteStore.remove_route(route_id)
+      # And add the new one
+      Disraptor::RouteStore.add_route(route_id, route)
 
-  def self.remove(route_id)
-    Disraptor::RouteStore.remove_route(route_id)
-  end
+      route
+    end
 
-  private
+    def remove(route_id)
+      Disraptor::RouteStore.remove_route(route_id)
+    end
 
-  def self.create_route_object(route_id, source_path, target_url)
-    route = {
-      id: route_id,
-      sourcePath: source_path,
-      targetURL: target_url
-    }
+    private
+
+    def create_route_object(route_id, source_path, target_url)
+      route = {
+        id: route_id,
+        sourcePath: source_path,
+        targetURL: target_url
+      }
+    end
+
   end
 end
