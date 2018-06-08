@@ -10,11 +10,11 @@ export default Ember.Controller.extend({
    *
    * **Examples** (note the automatic plural form):
    *
-   * - GET /routes
-   * - PUT /routes/:route_id
-   * - DELETE /routes/:route_id
+   * - GET /disraptor_route
+   * - PUT /disraptor_route/:route_id
+   * - DELETE /disraptor_route/:route_id
    */
-  endPoint: 'route',
+  endPoint: 'disraptor-route',
 
   init() {
     this._super();

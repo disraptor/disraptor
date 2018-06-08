@@ -17,7 +17,7 @@ after_initialize do
   end
 
   load File.expand_path('../lib/route_store.rb', __FILE__)
-  load File.expand_path('../app/controllers/routes_controller.rb', __FILE__)
+  load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
   load File.expand_path('../app/models/route.rb', __FILE__)
 
   Discourse::Application.routes.append do
@@ -25,8 +25,8 @@ after_initialize do
     get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
 
     # Note sure if this is the right place for these routes.
-    get '/routes' => 'routes#index', constraints: AdminConstraint.new
-    put '/routes/:route_id' => 'routes#update', constraints: AdminConstraint.new
-    delete '/routes/:route_id' => 'routes#destroy', constraints: AdminConstraint.new
+    get '/disraptor_routes' => 'disraptor_config#index', constraints: AdminConstraint.new
+    put '/disraptor_routes/:route_id' => 'disraptor_config#update', constraints: AdminConstraint.new
+    delete '/disraptor_routes/:route_id' => 'disraptor_config#destroy', constraints: AdminConstraint.new
   end
 end

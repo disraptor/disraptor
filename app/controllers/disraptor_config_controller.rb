@@ -1,4 +1,6 @@
-class RoutesController < ApplicationController
+# Controller for handling all Disraptor configuration request
+# That is, all request that are
+class DisraptorConfigController < ApplicationController
   before_action :check_if_disraptor_enabled
 
   def index
@@ -7,7 +9,7 @@ class RoutesController < ApplicationController
 
     routes = Disraptor::Route.find_all()
 
-    render json: { routes: routes }
+    render json: { disraptor_routes: routes }
   end
 
   def update
@@ -15,8 +17,8 @@ class RoutesController < ApplicationController
     Rails.logger.info 'Disraptor: Updating route.'
 
     route_id = params[:route_id]
-    source_path = params[:route][:sourcePath]
-    target_url = params[:route][:targetURL]
+    source_path = params[:disraptor_route][:sourcePath]
+    target_url = params[:disraptor_route][:targetURL]
     route = Disraptor::Route.add(route_id, source_path, target_url)
 
     render json: route
