@@ -5,6 +5,11 @@ class Disraptor::RouteStore
       PluginStore.get(Disraptor::PLUGIN_NAME, 'routes') || {}
     end
 
+    def get_route(route_id)
+      routes = PluginStore.get(Disraptor::PLUGIN_NAME, 'routes') || {}
+      routes[route_id]
+    end
+
     def add_route(route_id, route)
       routes = PluginStore.get(Disraptor::PLUGIN_NAME, 'routes') || {}
       routes[route_id] = route
