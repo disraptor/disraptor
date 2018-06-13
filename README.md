@@ -4,6 +4,18 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 ## Development
 
+### Setup
+
+```sh
+bundle exec rails server --binding=0.0.0.0
+```
+
+Occasionally, it’s necessary to clear the cache.
+
+```sh
+rm -rf tmp/cache
+```
+
 ### Configuring Routes
 
 The Disraptor plugin allows you to configure routes via Discourse’s plugin pages (`/admin/plugins/disraptor`). Routes created there will be transferred to the server and stored in Discourse’s PluginStore. A couple of components are required for this data exchange to work.
