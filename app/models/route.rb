@@ -8,6 +8,11 @@ class Disraptor::Route
       routes.values
     end
 
+    def find_by_source_path(source_path)
+      routes = Disraptor::RouteStore.get_routes()
+      routes.values.detect { |route| route['sourcePath'] == source_path }
+    end
+
     def add(route_id, source_path, target_url)
       route = create_route_object(route_id, source_path, target_url)
 
