@@ -7,6 +7,7 @@
 enabled_site_setting :disraptor_enabled
 
 register_asset 'stylesheets/disraptor-plugin.scss'
+register_asset 'stylesheets/disraptor-view.scss'
 
 # Adds a link the Disraptor plugin on the `/admin/plugins` page with the route `disraptor`.
 add_admin_route 'disraptor.title', 'disraptor'
@@ -18,6 +19,7 @@ after_initialize do
 
   load File.expand_path('../lib/route_store.rb', __FILE__)
   load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
+  load File.expand_path('../app/controllers/disraptor_routes_controller.rb', __FILE__)
   load File.expand_path('../app/models/route.rb', __FILE__)
 
   Discourse::Application.routes.append do
@@ -28,5 +30,9 @@ after_initialize do
     get '/disraptor_routes' => 'disraptor_config#index', constraints: AdminConstraint.new
     put '/disraptor_routes/:route_id' => 'disraptor_config#update', constraints: AdminConstraint.new
     delete '/disraptor_routes/:route_id' => 'disraptor_config#destroy', constraints: AdminConstraint.new
+
+    Disraptor::RouteStore.get_routes.values.each do |route|
+      get "/#{route['sourcePath']}" => 'disraptor_routes#show'
+    end
   end
 end
