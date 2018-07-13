@@ -2,6 +2,28 @@
 
 Disraptor is a plugin for Discourse. It aims at offering Discourse’s core functionality (e.g. user management, authentication, etc.) to web applications so they don’t have to implement these features themselves.
 
+At its core, the plugin allows an administrator of a Discourse forum to configure roots in the form of `source-path → target-url`:
+
+```
+/test → http://127.0.0.1:8080/test
+```
+
+With the Discourse forum running on `example.org`, opening `example.org/test` would be a match for that route. Disraptor will load the document at `http://127.0.0.1:8080/test` with all its styles and scripts if possible (see [Limitations](#limitations) for more information).
+
+
+
+## Content
+
+- [Development](#development)
+  - [Setup](#setup)
+- [Documentation](#documentation)
+  - [Limitations](#limitations)
+  - [URL references in target documents](#url-references-in-target-documents)
+  - [Configuring Routes](#configuring-routes)
+  - [Server-side-only Routes](#server-side-only-routes)
+
+
+
 ## Development
 
 ### Setup
@@ -15,6 +37,44 @@ Occasionally, it’s necessary to clear the cache.
 ```sh
 rm -rf tmp/cache
 ```
+
+
+## Documentation
+
+### Limitations
+
+Disraptor can only operate reliably while imposing restrictions on the target documents that are to be loaded.
+
+- No file-relative URLs (i.e. URLs have to start with a slash). This is explained in the section on [URL references in target documents](#url-references-in-target-documents).
+
+
+
+### URL references in target documents
+
+For a Disraptor document that is registered via the route `/example → http://127.0.0.1:8080/`, all resources of that document have to be handled via Disraptor. This opens up a wide variety of issues.
+
+Let’s take CSS as a general example. Assume that the example document in this section loads a CSS file like this:
+
+**`http://127.0.0.1:8080/`**:
+
+```html
+<link rel="stylesheet" href="/css/styles.css">
+```
+
+However, CSS files are not self-contained. They can have `@import` rules or property declarations referencing external URLs. These references can be absolute or relative.
+
+**`http://127.0.0.1:8080/css/styles.css`**:
+
+```css
+@import '/css/colors.css';
+@import 'base.css';
+```
+
+What now? This refers to `http://127.0.0.1:8080/css/colors.css` and `http://127.0.0.1:8080/css/base.css` in the original context of the example document. In a Disraptor context, that’s no longer true. URLs relative to the document can be covered by the same technique mentioned above, but what about URLs like `'base.css'` (or `url('base.css')`)? They wouldn’t automatically be covered.
+
+For this reason, file-relative URLs are forbidden in Disraptor applications. Every URL in your CSS has to start with a slash character.
+
+
 
 ### Configuring Routes
 
@@ -101,3 +161,55 @@ end
 Pay attention to the name of the file and the class itself. If you declared a route to `favorite_pets#index`, it will look for a `FavoritePetsController`, not a `FavoritePetController` (note the missing “s”) or a `PetsController`.
 
 Plus, in order to handle the routes declared in `plugin.rb`, the controller needs the methods we declared, too: `index`, `create`, `update` and `destroy`.
+
+
+
+### Server-side-only Routes
+
+I struggled creating server-side-only routes (see [meta.discourse.org: Get server-side controller method to be called via plugin route](https://meta.discourse.org/t/get-server-side-controller-method-to-be-called-via-plugin-route)). Below, I will document my findings.
+
+---
+
+Adding a route like this to `plugin.rb` doesn’t always call `FavoritePetsController#show` method as one would expect:
+
+```ruby
+get '/css/bird.css' => 'favorite_pets#show'
+```
+
+Requesting `/css/bird.css` *will* call a method named `show` in a class called `FavoritePetsController`.
+
+**`./app/controllers/favorite_pets_controller.rb`**:
+
+```ruby
+class FavoritePetsController < ApplicationController
+  def show
+    Rails.logger.info '┌────────────┐'
+    Rails.logger.info '│ Here we go │'
+    Rails.logger.info '└────────────┘'
+  end
+end
+```
+
+However, if the controller is defined like this, the lines containing the “Here we go” won’t show up. This is confusing as the following can be found in the logger output:
+
+```
+I, [2018-07-12T16:45:17.108958 #30583]  INFO -- : Processing by FavoritePetsController#show as CSS
+```
+
+So `FavoritePetsController#show` has been called but also it hasn’t?
+
+I don’t fully understand it, yet, but there is a clue:
+
+```ruby
+class FavoritePetsController < ApplicationController
+  skip_before_action :check_xhr
+
+  def show
+    Rails.logger.info '┌────────────┐'
+    Rails.logger.info '│ Here we go │'
+    Rails.logger.info '└────────────┘'
+  end
+end
+```
+
+Now this will finally produce the desired logging output. Without this, Discourse expects requests to the server-side controller to come from the client-side via AJAX (or XHR, short for XMLHttpRequest). `check_xhr` seems to be an implicit `before_action` that needs to be skipped in order to avoid this behavior.
