@@ -1,5 +1,6 @@
 class DisraptorRoutesController < ApplicationController
-  before_action :check_if_disraptor_enabled
+  before_action :check_if_disraptor_enabled, :check_xhr_for_documents
+  skip_before_action :check_xhr
 
   def show
     Rails.logger.info '┌──────────────────────────────┐'
@@ -14,14 +15,26 @@ class DisraptorRoutesController < ApplicationController
       target_url = route['targetURL']
 
       url = URI.parse(target_url)
-      req = Net::HTTP::Get.new(url.to_s)
+      req = Net::HTTP::Get.new(url.to_s, {'Content-Type' => request.format.to_s})
       res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
 
-      render html: res.body.html_safe
+      if request.format == 'text/html'
+        Rails.logger.info 'Loading Disraptor document.'
+        render body: res.body.html_safe, content_type: request.format
+      else
+        Rails.logger.info 'Loading Disraptor resource.'
+        render body: res.body, content_type: request.format
+      end
     end
   end
 
   private
+
+  def check_xhr_for_documents
+    if request.format == 'text/html'
+      check_xhr
+    end
+  end
 
   def check_if_disraptor_enabled
     unless SiteSetting.disraptor_enabled

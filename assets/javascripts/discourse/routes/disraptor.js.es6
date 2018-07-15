@@ -1,52 +1,72 @@
 import { ajax } from 'discourse/lib/ajax';
 
 /**
- * Handles Disraptor’s routing.
+ * Handles routing for Disraptor documents.
  */
 export default Discourse.Route.extend({
-  targetContent: null,
+  disraptorDocument: '',
 
   /**
-   * Need to send another request for the current path to the server because the Rails controller
-   * won’t react to the initial request. See `./app/controllers/disraptor_routes_controller.rb`.
+   * Send an AJAX request for the current path to the server to retrieve a Disraptor document for
+   * the current route.
    */
   beforeModel(transition) {
-    return ajax(transition.intent.url, { type: 'GET', dataType: 'text' })
+    // This is used to remove some Discourse styles from the main content area when serving a
+    // Disraptor document.
+    document.documentElement.classList.add('disraptor-page');
+
+    // Load the Disraptor document
+    return ajax(transition.intent.url, { dataType: 'html' })
       .then(result => {
-        this.set('targetContent', result);
+        const headContent = this.extractTagContent('head', result);
+        const linkTags = this.extractLinkTags(headContent);
+        for (const linkTag of linkTags) {
+          if (linkTag.getAttribute('rel') === 'stylesheet') {
+            document.head.insertAdjacentElement('beforeend', linkTag);
+          }
+        }
+
+        const bodyContent = this.extractTagContent('body', result);
+        this.set('disraptorDocument', bodyContent);
       })
       .catch(error => {
         console.error(error);
       });
   },
 
-  renderTemplate: function () {
-    // Attempts to render the template `../templates/disraptor.hbs`
+  model() {
+    return {
+      disraptorDocument: this.get('disraptorDocument')
+    };
+  },
+
+  renderTemplate() {
+    // Renders the template `../templates/disraptor.hbs`
     this.render('disraptor');
   },
 
-  actions: {
-    didTransition: function () {
-      // After the template rendered
-      Ember.run.scheduleOnce('afterRender', this, function () {
-        document.documentElement.classList.add('disraptor-page');
+  /**
+   * Extracts all `HTMLLinkElement`s from a string of the HTMLHeadElement.
+   *
+   * @param {String} headMarkup
+   * @returns {Array<HTMLLinkElement>}
+   */
+  extractLinkTags(headMarkup) {
+    return $(headMarkup).filter(function (node) {
+      return this.tagName === 'LINK';
+    }).toArray();
+  },
 
-        if (this.get('targetContent')) {
-          const view = document.querySelector('#disraptor-view');
-          if (view) {
-            const sanitized = this.get('targetContent')
-              .replace('&', '&amp;')
-              .replace(/[\\"']/g, '&quot;');
-
-            view.insertAdjacentHTML('beforeend', `<iframe sandbox="allow-same-origin allow-scripts" srcdoc="${sanitized}"></iframe>`);
-            const iframe = view.lastElementChild;
-
-            iframe.onload = function () {
-              iframe.style.setProperty('height', iframe.contentWindow.document.documentElement.scrollHeight + 'px');
-            };
-          }
-        }
-      });
-    }
+  /**
+   * Extracts the content of a certain HTML element within a string of HTML.
+   *
+   * @param {String} tagName
+   * @param {String} htmlContent
+   * @returns {String}
+   */
+  extractTagContent(tagName, htmlContent) {
+    const openTagEndPos = htmlContent.indexOf('>', htmlContent.indexOf(`<${tagName}`));
+    const closeTagEndPos = htmlContent.indexOf('>', htmlContent.indexOf(`</${tagName}`));
+    return htmlContent.substring(openTagEndPos + 1, closeTagEndPos);
   }
 });
