@@ -19,6 +19,6 @@ export default RestModel.extend({
    * Required when sending PUT requests via Discourse’s store
    */
   updateProperties() {
-    return this.getProperties('sourcePath', 'targetURL');
+    return this.createProperties();
   }
 });

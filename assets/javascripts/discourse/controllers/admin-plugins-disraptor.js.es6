@@ -1,3 +1,5 @@
+import { hashString } from 'discourse/lib/hash';
+
 /**
  * Disraptor front end controller.
  *
@@ -5,29 +7,33 @@
  */
 export default Ember.Controller.extend({
   /**
-   * Needs to match the filename of `assets/javascripts/discourse/models/route.js.es6`.
-   * This determines the HTTP endpoint to which AJAX requests will me made.
+   * Needs to match the filename of `assets/javascripts/discourse/models/disraptor-route.js.es6`.
+   * This determines the HTTP endpoint to which AJAX requests will me made. Note that the endpoint
+   * will have any dashes (i.e. `-`) replaced with underscores (i.e. `_`) and that it will be
+   * pluralized:
+   * `disraptor-route` becomes `disraptor_routes`.
    *
-   * **Examples** (note the automatic plural form):
+   * **Examples**:
    *
-   * - GET /disraptor_route
-   * - PUT /disraptor_route/:route_id
-   * - DELETE /disraptor_route/:route_id
+   * - GET /disraptor_routes
+   * - GET /disraptor_routes/:route_id
+   * - PUT /disraptor_routes/:route_id
+   * - DELETE /disraptor_routes/:route_id
    */
-  endPoint: 'disraptor-route',
+  storeType: 'disraptor-route',
 
   init() {
     this._super();
     this.set('routesLoading', true);
     this.set('routes', []);
 
-    this.store.findAll(this.endPoint)
+    this.store.findAll(this.storeType)
       .then(result => {
         this.set('routesLoading', false);
-        for (const routeRecord of result.content) {
+        for (const record of result.content) {
           this.routes.pushObject({
-            sourcePath: routeRecord.sourcePath,
-            record: routeRecord,
+            sourcePath: record.sourcePath,
+            record: record,
             isBeingEdited: false
           });
         }
@@ -38,6 +44,12 @@ export default Ember.Controller.extend({
       });
   },
 
+  /**
+   * Adds a route to the user interface. Also removes a potentially existing route with the same
+   * `sourcePath` property.
+   *
+   * @param {object} route
+   */
   addRoute(route) {
     const existingRoute = this.routes.findBy('sourcePath', route.record.sourcePath);
     if (existingRoute) {
@@ -50,75 +62,93 @@ export default Ember.Controller.extend({
     this.notifyPropertyChange('routes');
   },
 
-  removeRoute(route) {
+  /**
+   * Removes a route from the user interface.
+   *
+   * @param {object} route
+   */
+  removeRouteFromUI(route) {
     this.routes.removeObject(route);
 
     // Triggers Ember to rerender
     this.notifyPropertyChange('routes');
   },
 
-  saveRecord(routeRecord) {
-    // Sends a PUT request to the HTTP end point
-    routeRecord.save()
-      .then(result => {
-        // The RestModel doesn’t always return a result object including a
-        // reference to the record.
-        if (result.target) {
-          // Once the record was successfully saved, set its isNew property to false.
-          // This is crucial if it should be deleted afterwards.
-          result.target.set('isNew', false);
-        }
-
-        this.addRoute({
-          sourcePath: routeRecord.sourcePath,
-          record: routeRecord,
-          isBeingEdited: false
-        });
-        console.log('Saved route record', routeRecord.sourcePath, '→', routeRecord.targetURL);
-      })
-      .catch(error => {
-        console.error('Failed to save route record', error);
-      });
-  },
-
   actions: {
     /**
-     * Creates a new route and stores it in the so-called store (see
-     * [meta.discourse.org: Upgrading our front end models to use a store][1]).
+     * Saves a record in Discourse’s store (see
+     * [meta.discourse.org: Upgrading our front end models to use a store][1]) by sending either a
+     * POST or PUT request depending on whether the record has an `id` property.
+     *
+     * If `routeRecord` has a property `id`, a PUT request will be send to the server, signifying
+     * that an existing record should be updated. Otherwise, a POST request will be send, signifying
+     * that a new record should be created. This is an implementation detail of Discourse’s store.
+     * Note that one can create a new record even when the record contains an ID already. This is
+     * necessary as we need to be able to identify routes by a common property.
      *
      * [1]: https://meta.discourse.org/t/upgrading-our-front-end-models-to-use-a-store/27837
      */
-    createRoute() {
-      const sourcePath = this.get('routeSourcePath');
+    createRoute(sourcePath, targetURL) {
       // Hash the source path (e.g. /example) to obtain a number that can be
-      // used as an ID for the store. This intentionally create a conflict when
+      // used as an ID for the store. This intentionally creates a conflict when
       // attemtping to create a route for the same path twice.
-      const routeId = hashCode(sourcePath);
+      const id = hashString(sourcePath) >>> 0;
 
-      const recordProperties = {
-        id: routeId,
-        sourcePath,
-        targetURL: this.get('routeTargetURL')
-      };
+      this.store
+        .createRecord(this.storeType, { id, sourcePath, targetURL })
+        .save()
+        .then(result => {
+          this.addRoute({
+            sourcePath: result.payload.sourcePath,
+            record: result.target,
+            isBeingEdited: false
+          });
 
-      const routeRecord = this.store.createRecord(this.endPoint, recordProperties);
-      this.saveRecord(routeRecord);
+          console.log('Saved route', result.payload.sourcePath, '→', result.payload.targetURL);
+        })
+        .catch(error => {
+          console.error('Failed to save route', error);
+        });
     },
 
-    saveRoute(route) {
-      this.saveRecord(route.record);
+    /**
+     * Updates a route in the store.
+     *
+     * @param {*} routeRecord
+     */
+    updateRouteRecord(routeRecord) {
+      const recordProperties = {
+        sourcePath: routeRecord.sourcePath,
+        targetURL: routeRecord.targetURL
+      };
+
+      routeRecord
+        .update(recordProperties)
+        .then(result => {
+          this.addRoute({
+            sourcePath: result.payload.sourcePath,
+            record: result.target,
+            isBeingEdited: false
+          });
+
+          console.log('Updated route', result.payload.sourcePath, '→', result.payload.targetURL);
+        })
+        .catch(error => {
+          console.error('Failed to update route', error);
+        });
     },
 
     /**
      * Deletes an existing route.
      *
-     * @param {*} route Record of the route to delete
+     * @param {*} route Route to delete
      */
     deleteRoute(route) {
       // Sends a DELETE request to the HTTP end point
-      this.store.destroyRecord(this.endPoint, route.record)
+      this.store
+        .destroyRecord(this.storeType, route.record)
         .then(() => {
-          this.removeRoute(route);
+          this.removeRouteFromUI(route);
           console.log('Deleted route record', route.record.sourcePath);
         })
         .catch(error => {
@@ -126,40 +156,13 @@ export default Ember.Controller.extend({
         });
     },
 
+    /**
+     * Toggles the editing state of a route.
+     *
+     * @param {*} route
+     */
     toggleEditingRoute(route) {
       Ember.set(route, 'isBeingEdited', !route.isBeingEdited);
-    },
-
-    startEditingRoute(route) {
-      Ember.set(route, 'isBeingEdited', true);
-      this.notifyPropertyChange('routes');
-    },
-
-    stopEditingRoute(route) {
-      Ember.set(route, 'isBeingEdited', false);
-      this.notifyPropertyChange('routes');
     }
   }
 });
-
-/**
- * Basic, non-cryptographic hash function.
- *
- * @param {String} input
- */
-function hashCode(input) {
-  let hash = 0;
-
-  if (input.length === 0) {
-    return hash;
-  }
-
-  for (let i = 0; i < input.length; i++) {
-    const char = input.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    // Convert to 32bit integer
-    hash = hash & hash;
-  }
-
-  return hash;
-}

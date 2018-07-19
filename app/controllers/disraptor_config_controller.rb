@@ -3,16 +3,20 @@
 class DisraptorConfigController < ApplicationController
   before_action :check_if_disraptor_enabled
 
+  # Corresponds to requests in the form
+  # GET /disraptor_routes
   def index
-    Rails.logger.info 'Disraptor: Showing available routes.'
+    Rails.logger.info '👻 Disraptor: Showing available routes.'
 
     routes = Disraptor::Route.find_all()
 
     render json: { disraptor_routes: routes }
   end
 
+  # Corresponds to requests in the form
+  # PUT /disraptor_routes/:route_id
   def update
-    Rails.logger.info 'Disraptor: Updating route.'
+    Rails.logger.info '👻 Disraptor: Updating route.'
 
     route_id = params[:route_id]
     source_path = params[:disraptor_route][:sourcePath]
@@ -21,18 +25,20 @@ class DisraptorConfigController < ApplicationController
 
     Rails.application.reload_routes!
 
-    render json: route
+    render json: { disraptor_route: route }
   end
 
+  # Corresponds to requests in the form
+  # DELETE /disraptor_routes/:route_id
   def destroy
-    Rails.logger.info 'Disraptor: Destroying route.'
+    Rails.logger.info '👻 Disraptor: Destroying route.'
 
     route_id = params[:route_id]
     route = Disraptor::Route.remove(route_id)
 
     Rails.application.reload_routes!
 
-    render json: route
+    render json: success_json
   end
 
   private

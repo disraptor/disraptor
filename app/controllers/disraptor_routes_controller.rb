@@ -1,13 +1,14 @@
 class DisraptorRoutesController < ApplicationController
+  # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
+  # Instead, wait for an XHR request from the frontend.
   before_action :check_if_disraptor_enabled, :check_xhr_for_documents
+  # Generally, skip the XHR check and respond directly with the server-side controller
   skip_before_action :check_xhr
 
   def show
-    Rails.logger.info '┌──────────────────────────────┐'
-    Rails.logger.info '│ Disraptor: Requesting route. │'
-    Rails.logger.info '└──────────────────────────────┘'
+    Rails.logger.info '👻 Disraptor: Requesting route ' + request.path
 
-    route = Disraptor::Route.find_by_source_path(request.path)
+    route = Disraptor::Route.find_by_path(request.path)
 
     if route.nil?
       render body: nil, status: 404
@@ -19,10 +20,10 @@ class DisraptorRoutesController < ApplicationController
       res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
 
       if request.format == 'text/html'
-        Rails.logger.info 'Loading Disraptor document.'
+        Rails.logger.info '👻 Disraptor: Loading a document.'
         render body: res.body.html_safe, content_type: request.format
       else
-        Rails.logger.info 'Loading Disraptor resource.'
+        Rails.logger.info '👻 Disraptor: Loading a resource.'
         render body: res.body, content_type: request.format
       end
     end

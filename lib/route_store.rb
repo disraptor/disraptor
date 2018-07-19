@@ -1,6 +1,5 @@
 class Disraptor::RouteStore
   class << self
-
     def get_routes
       PluginStore.get(Disraptor::PLUGIN_NAME, 'routes') || {}
     end
@@ -21,6 +20,5 @@ class Disraptor::RouteStore
       routes.delete(route_id)
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
     end
-
   end
 end

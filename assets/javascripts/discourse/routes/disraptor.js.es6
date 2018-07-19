@@ -68,5 +68,11 @@ export default Discourse.Route.extend({
     const openTagEndPos = htmlContent.indexOf('>', htmlContent.indexOf(`<${tagName}`));
     const closeTagEndPos = htmlContent.indexOf('>', htmlContent.indexOf(`</${tagName}`));
     return htmlContent.substring(openTagEndPos + 1, closeTagEndPos);
+  },
+
+  actions: {
+    willTransition() {
+      document.documentElement.classList.remove('disraptor-page');
+    }
   }
 });

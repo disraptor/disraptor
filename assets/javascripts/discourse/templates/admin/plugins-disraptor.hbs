@@ -8,7 +8,7 @@
 
   <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
 
-  <form {{ action 'createRoute' on='submit' }} class="dr-new-route">
+  <form {{ action 'createRoute' routeSourcePath routeTargetURL on='submit' }} class="dr-new-route">
     <div class="dr-new-route__inputs">
       <label class="dr-text-field">
         <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
@@ -36,11 +36,7 @@
       {{#each routes as |route|}}
         <li class="route">
           <div class="route__display">
-            {{#if route.isBeingEdited}}
-              {{ input value=route.record.sourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') type="text" pattern="^/.*" required=true }}
-            {{else}}
-              {{ route.record.sourcePath }}
-            {{/if}}
+            {{ route.record.sourcePath }}
 
             <span>→</span>
 
@@ -53,7 +49,7 @@
 
           <div class="route__controls">
             {{#if route.isBeingEdited}}
-              <button type="button" {{ action 'saveRoute' route }} class="btn btn-primary">
+              <button type="button" {{ action 'updateRouteRecord' route.record }} class="btn btn-primary">
                 {{ i18n 'disraptor.edit_route.save' }}
               </button>
             {{/if}}
