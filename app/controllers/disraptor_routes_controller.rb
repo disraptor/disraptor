@@ -8,23 +8,40 @@ class DisraptorRoutesController < ApplicationController
   def show
     Rails.logger.info '👻 Disraptor: Requesting route ' + request.path
 
-    route = Disraptor::Route.find_by_path(request.path)
+    route = nil
+    target_url = nil
+
+    if params.key?('wildcard_path')
+      wildcard_begin = request.path.index(params[:wildcard_path])
+      wildcard_prefix = request.path[0, wildcard_begin - 1]
+      wildcard_source_path = wildcard_prefix + '/*'
+      route = Disraptor::Route.find_by_path(wildcard_source_path)
+
+      target_wildcard_begin = route['targetURL'].index(wildcard_prefix)
+      target_prefix = route['targetURL'][0, target_wildcard_begin]
+      target_url = target_prefix + request.path
+      Rails.logger.info target_url
+    else
+      route = Disraptor::Route.find_by_path(request.path)
+      target_url = route['targetURL']
+    end
 
     if route.nil?
       render body: nil, status: 404
     else
-      target_url = route['targetURL']
-
       url = URI.parse(target_url)
-      req = Net::HTTP::Get.new(url.to_s, {'Content-Type' => request.format.to_s})
-      res = Net::HTTP.start(url.host, url.port) { |http| http.request(req) }
+      proxy_request = Net::HTTP::Get.new(url.to_s, {'Content-Type' => request.format.to_s})
+      proxy_response = Net::HTTP.start(url.host, url.port) { |http| http.request(proxy_request) }
 
-      if request.format == 'text/html'
+      if proxy_response.code == '404'
+        Rails.logger.info '👻 Disraptor: 404.'
+        render body: nil, status: 404
+      elsif request.format == 'text/html'
         Rails.logger.info '👻 Disraptor: Loading a document.'
-        render body: res.body.html_safe, content_type: request.format
+        render body: proxy_response.body.html_safe, content_type: request.format
       else
         Rails.logger.info '👻 Disraptor: Loading a resource.'
-        render body: res.body, content_type: request.format
+        render body: proxy_response.body, content_type: request.format
       end
     end
   end

@@ -26,12 +26,14 @@ after_initialize do
     # Serve the default plugins content when the user directly opens the Disraptor plugin.
     get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
 
-    # Note sure if this is the right place for these routes.
     get '/disraptor_routes' => 'disraptor_config#index', constraints: AdminConstraint.new
     put '/disraptor_routes/:route_id' => 'disraptor_config#update', constraints: AdminConstraint.new
     delete '/disraptor_routes/:route_id' => 'disraptor_config#destroy', constraints: AdminConstraint.new
 
     Disraptor::RouteStore.get_routes.values.each do |route|
+      if route['sourcePath'].end_with?('/*')
+        get "/#{route['sourcePath'].chomp('/*')}/*wildcard_path" => 'disraptor_routes#show'
+      else
       get "/#{route['sourcePath']}" => 'disraptor_routes#show'
     end
   end
