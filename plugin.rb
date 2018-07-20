@@ -42,8 +42,8 @@ after_initialize do
         # Instead, the `format` property will be set to `CSS`
         get "/#{route['sourcePath']}wildcard_segment" => 'disraptor_routes#show_wildcard_path'
       else
-      get "/#{route['sourcePath']}" => 'disraptor_routes#show'
+        get "/#{route['sourcePath']}" => 'disraptor_routes#show'
+      end
     end
   end
-end
 end
