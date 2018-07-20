@@ -31,10 +31,19 @@ after_initialize do
     delete '/disraptor_routes/:route_id' => 'disraptor_config#destroy', constraints: AdminConstraint.new
 
     Disraptor::RouteStore.get_routes.values.each do |route|
+      # Check for a wildcard path (e.g. `/css/*`)
       if route['sourcePath'].end_with?('/*')
-        get "/#{route['sourcePath'].chomp('/*')}/*wildcard_path" => 'disraptor_routes#show'
+        # Construct routes of the form `/css/*wildcard_segment` as described in:
+        # http://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments
+        #
+        # `DisraptorRoutesController#show` will now receive a `params` object including a
+        # `wildcard_segment` property. For a request to `/css/slidehub/styles.css`, its
+        # value will be `slidehub/styles`. Note that the extension (e.g. `.css`) is missing.
+        # Instead, the `format` property will be set to `CSS`
+        get "/#{route['sourcePath']}wildcard_segment" => 'disraptor_routes#show_wildcard_path'
       else
       get "/#{route['sourcePath']}" => 'disraptor_routes#show'
     end
   end
+end
 end
