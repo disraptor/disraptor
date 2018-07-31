@@ -2,31 +2,23 @@
 
 Disraptor is a plugin for Discourse. It aims at offering Discourse’s core functionality (e.g. user management, authentication, etc.) to web applications so they don’t have to implement these features themselves.
 
-At its core, the plugin allows an administrator of a Discourse forum to configure roots in the form of `source-path → target-url`:
-
-```
-/test → http://127.0.0.1:8080/test
-```
-
-With the Discourse forum running on `example.org`, opening `example.org/test` would be a match for that route. Disraptor will load the document at `http://127.0.0.1:8080/test` with all its styles and scripts if possible (see [Limitations](#limitations) for more information).
-
 
 
 ## Content
 
 - [Development](#development)
-  - [Setup](#setup)
 - [Documentation](#documentation)
+  - [Introduction](#introduction)
   - [Limitations](#limitations)
   - [URL references in target documents](#url-references-in-target-documents)
   - [Configuring Routes](#configuring-routes)
   - [Server-side-only Routes](#server-side-only-routes)
+- [Notes](#notes)
 
 
 
 ## Development
 
-### Setup
 
 ```sh
 bundle exec rails server --binding=0.0.0.0
@@ -40,6 +32,34 @@ rm -rf tmp/cache
 
 
 ## Documentation
+
+### Introduction
+
+At its core, the plugin allows an administrator of a Discourse forum to configure routes in the form of `source-path → target-url`:
+
+```
+/test → http://127.0.0.1:8080/
+```
+
+With the Discourse forum running on `example.org` and having a route configured as shown above, opening `example.org/test` would be a match for that route. Disraptor will load the document at `http://127.0.0.1:8080/` with all its styles and scripts if possible (see [Limitations](#limitations) for more information).
+
+The above example would be a route for a document. In the same way, one can setup routes for resources like CSS or images:
+
+```
+/css/styles.css → http://127.0.0.1:8080/css/styles.css
+```
+
+Now, opening `example.org/css/styles.css` would result in loading the resource at `http://127.0.0.1:8080/css/styles.css`. Doing this for a lot resources (e.g. a lot of CSS files) would be tedious. This is why Disraptor allows to setup routes as wildcard routes.
+
+```
+/css → http://127.0.0.1:8080/css
+```
+
+Assuming the *wildcard route* option was selected when creating that route, all requests for paths *starting* with the specified source path (i.e. `/css`) will match. This route would cover the example from before (i.e. `example.org/css/styles.css`), but also all other paths starting with `/css` after the domain (e.g. `example.org/css/colors.css` or `example.org/css/tricked.html`).
+
+**(!) Note**: Disraptor doesn’t really distinquish between documents and resources. They’re treated exactly the same when configured the same way.
+
+
 
 ### Limitations
 
@@ -55,7 +75,7 @@ For a Disraptor document that is registered via the route `/example → http://1
 
 Let’s take CSS as a general example. Assume that the example document in this section loads a CSS file like this:
 
-**`http://127.0.0.1:8080/`**:
+**`http://127.0.0.1:8080`**:
 
 ```html
 <link rel="stylesheet" href="/css/styles.css">
@@ -116,12 +136,12 @@ export default RestModel.extend({
   },
 
   updateProperties() {
-    return this.getProperties('name');
+    return this.createProperties();
   }
 });
 ```
 
-The two methods `createProperties` and `updateProperties` need to be implemented in that model. At the moment, I’m unsure what the purpose of these methods is. However, I can tell that they need to return an object with all the properties that are supposed to be transferred to the server when calling `pet.save()`.
+The two methods `createProperties` and `updateProperties` need to be implemented in that model. At the moment, I’m unsure what the purpose of these methods is. However, I can tell that they need to return an object with all the properties that are supposed to be transferred to the server when calling `pet.save()`. Therefor, the to implementations can often be identical.
 
 ### Server-side Controller
 
@@ -213,3 +233,8 @@ end
 ```
 
 Now this will finally produce the desired logging output. Without this, Discourse expects requests to the server-side controller to come from the client-side via AJAX (or XHR, short for XMLHttpRequest). `check_xhr` seems to be an implicit `before_action` that needs to be skipped in order to avoid this behavior.
+
+
+## Notes
+
+- Can a target document attack the route server by using file-relative URLs; thus, potentially gaining access to Discourse APIs?
