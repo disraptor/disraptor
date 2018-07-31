@@ -22,14 +22,21 @@ export default Ember.Controller.extend({
    */
   storeType: 'disraptor-route',
 
+  // This controls the checked attribute of a checkbox; hence, if left unset, the
+  // attribute’s value is `undefined`, not `false`.
+  routeWildcard: false,
+
   init() {
     this._super();
+
     this.set('routesLoading', true);
     this.set('routes', []);
 
+    // Populates the list of active routes
     this.store.findAll(this.storeType)
       .then(result => {
         this.set('routesLoading', false);
+
         for (const record of result.content) {
           this.routes.pushObject({
             sourcePath: record.sourcePath,
@@ -37,6 +44,7 @@ export default Ember.Controller.extend({
             isBeingEdited: false
           });
         }
+
         this.notifyPropertyChange('routes');
       })
       .catch(error => {
@@ -48,7 +56,7 @@ export default Ember.Controller.extend({
    * Adds a route to the user interface. Also removes a potentially existing route with the same
    * `sourcePath` property.
    *
-   * @param {object} route
+   * @param {object} route Route to add to the UI
    */
   addRoute(route) {
     const existingRoute = this.routes.findBy('sourcePath', route.record.sourcePath);
@@ -65,7 +73,7 @@ export default Ember.Controller.extend({
   /**
    * Removes a route from the user interface.
    *
-   * @param {object} route
+   * @param {object} route Route to remove from the UI
    */
   removeRouteFromUI(route) {
     this.routes.removeObject(route);
@@ -87,15 +95,21 @@ export default Ember.Controller.extend({
      * necessary as we need to be able to identify routes by a common property.
      *
      * [1]: https://meta.discourse.org/t/upgrading-our-front-end-models-to-use-a-store/27837
+     *
+     * @param {String} sourcePath The source path of the route (e.g. `/test`)
+     * @param {String} targetURL The target URL of the route (e.g. `http://127.0.0.1:8080/test`)
+     * @param {Boolean} wildcard Whether the route matches paths that start with `sourcePath` (e.g.
+     * `/css/styles.css` is matched by the wildcard path `/css`) instead of being exact matches
+     * (e.g. `/css/styles.css` is matched by only `/css/styles.css`).
      */
-    createRoute(sourcePath, targetURL) {
+    createRoute(sourcePath, targetURL, wildcard) {
       // Hash the source path (e.g. /example) to obtain a number that can be
       // used as an ID for the store. This intentionally creates a conflict when
       // attemtping to create a route for the same path twice.
       const id = hashString(sourcePath) >>> 0;
 
       this.store
-        .createRecord(this.storeType, { id, sourcePath, targetURL })
+        .createRecord(this.storeType, { id, sourcePath, targetURL, wildcard })
         .save()
         .then(result => {
           this.addRoute({
@@ -104,7 +118,10 @@ export default Ember.Controller.extend({
             isBeingEdited: false
           });
 
-          console.log('Saved route', result.payload.sourcePath, '→', result.payload.targetURL);
+          console.log(
+            `Saved ${result.payload.wildcard? 'wildcard ' : ''} route:`,
+            `${result.payload.sourcePath} → ${result.payload.targetURL}`
+          );
         })
         .catch(error => {
           console.error('Failed to save route', error);
@@ -114,12 +131,13 @@ export default Ember.Controller.extend({
     /**
      * Updates a route in the store.
      *
-     * @param {*} routeRecord
+     * @param {*} routeRecord Record of the route to update
      */
     updateRouteRecord(routeRecord) {
       const recordProperties = {
         sourcePath: routeRecord.sourcePath,
-        targetURL: routeRecord.targetURL
+        targetURL: routeRecord.targetURL,
+        wildcard: routeRecord.wildcard
       };
 
       routeRecord
@@ -159,7 +177,7 @@ export default Ember.Controller.extend({
     /**
      * Toggles the editing state of a route.
      *
-     * @param {*} route
+     * @param {*} route Route to toggle the editing state for
      */
     toggleEditingRoute(route) {
       Ember.set(route, 'isBeingEdited', !route.isBeingEdited);

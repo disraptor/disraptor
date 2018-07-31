@@ -16,7 +16,7 @@ class DisraptorRoutesController < ApplicationController
   # Handles requests for wildcard paths like /css/styles.css for routes with a source path /css/*.
   def show_wildcard_path
     wildcard_prefix = get_wildcard_prefix(request.path, params[:wildcard_segment])
-    route = Disraptor::Route.find_by_path(wildcard_prefix + '/*')
+    route = Disraptor::Route.find_by_path(wildcard_prefix)
     target_url = construct_target_url(request.path, route['targetURL'], wildcard_prefix)
 
     send_proxy_request(request, target_url)

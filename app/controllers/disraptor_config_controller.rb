@@ -21,7 +21,8 @@ class DisraptorConfigController < ApplicationController
     route_id = params[:route_id]
     source_path = params[:disraptor_route][:sourcePath]
     target_url = params[:disraptor_route][:targetURL]
-    route = Disraptor::Route.add(route_id, source_path, target_url)
+    wildcard = params[:disraptor_route][:wildcard] == "true"
+    route = Disraptor::Route.edit(route_id, source_path, target_url, wildcard)
 
     Rails.application.reload_routes!
 

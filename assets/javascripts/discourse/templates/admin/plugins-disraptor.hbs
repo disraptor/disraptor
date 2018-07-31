@@ -8,7 +8,10 @@
 
   <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
 
-  <form {{ action 'createRoute' routeSourcePath routeTargetURL on='submit' }} class="dr-new-route">
+  <form
+    {{ action 'createRoute' routeSourcePath routeTargetURL routeWildcard on='submit' }}
+    class="dr-new-route"
+  >
     <div class="dr-new-route__inputs">
       <label class="dr-text-field">
         <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
@@ -23,6 +26,11 @@
       </label>
     </div>
 
+    <label class="dr-checkbox">
+      {{ input checked=routeWildcard class="dr-checkbox__control" type="checkbox" }}
+      <span class="dr-checkbox__label">{{ i18n 'disraptor.routes.wildcard' }}</span>
+    </label>
+
     <button type="submit" class="btn btn-primary">
       {{ d-icon 'plus'}}
       {{ i18n 'disraptor.create_route.button_label' }}
@@ -32,43 +40,56 @@
   <h3>{{ i18n 'disraptor.route_list.title' }}</h3>
 
   {{#if routes}}
-    <ul class="route-list">
-      {{#each routes as |route|}}
-        <li class="route">
-          <div class="route__display">
-            {{ route.record.sourcePath }}
+    <table class="dr-routes-table">
+      <thead>
+        <tr>
+          <th>{{ i18n 'disraptor.route_list.table.route' }}</th>
+          <th width="15%">{{ i18n 'disraptor.route_list.table.wildcard' }}</th>
+          <th width="25%">{{ i18n 'disraptor.route_list.table.manage' }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each routes as |route|}}
+          <tr>
+            <td>
+              {{ route.record.sourcePath }}
 
-            <span>→</span>
+              <span>→</span>
 
-            {{#if route.isBeingEdited}}
-              {{ input value=route.record.targetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') type="url" required=true }}
-            {{else}}
-              {{ route.record.targetURL }}
-            {{/if}}
-          </div>
-
-          <div class="route__controls">
-            {{#if route.isBeingEdited}}
-              <button type="button" {{ action 'updateRouteRecord' route.record }} class="btn btn-primary">
-                {{ i18n 'disraptor.edit_route.save' }}
-              </button>
-            {{/if}}
-
-            <button type="button" {{ action 'toggleEditingRoute' route }} class="btn">
               {{#if route.isBeingEdited}}
-                {{ i18n 'disraptor.edit_route.stop' }}
+                {{ input value=route.record.targetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') type="url" required=true }}
               {{else}}
-                {{ i18n 'disraptor.edit_route.start' }}
+                {{ route.record.targetURL }}
               {{/if}}
-            </button>
+            </td>
 
-            <button type="button" {{ action 'deleteRoute' route }} class="btn btn-danger">
-              {{ i18n 'disraptor.routes.delete_label' }}
-            </button>
-          </div>
-        </li>
-      {{/each}}
-    </ul>
+            <td>
+              {{ route.record.wildcard }}
+            </td>
+
+            <td class="dr-align-right">
+              {{#if route.isBeingEdited}}
+                <button type="button" {{ action 'updateRouteRecord' route.record }} class="btn btn-primary">
+                  {{ i18n 'disraptor.edit_route.save' }}
+                </button>
+              {{/if}}
+
+              <button type="button" {{ action 'toggleEditingRoute' route }} class="btn">
+                {{#if route.isBeingEdited}}
+                  {{ i18n 'disraptor.edit_route.stop' }}
+                {{else}}
+                  {{ i18n 'disraptor.edit_route.start' }}
+                {{/if}}
+              </button>
+
+              <button type="button" {{ action 'deleteRoute' route }} class="btn btn-danger">
+                {{ i18n 'disraptor.routes.delete_label' }}
+              </button>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
   {{else if routesLoading}}
     <p>{{ i18n 'disraptor.route_list.loading' }}</p>
   {{else}}

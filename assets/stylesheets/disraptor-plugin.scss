@@ -30,26 +30,19 @@
 }
 
 /* Overqualify the selector in order to have higher specificity that Discourse’s default styles. */
-input[type="text"],
-input[type="url"] {
+input.dr-text-field__control {
   margin-bottom: 0;
 }
 
-input[type="text"]:required:invalid,
-input[type="url"]:required:invalid {
+input.dr-text-field__control:required:invalid,
+input.dr-checkbox__control:required:invalid {
   box-shadow: none;
 }
 
-.route-list {
-  margin-left: 0;
-  list-style: none;
+.dr-routes-table {
+  table-layout: fixed;
 }
 
-.route {
-  display: grid;
-  grid-template-columns: 1fr auto;
-}
-
-.route:not(:last-child) {
-  margin-bottom: 9px;
+.dr-align-right {
+  text-align: right;
 }

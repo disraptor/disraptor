@@ -15,8 +15,8 @@ class Disraptor::Route
     end
 
     # Adds a new route
-    def add(route_id, source_path, target_url)
-      route = create_route_object(route_id, source_path, target_url)
+    def add(route_id, source_path, target_url, wildcard)
+      route = create_route_object(route_id, source_path, target_url, wildcard)
 
       Disraptor::RouteStore.add_route(route_id, route)
 
@@ -24,8 +24,8 @@ class Disraptor::Route
     end
 
     # Updates an existing route
-    def edit(route_id, source_path, target_url)
-      route = create_route_object(route_id, source_path, target_url)
+    def edit(route_id, source_path, target_url, wildcard)
+      route = create_route_object(route_id, source_path, target_url, wildcard)
 
       # Remove the existing route
       Disraptor::RouteStore.remove_route(route_id)
@@ -43,11 +43,12 @@ class Disraptor::Route
     private
 
     # Creates a hash that represents a route
-    def create_route_object(route_id, source_path, target_url)
+    def create_route_object(route_id, source_path, target_url, wildcard)
       route = {
-        id: route_id,
-        sourcePath: source_path,
-        targetURL: target_url
+        'id' => route_id,
+        'sourcePath' => source_path,
+        'targetURL' => target_url,
+        'wildcard' => wildcard
       }
     end
   end
