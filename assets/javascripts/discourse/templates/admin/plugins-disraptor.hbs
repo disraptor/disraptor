@@ -50,7 +50,7 @@
       </thead>
       <tbody>
         {{#each routes as |route|}}
-          <tr>
+          <tr data-route-id="{{ route.record.id }}">
             <td>
               {{ route.record.sourcePath }}
 
