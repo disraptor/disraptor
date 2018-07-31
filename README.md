@@ -7,6 +7,8 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 ## Content
 
 - [Development](#development)
+  - [Start Discourse](#start-discourse)
+  - [Run Tests](#run-tests)
 - [Documentation](#documentation)
   - [Introduction](#introduction)
   - [Limitations](#limitations)
@@ -19,6 +21,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 ## Development
 
+### Start Discourse
 
 ```sh
 bundle exec rails server --binding=0.0.0.0
@@ -29,6 +32,11 @@ Occasionally, it’s necessary to clear the cache.
 ```sh
 rm -rf tmp/cache
 ```
+
+### Run Tests
+
+- Frontend tests: [127.0.0.1:3000/qunit?module=Acceptance%3A%20Disraptor](http://127.0.0.1:3000/qunit?module=Acceptance%3A%20Disraptor)
+
 
 
 ## Documentation
@@ -237,4 +245,4 @@ Now this will finally produce the desired logging output. Without this, Discours
 
 ## Notes
 
-- Can a target document attack the route server by using file-relative URLs; thus, potentially gaining access to Discourse APIs?
+- Can a target document attack the route server by using file-relative URLs; thus, potentially gaining acces

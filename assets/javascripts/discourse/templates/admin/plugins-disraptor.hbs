@@ -13,25 +13,25 @@
     class="dr-new-route"
   >
     <div class="dr-new-route__inputs">
-      <label class="dr-text-field">
+      <label class="dr-new-route__source-path dr-text-field">
         <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
         {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class="dr-text-field__control" type="text" pattern="^/.*" required=true }}
       </label>
 
       <span>→</span>
 
-      <label class="dr-text-field">
+      <label class="dr-new-route__target-url dr-text-field">
         <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
         {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="url" required=true }}
       </label>
     </div>
 
-    <label class="dr-checkbox">
+    <label class="dr-new-route__wildcard dr-checkbox">
       {{ input checked=routeWildcard class="dr-checkbox__control" type="checkbox" }}
       <span class="dr-checkbox__label">{{ i18n 'disraptor.routes.wildcard' }}</span>
     </label>
 
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="dr-new-route__submit btn btn-primary">
       {{ d-icon 'plus'}}
       {{ i18n 'disraptor.create_route.button_label' }}
     </button>
