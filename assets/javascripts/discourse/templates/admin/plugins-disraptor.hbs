@@ -26,10 +26,42 @@
       </label>
     </div>
 
+    {{#if sourcePathExists}}
+      <p class="dr-warning">{{ i18n 'disraptor.create_route.route_exists' }}</p>
+    {{/if}}
+
     <label class="dr-new-route__wildcard dr-checkbox">
       {{ input checked=routeWildcard class="dr-checkbox__control" type="checkbox" }}
       <span class="dr-checkbox__label">{{ i18n 'disraptor.routes.wildcard' }}</span>
     </label>
+
+    <h4>{{ i18n 'disraptor.create_route.preview_heading' }}</h4>
+
+    <p>{{ i18n 'disraptor.create_route.preview_explanation' }}:</p>
+
+    <ul class="dr-route-match-preview">
+      <li>
+        {{route-preview
+          routeSourcePath=routeSourcePath
+          routeTargetURL=routeTargetURL
+        }}
+      </li>
+
+      {{#if routeWildcard}}
+        <li>
+          {{route-preview
+            routeSourcePath=(concat routeSourcePath "/test")
+            routeTargetURL=(concat routeTargetURL "/test")
+          }}
+        </li>
+        <li>
+          {{route-preview
+            routeSourcePath=(concat routeSourcePath "/test/nest")
+            routeTargetURL=(concat routeTargetURL "/test/nest")
+          }}
+        </li>
+      {{/if}}
+    </ul>
 
     <button type="submit" class="dr-new-route__submit btn btn-primary">
       {{ d-icon 'plus'}}

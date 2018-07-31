@@ -46,3 +46,12 @@ input.dr-checkbox__control:required:invalid {
 .dr-align-right {
   text-align: right;
 }
+
+.dr-warning {
+  padding: 6px 12px;
+  background-color: $highlight-low;
+}
+
+.dr-warning::before {
+  content: "\2f" "\21" "\5c" "\a0";
+}

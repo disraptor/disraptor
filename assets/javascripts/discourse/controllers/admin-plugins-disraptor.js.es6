@@ -26,6 +26,12 @@ export default Ember.Controller.extend({
   // attribute’s value is `undefined`, not `false`.
   routeWildcard: false,
 
+  // Used to display a warning when a route with the entered source path already exists.
+  sourcePathExists: Ember.computed('routeSourcePath', function () {
+    const existingRoute = this.routes.findBy('sourcePath', this.get('routeSourcePath'));
+    return existingRoute !== undefined;
+  }),
+
   init() {
     this._super();
 

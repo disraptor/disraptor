@@ -8,13 +8,16 @@ en:
         source_path: 'Source path'
         source_path_placeholder: '/disraptor'
         target_url: 'Target URL'
-        target_url_placeholder: 'http://disraptor.org'
+        target_url_placeholder: 'http://127.0.0.1:8080/'
         wildcard: 'Wildcard route'
         create: 'Create'
         delete_label: 'Delete'
 
       create_route:
         title: 'Create a New Route'
+        route_exists: 'This route already exists. Adding it again will override the existing route.'
+        preview_heading: 'Preview'
+        preview_explanation: 'The above route will match like this'
         button_label: 'Create'
 
       edit_route:
