@@ -21,13 +21,19 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 ## Development
 
+### Setup Discourse & Disraptor
+
+The Disraptor wiki has a guide for setting up a Discourse development environment along with Disraptor: [Discourse Development Setup (Ubuntu)](https://github.com/disraptor/disraptor/wiki/Discourse-Development-Setup-(Ubuntu))
+
 ### Start Discourse
 
+**Local Development Server**:
+
 ```sh
-bundle exec rails server --binding=0.0.0.0
+bundle exec rails server
 ```
 
-Occasionally, it’s necessary to clear the cache.
+Occasionally, it’s necessary to clear the cache:
 
 ```sh
 rm -rf tmp/cache
@@ -35,7 +41,7 @@ rm -rf tmp/cache
 
 ### Run Tests
 
-- Frontend tests: [127.0.0.1:3000/qunit?module=Acceptance%3A%20Disraptor](http://127.0.0.1:3000/qunit?module=Acceptance%3A%20Disraptor)
+- Frontend tests: Start the development server and go to [localhost:3000/qunit?module=Acceptance%3A%20Disraptor](http://localhost:3000/qunit?module=Acceptance%3A%20Disraptor)
 
 
 
@@ -46,21 +52,21 @@ rm -rf tmp/cache
 At its core, the plugin allows an administrator of a Discourse forum to configure routes in the form of `source-path → target-url`:
 
 ```
-/test → http://127.0.0.1:8080/
+/test → http://localhost:8080/
 ```
 
-With the Discourse forum running on `example.org` and having a route configured as shown above, opening `example.org/test` would be a match for that route. Disraptor will load the document at `http://127.0.0.1:8080/` with all its styles and scripts if possible (see [Limitations](#limitations) for more information).
+With the Discourse forum running on `example.org` and having a route configured as shown above, opening `example.org/test` would be a match for that route. Disraptor will load the document at `http://localhost:8080/` with all its styles and scripts if possible (see [Limitations](#limitations) for more information).
 
 The above example would be a route for a document. In the same way, one can setup routes for resources like CSS or images:
 
 ```
-/css/styles.css → http://127.0.0.1:8080/css/styles.css
+/css/styles.css → http://localhost:8080/css/styles.css
 ```
 
-Now, opening `example.org/css/styles.css` would result in loading the resource at `http://127.0.0.1:8080/css/styles.css`. Doing this for a lot resources (e.g. a lot of CSS files) would be tedious. This is why Disraptor allows to setup routes as wildcard routes.
+Now, opening `example.org/css/styles.css` would result in loading the resource at `http://localhost:8080/css/styles.css`. Doing this for a lot resources (e.g. a lot of CSS files) would be tedious. This is why Disraptor allows to setup routes as wildcard routes.
 
 ```
-/css → http://127.0.0.1:8080/css
+/css → http://localhost:8080/css
 ```
 
 Assuming the *wildcard route* option was selected when creating that route, all requests for paths *starting* with the specified source path (i.e. `/css`) will match. This route would cover the example from before (i.e. `example.org/css/styles.css`), but also all other paths starting with `/css` after the domain (e.g. `example.org/css/colors.css` or `example.org/css/tricked.html`).
@@ -79,11 +85,11 @@ Disraptor can only operate reliably while imposing restrictions on the target do
 
 ### URL references in target documents
 
-For a Disraptor document that is registered via the route `/example → http://127.0.0.1:8080/`, all resources of that document have to be handled via Disraptor. This opens up a wide variety of issues.
+For a Disraptor document that is registered via the route `/example → http://localhost:8080/`, all resources of that document have to be handled via Disraptor. This opens up a wide variety of issues.
 
 Let’s take CSS as a general example. Assume that the example document in this section loads a CSS file like this:
 
-**`http://127.0.0.1:8080`**:
+**`http://localhost:8080`**:
 
 ```html
 <link rel="stylesheet" href="/css/styles.css">
@@ -91,14 +97,14 @@ Let’s take CSS as a general example. Assume that the example document in this 
 
 However, CSS files are not self-contained. They can have `@import` rules or property declarations referencing external URLs. These references can be absolute or relative.
 
-**`http://127.0.0.1:8080/css/styles.css`**:
+**`http://localhost:8080/css/styles.css`**:
 
 ```css
 @import '/css/colors.css';
 @import 'base.css';
 ```
 
-What now? This refers to `http://127.0.0.1:8080/css/colors.css` and `http://127.0.0.1:8080/css/base.css` in the original context of the example document. In a Disraptor context, that’s no longer true. URLs relative to the document can be covered by the same technique mentioned above, but what about URLs like `'base.css'` (or `url('base.css')`)? They wouldn’t automatically be covered.
+What now? This refers to `http://localhost:8080/css/colors.css` and `http://localhost:8080/css/base.css` in the original context of the example document. In a Disraptor context, that’s no longer true. URLs relative to the document can be covered by the same technique mentioned above, but what about URLs like `'base.css'` (or `url('base.css')`)? They wouldn’t automatically be covered.
 
 For this reason, file-relative URLs are forbidden in Disraptor applications. Every URL in your CSS has to start with a slash character.
 
@@ -106,7 +112,7 @@ For this reason, file-relative URLs are forbidden in Disraptor applications. Eve
 
 ### Configuring Routes
 
-The Disraptor plugin allows you to configure routes via Discourse’s plugin pages (`/admin/plugins/disraptor`). Routes created there will be transferred to the server and stored in Discourse’s PluginStore. A couple of components are required for this data exchange to work.
+The Disraptor plugin allows you to configure routes via Discourse’s plugin pages ([localhost:3000/admin/plugins/disraptor](http://localhost:3000/admin/plugins/disraptor)). Routes created there will be transferred to the server and stored in Discourse’s PluginStore. A couple of components are required for this data exchange to work.
 
 Also, one must pay close attention to the naming conventions that are used in the world of Ruby/Rails/Discourse. For this example, I deliberately use a two-word HTTP endpoint (`/favorite_pets`) to illustrate common pitfalls; issues that might not be obvious with an endpoint like `/pets`.
 
@@ -121,12 +127,20 @@ For example, the following will send a POST request to `/favorite_pets`:
 ```js
 const pet = this.store.createRecord('favorite-pet', { name: 'Relojero Pajaro' });
 pet.save()
-  .then(result => {
-    console.log(result)
-  })
-  .catch(error => {
-    console.error(error);
-  });
+  .then(console.log)
+  .catch(console.error);
+```
+
+When providing an ID with the record’s properties, a PUT request to `/favorite_pets/135` will be send instead:
+
+```js
+const pet = this.store.createRecord('favorite-pet', {
+  id: 135,
+  name: 'Relojero Pajaro'
+});
+pet.save()
+  .then(console.log)
+  .catch(console.error);
 ```
 
 To be precise, the call `pet.save()` will trigger the request. The method `createRecord` will just create the record that is to be transferred.
@@ -149,7 +163,7 @@ export default RestModel.extend({
 });
 ```
 
-The two methods `createProperties` and `updateProperties` need to be implemented in that model. At the moment, I’m unsure what the purpose of these methods is. However, I can tell that they need to return an object with all the properties that are supposed to be transferred to the server when calling `pet.save()`. Therefor, the to implementations can often be identical.
+The two methods `createProperties` (for POST requests) and `updateProperties` (for PUT requests) need to be implemented in that model. At the moment, I’m unsure what the purpose of these methods is. However, I can tell that they need to return an object with all the properties that are supposed to be transferred to the server when calling `pet.save()`. Therefor, the two implementations can often be identical.
 
 ### Server-side Controller
 
@@ -175,7 +189,7 @@ This piece of code will direct GET requests to `/favorite_pets` to the `index` m
 ```ruby
 class FavoritePetsController < ApplicationController
   def index
-    # Get a list of pets from your hypothetical PetApp
+    # Get a list of pets from a hypothetical PetApp class
     pets = PetApp.get_pets()
 
     # Discoure’s store expects collection resources to return an object
@@ -194,55 +208,61 @@ Plus, in order to handle the routes declared in `plugin.rb`, the controller need
 
 ### Server-side-only Routes
 
-I struggled creating server-side-only routes (see [meta.discourse.org: Get server-side controller method to be called via plugin route](https://meta.discourse.org/t/get-server-side-controller-method-to-be-called-via-plugin-route)). Below, I will document my findings.
+By default, Discourse’s server-side controllers expect routes to be called via AJAX from the Discourse front end. However, you may want to have a server-side-only route (e.g. for requesting resources or data). It’s not immediately obvious how to implement these. Below, I will document my findings because I struggled with this (also documented on [meta.discourse.org: Get server-side controller method to be called via plugin route](https://meta.discourse.org/t/get-server-side-controller-method-to-be-called-via-plugin-route)).
 
 ---
 
-Adding a route like this to `plugin.rb` doesn’t always call `FavoritePetsController#show` method as one would expect:
+First of all, adding a route like this to `plugin.rb` doesn’t always call `FavoritePetsController#show` method as one would expect:
 
 ```ruby
 get '/css/bird.css' => 'favorite_pets#show'
 ```
 
-Requesting `/css/bird.css` *will* call a method named `show` in a class called `FavoritePetsController`.
+Requesting `/css/bird.css` *will* call a method named `show` in a class called `FavoritePetsController`. Let’s set this up:
 
 **`./app/controllers/favorite_pets_controller.rb`**:
 
 ```ruby
 class FavoritePetsController < ApplicationController
   def show
-    Rails.logger.info '┌────────────┐'
-    Rails.logger.info '│ Here we go │'
-    Rails.logger.info '└────────────┘'
+    Rails.logger.info 'Here we go! 🚂'
   end
 end
 ```
 
-However, if the controller is defined like this, the lines containing the “Here we go” won’t show up. This is confusing as the following can be found in the logger output:
+Trying this out by requesting `/css/bird.css` won’t work. The lines containing the “Here we go! 🚂” won’t show up. This is confusing as the following can be found in the logger output:
 
 ```
 I, [2018-07-12T16:45:17.108958 #30583]  INFO -- : Processing by FavoritePetsController#show as CSS
 ```
 
-So `FavoritePetsController#show` has been called but also it hasn’t?
+So `FavoritePetsController#show` has been called but also it hasn’t? It turns out that Discourse’s controllers have an implicit *before action* called `check_xhr`. Such an action is triggered whenever a controller action is about to be invoked. Let’s have a look at it.
 
-I don’t fully understand it, yet, but there is a clue:
+
+```ruby
+def check_xhr
+  # bypass xhr check on PUT / POST / DELETE provided api key is there, otherwise calling api is annoying
+  return if !request.get? && (is_api? || is_user_api?)
+  raise RenderEmpty.new unless ((request.format && request.format.json?) || request.xhr?)
+end
+```
+
+The baseline here is the check for `request.xhr?`. If the request was made via AJAX (i.e. an XMLHttpRequest or XHR for short), everything’s fine. Otherwise (ignoring the other conditions for now), an error is thrown. We can skip before actions like this:
+
 
 ```ruby
 class FavoritePetsController < ApplicationController
   skip_before_action :check_xhr
 
   def show
-    Rails.logger.info '┌────────────┐'
-    Rails.logger.info '│ Here we go │'
-    Rails.logger.info '└────────────┘'
+    Rails.logger.info 'Here we go! 🚂'
   end
 end
 ```
 
-Now this will finally produce the desired logging output. Without this, Discourse expects requests to the server-side controller to come from the client-side via AJAX (or XHR, short for XMLHttpRequest). `check_xhr` seems to be an implicit `before_action` that needs to be skipped in order to avoid this behavior.
+Now this will finally produce the desired logging output. In other words, the other `FavoritePetsController` example acts as if we declared `before_action :check_xhr`.
 
 
 ## Notes
 
-- Can a target document attack the route server by using file-relative URLs; thus, potentially gaining acces
+- Can a target document attack the route server by using file-relative URLs; thus, potentially gaining access to Discourse APIs?
