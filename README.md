@@ -12,7 +12,9 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 - [Documentation](#documentation)
   - [Introduction](#introduction)
   - [Limitations](#limitations)
-  - [URL references in target documents](#url-references-in-target-documents)
+    - [URL references in documents and resources](#url-references-in-documents-and-resources)
+    - [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
+    - [Selecting and querying DOM nodes](#selecting-and-querying-dom-nodes)
   - [Configuring Routes](#configuring-routes)
   - [Server-side-only Routes](#server-side-only-routes)
 - [Notes](#notes)
@@ -75,15 +77,18 @@ Assuming the *wildcard route* option was selected when creating that route, all 
 
 
 
-### Limitations
+### Limitations for Disraptor documents and resources
 
-Disraptor can only operate reliably while imposing restrictions on the target documents that are to be loaded.
+Disraptor can only operate reliably while imposing restrictions on its documents and resources.
 
-- No file-relative URLs (i.e. URLs have to start with a slash). This is explained in the section on [URL references in target documents](#url-references-in-target-documents).
+- Scripts that are loaded by Discourse (e.g. jQuery) **must not** be loaded by a Disraptor document.
+- URLs **must not** be file-relative. Instead, root-relative (i.e. URLs starting with a slash) or absolute URLs **must** be used. Explanation: [URL references in documents and resources](#url-references-in-documents-and-resources).
+- HTML IDs, classes and custom attributes **should not** conflict with Discourse. Instead, HTML ID, class and custom attribute names **should** be prefixed. Explanation: [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
+- Stylesheets and scripts **must not** select or query DOM nodes outside of a Disraptor document. Instead, only DOM nodes inside a Disraptor document **must** be selected/queried. Explanation: [Selecting and querying DOM nodes](#selecting-and-querying-dom-nodes)
 
 
 
-### URL references in target documents
+#### URL references in documents and resources
 
 For a Disraptor document that is registered via the route `/example → http://localhost:8080/`, all resources of that document have to be handled via Disraptor. This opens up a wide variety of issues.
 
@@ -107,6 +112,14 @@ However, CSS files are not self-contained. They can have `@import` rules or prop
 What now? This refers to `http://localhost:8080/css/colors.css` and `http://localhost:8080/css/base.css` in the original context of the example document. In a Disraptor context, that’s no longer true. URLs relative to the document can be covered by the same technique mentioned above, but what about URLs like `'base.css'` (or `url('base.css')`)? They wouldn’t automatically be covered.
 
 For this reason, file-relative URLs are forbidden in Disraptor applications. Every URL in your CSS has to start with a slash character.
+
+#### Conflict-free naming of HTML IDs, classes and custom attributes
+
+In order to make sure that as little as possible Discourse styles and scripts affect Disraptor documents, you should prefix your HTML IDs, class names and custom attribute names and update all references (e.g. in CSS or JavaScript selectors) to these identifiers and names accordingly. One exception to this rule is reusing Discourse styles for your own components (e.g. reusing `<button>` styles).
+
+#### Selecting and querying DOM nodes
+
+In order to avoid side-effects of stylesheets and scripts of a Disraptor document on Discourse’s parent document, only DOM nodes of the Disraptor document must be selected/queried by these styles and scripts.
 
 
 
@@ -165,7 +178,7 @@ export default RestModel.extend({
 
 The two methods `createProperties` (for POST requests) and `updateProperties` (for PUT requests) need to be implemented in that model. At the moment, I’m unsure what the purpose of these methods is. However, I can tell that they need to return an object with all the properties that are supposed to be transferred to the server when calling `pet.save()`. Therefor, the two implementations can often be identical.
 
-### Server-side Controller
+#### Server-side Controller
 
 With the client being properly setup, the requests will be send out, but they should be answered with a “404 Not Found” error as the server doesn’t handle requests to the route `/favorite_pets`, yet.
 
@@ -238,7 +251,7 @@ I, [2018-07-12T16:45:17.108958 #30583]  INFO -- : Processing by FavoritePetsCont
 
 So `FavoritePetsController#show` has been called but also it hasn’t? It turns out that Discourse’s controllers have an implicit *before action* called `check_xhr`. Such an action is triggered whenever a controller action is about to be invoked. Let’s have a look at it.
 
-
+[**`discourse/app/controllers/application_controller.rb`**](https://github.com/discourse/discourse/blob/master/app/controllers/application_controller.rb#L602-L606):
 ```ruby
 def check_xhr
   # bypass xhr check on PUT / POST / DELETE provided api key is there, otherwise calling api is annoying
@@ -265,4 +278,4 @@ Now this will finally produce the desired logging output. In other words, the ot
 
 ## Notes
 
-- Can a target document attack the route server by using file-relative URLs; thus, potentially gaining access to Discourse APIs?
+- Can a Disraptor document attack the route server by using file-relative URLs; thus, potentially gaining access to Discourse APIs?
