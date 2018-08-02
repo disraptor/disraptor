@@ -53,9 +53,10 @@ export default Discourse.Route.extend({
    * @returns {Array<HTMLLinkElement>}
    */
   extractLinkTags(headMarkup) {
-    return $(headMarkup).filter(function (node) {
-      return this.tagName === 'LINK';
-    }).toArray();
+    // Use a <template> element to parse a DOM fragment
+    const headTemplate = document.createElement('template');
+    headTemplate.insertAdjacentHTML('beforeend', headMarkup);
+    return Array.from(headTemplate.children).filter(element => element.tagName === 'LINK');
   },
 
   /**
@@ -67,8 +68,8 @@ export default Discourse.Route.extend({
    */
   extractTagContent(tagName, htmlContent) {
     const openTagEndPos = htmlContent.indexOf('>', htmlContent.indexOf(`<${tagName}`));
-    const closeTagEndPos = htmlContent.indexOf('>', htmlContent.indexOf(`</${tagName}`));
-    return htmlContent.substring(openTagEndPos + 1, closeTagEndPos);
+    const closeTagBeginPos = htmlContent.indexOf(`</${tagName}`);
+    return htmlContent.substring(openTagEndPos + 1, closeTagBeginPos);
   },
 
   actions: {
