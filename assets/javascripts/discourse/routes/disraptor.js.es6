@@ -22,6 +22,7 @@ export default Discourse.Route.extend({
         const linkTags = this.extractLinkTags(headContent);
         for (const linkTag of linkTags) {
           if (linkTag.getAttribute('rel') === 'stylesheet') {
+            linkTag.setAttribute('data-disraptor-link', '');
             document.head.insertAdjacentElement('beforeend', linkTag);
           }
         }
@@ -73,6 +74,11 @@ export default Discourse.Route.extend({
   actions: {
     willTransition() {
       document.documentElement.classList.remove('disraptor-page');
+
+      const linkTags = document.querySelectorAll('[data-disraptor-link]');
+      linkTags.forEach(linkTag => {
+        linkTag.remove();
+      });
     }
   }
 });
