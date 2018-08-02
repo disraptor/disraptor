@@ -30,9 +30,7 @@ export default Discourse.Route.extend({
         const bodyContent = this.extractTagContent('body', result);
         this.set('disraptorDocument', bodyContent);
       })
-      .catch(error => {
-        console.error(error);
-      });
+      .catch(console.error);
   },
 
   model() {
