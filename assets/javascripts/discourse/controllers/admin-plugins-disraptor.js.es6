@@ -10,10 +10,9 @@ export default Ember.Controller.extend({
    * Needs to match the filename of `assets/javascripts/discourse/models/disraptor-route.js.es6`.
    * This determines the HTTP endpoint to which AJAX requests will me made. Note that the endpoint
    * will have any dashes (i.e. `-`) replaced with underscores (i.e. `_`) and that it will be
-   * pluralized:
-   * `disraptor-route` becomes `disraptor_routes`.
+   * pluralized: `disraptor-route` becomes `disraptor_routes`.
    *
-   * **Examples**:
+   * **Example HTTP requests**:
    *
    * - GET /disraptor_routes
    * - GET /disraptor_routes/:route_id
@@ -88,6 +87,20 @@ export default Ember.Controller.extend({
     this.notifyPropertyChange('routes');
   },
 
+  /**
+   * Strips the query string from a URL or path.
+   *
+   * @param {String} url
+   * @returns {String}
+   */
+  stripQueryString(url) {
+    if (url.includes('?')) {
+      return url.substring(0, url.indexOf('?'));
+    }
+
+    return url;
+  },
+
   actions: {
     /**
      * Saves a record in Discourse’s store (see
@@ -109,6 +122,9 @@ export default Ember.Controller.extend({
      * (e.g. `/css/styles.css` is matched by only `/css/styles.css`).
      */
     createRoute(sourcePath, targetURL, wildcard) {
+      sourcePath = this.stripQueryString(sourcePath);
+      targetURL = this.stripQueryString(targetURL);
+
       // Hash the source path (e.g. /example) to obtain a number that can be
       // used as an ID for the store. This intentionally creates a conflict when
       // attemtping to create a route for the same path twice.
