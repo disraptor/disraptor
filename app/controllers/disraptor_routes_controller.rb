@@ -1,9 +1,9 @@
 class DisraptorRoutesController < ApplicationController
   # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
   # Instead, wait for an XHR request from the Discourse frontend.
-  before_action :check_if_disraptor_enabled, :check_xhr_for_documents
+  before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents
   # Generally, skip the XHR check and respond directly with this controller.
-  skip_before_action :check_xhr
+  skip_before_action :check_xhr, :verify_authenticity_token
 
   # Handles requests for regular paths like /example for routes with a source path /example.
   def show
@@ -84,6 +84,12 @@ class DisraptorRoutesController < ApplicationController
   def check_xhr_for_documents
     if request.format == 'text/html'
       check_xhr
+    end
+  end
+
+  def forgery_protection_for_documents
+    if request.format == 'text/html'
+      verify_authenticity_token
     end
   end
 
