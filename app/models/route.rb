@@ -16,6 +16,11 @@ class Disraptor::Route
 
     # Adds a new route
     def add(route_id, source_path, target_url, wildcard)
+      if (source_path.start_with?('/admin'))
+        Rails.logger.error "😱 Attempt to add admin route '#{source_path}' was cancelled."
+        return
+      end
+
       route = create_route_object(route_id, source_path, target_url, wildcard)
 
       Disraptor::RouteStore.add_route(route_id, route)
