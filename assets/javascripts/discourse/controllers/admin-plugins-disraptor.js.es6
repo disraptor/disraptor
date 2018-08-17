@@ -146,7 +146,7 @@ export default Ember.Controller.extend({
           );
         })
         .catch(error => {
-          console.error('Failed to save route', error);
+          console.error('Failed to save route:', error);
         });
     },
 
@@ -174,7 +174,7 @@ export default Ember.Controller.extend({
           console.log('Updated route', result.payload.sourcePath, '→', result.payload.targetURL);
         })
         .catch(error => {
-          console.error('Failed to update route', error);
+          console.error('Failed to update route:', error);
         });
     },
 
