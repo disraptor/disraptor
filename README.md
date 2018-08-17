@@ -11,12 +11,13 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
   - [Run Tests](#run-tests)
 - [Documentation](#documentation)
   - [Introduction](#introduction)
-  - [Limitations](#limitations)
+  - [Limitations for Disraptor documents and resources](#limitations-for-disraptor-documents-and-resources)
     - [URL references in documents and resources](#url-references-in-documents-and-resources)
     - [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
     - [Selecting and querying DOM nodes](#selecting-and-querying-dom-nodes)
   - [Configuring Routes](#configuring-routes)
   - [Server-side-only Routes](#server-side-only-routes)
+- [To Do](#to-do)
 - [Notes](#notes)
 
 
@@ -90,28 +91,31 @@ Disraptor can only operate reliably while imposing restrictions on its documents
 
 #### URL references in documents and resources
 
-For a Disraptor document that is registered via the route `/example → http://localhost:8080/`, all resources of that document have to be handled via Disraptor. This opens up a wide variety of issues.
+URL references in Disraptor documents and resources must either be absolute or root-relative. The correct context of file-relative URLs cannot be recovered; hence, they’re forbidden.
 
-Let’s take CSS as a general example. Assume that the example document in this section loads a CSS file like this:
+In the following example, two routes are specified. One for a document (`/example → http://localhost:8080/`) and a wildcard route for stylesheets (`/css → http://localhost:8080/css`). In the example document, there is a reference to a stylesheet at `/css/styles.css`:
 
-**`http://localhost:8080`**:
+**`http://localhost:8080/`**:
 
 ```html
 <link rel="stylesheet" href="/css/styles.css">
 ```
 
-However, CSS files are not self-contained. They can have `@import` rules or property declarations referencing external URLs. These references can be absolute or relative.
+The stylesheet contains the following styles of URL references: absolute, root-relative and file-relative.
 
 **`http://localhost:8080/css/styles.css`**:
 
 ```css
+@import 'http://localhost:8080/css/base.css';
 @import '/css/colors.css';
-@import 'base.css';
+@import 'typography.css';
 ```
 
-What now? This refers to `http://localhost:8080/css/colors.css` and `http://localhost:8080/css/base.css` in the original context of the example document. In a Disraptor context, that’s no longer true. URLs relative to the document can be covered by the same technique mentioned above, but what about URLs like `'base.css'` (or `url('base.css')`)? They wouldn’t automatically be covered.
+The first two styles (absolute and root-relative URLs) can always be handled. The root-relative URL will recover its context via the wildcard route and resolve to `http://localhost:8080/css/colors.css`.
 
-For this reason, file-relative URLs are forbidden in Disraptor applications. Every URL in your CSS has to start with a slash character.
+The third style (a file-relative URL) causes an issue. This will not match any Disraptor route because a Disraptor route has to begin with a slash: It’s always root-relative to the Discourse instance. Therefor, the last reference will resolve to a `typography.css` file on the Discourse instance if it exists. It’s not possible to recover the original context of this reference without looking at the content of each document or resource at the language level.
+
+For this reason, file-relative URLs are forbidden in Disraptor applications. Every URL reference in your stylesheets and scripts has to be absolute or root-relative.
 
 #### Conflict-free naming of HTML IDs, classes and custom attributes
 
@@ -262,7 +266,6 @@ end
 
 The baseline here is the check for `request.xhr?`. If the request was made via AJAX (i.e. an XMLHttpRequest or XHR for short), everything’s fine. Otherwise (ignoring the other conditions for now), an error is thrown. We can skip before actions like this:
 
-
 ```ruby
 class FavoritePetsController < ApplicationController
   skip_before_action :check_xhr
@@ -276,6 +279,16 @@ end
 Now this will finally produce the desired logging output. In other words, the other `FavoritePetsController` example acts as if we declared `before_action :check_xhr`.
 
 
+
+## To Do
+
+- [High Priority] Routes with query strings are not handled correctly
+- [Medium Priority] Test with Slidehub
+- [Medium Priority] Test with Tira
+- [Low Priority] Add *role* property to routes. This allows the Discourse instance to not send proxy requests if the current user lacks certain permissions.
+
+
+
 ## Notes
 
-- Can a Disraptor document attack the route server by using file-relative URLs; thus, potentially gaining access to Discourse APIs?
+- Store `target_url` as URL? Is there a class for that in Rails?
