@@ -18,14 +18,8 @@ export default Discourse.Route.extend({
     // Load the Disraptor document
     return ajax(transition.intent.url, { dataType: 'html' })
       .then(result => {
-        const headContent = this.extractTagContent('head', result);
-        const linkTags = this.extractLinkTags(headContent);
-        for (const linkTag of linkTags) {
-          if (linkTag.getAttribute('rel') === 'stylesheet') {
-            linkTag.setAttribute('data-disraptor-link', '');
-            document.head.insertAdjacentElement('beforeend', linkTag);
-          }
-        }
+        this.injectLinkTags(result);
+        this.injectScriptTags(result);
 
         const bodyContent = this.extractTagContent('body', result);
         this.set('disraptorDocument', bodyContent);
@@ -44,17 +38,35 @@ export default Discourse.Route.extend({
     this.render('disraptor');
   },
 
+  injectLinkTags(result) {
+    const headContent = this.extractTagContent('head', result);
+    const linkTags = this.extractTags(headContent, 'link');
+    for (const linkTag of linkTags) {
+      linkTag.setAttribute('data-disraptor-link', '');
+      document.head.insertAdjacentElement('beforeend', linkTag);
+    }
+  },
+
+  injectScriptTags(result) {
+    const headContent = this.extractTagContent('head', result);
+    const scriptTags = this.extractTags(headContent, 'script');
+    for (const scriptTag of scriptTags) {
+      injectScript(scriptTag.src);
+    }
+  },
+
   /**
    * Extracts all `HTMLLinkElement`s from a string of the HTMLHeadElement.
    *
    * @param {String} headMarkup
-   * @returns {Array<HTMLLinkElement>}
+   * @param {'script'|'link'} tagName
+   * @returns {Array<HTMLScriptElement>|Array<HTMLLinkElement>}
    */
-  extractLinkTags(headMarkup) {
+  extractTags(headMarkup, tagName) {
     // Use a <template> element to parse a DOM fragment
     const headTemplate = document.createElement('template');
     headTemplate.insertAdjacentHTML('beforeend', headMarkup);
-    return Array.from(headTemplate.children).filter(element => element.tagName === 'LINK');
+    return Array.from(headTemplate.children).filter(el => el.tagName === tagName.toUpperCase());
   },
 
   /**
@@ -74,10 +86,29 @@ export default Discourse.Route.extend({
     willTransition() {
       document.documentElement.classList.remove('disraptor-page');
 
-      const linkTags = document.querySelectorAll('[data-disraptor-link]');
-      linkTags.forEach(linkTag => {
-        linkTag.remove();
+      const disraptorElements = document.querySelectorAll(
+        '[data-disraptor-link], [data-disraptor-script]'
+      );
+
+      disraptorElements.forEach(element => {
+        element.remove();
       });
     }
   }
 });
+
+/**
+ * Based on [html5rocks.com: Deep dive into the murky waters of script loading][1] by Jake
+ * Archibald.
+ *
+ * [1]: https://www.html5rocks.com/en/tutorials/speed/script-loading/
+ *
+ * @param {String} src
+ */
+function injectScript(src) {
+  const script = document.createElement('script');
+  script.async = false;
+  script.src = src;
+  script.setAttribute('data-disraptor-script', '');
+  document.head.appendChild(script);
+}
