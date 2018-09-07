@@ -3,8 +3,6 @@ class Disraptor::Route
     # Returns an array containing all routes
     def find_all
       routes = Disraptor::RouteStore.get_routes()
-
-      return [] if routes.blank?
       routes.values
     end
 

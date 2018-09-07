@@ -12,15 +12,16 @@ register_asset 'stylesheets/disraptor-view.scss'
 # Adds a link the Disraptor plugin on the `/admin/plugins` page with the route `disraptor`.
 add_admin_route 'disraptor.title', 'disraptor'
 
-after_initialize do
   module ::Disraptor
     PLUGIN_NAME ||= 'disraptor'.freeze
   end
 
   load File.expand_path('../lib/route_store.rb', __FILE__)
+load File.expand_path('../app/models/route.rb', __FILE__)
+
+after_initialize do
   load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
   load File.expand_path('../app/controllers/disraptor_routes_controller.rb', __FILE__)
-  load File.expand_path('../app/models/route.rb', __FILE__)
 
   Discourse::Application.routes.append do
     # Serve the default plugins content when the user directly opens the Disraptor plugin.

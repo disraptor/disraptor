@@ -49,12 +49,8 @@ export default Ember.Controller.extend({
             isBeingEdited: false
           });
         }
-
-        this.notifyPropertyChange('routes');
       })
-      .catch(error => {
-        console.error(error);
-      });
+      .catch(console.error);
   },
 
   /**
@@ -70,21 +66,6 @@ export default Ember.Controller.extend({
     }
 
     this.routes.pushObject(route);
-
-    // Triggers Ember to rerender
-    this.notifyPropertyChange('routes');
-  },
-
-  /**
-   * Removes a route from the user interface.
-   *
-   * @param {object} route Route to remove from the UI
-   */
-  removeRouteFromUI(route) {
-    this.routes.removeObject(route);
-
-    // Triggers Ember to rerender
-    this.notifyPropertyChange('routes');
   },
 
   /**
@@ -188,7 +169,7 @@ export default Ember.Controller.extend({
       this.store
         .destroyRecord(this.storeType, route.record)
         .then(() => {
-          this.removeRouteFromUI(route);
+          this.routes.removeObject(route);
           console.log('Deleted route record', route.record.sourcePath);
         })
         .catch(error => {
