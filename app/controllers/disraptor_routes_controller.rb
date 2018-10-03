@@ -36,14 +36,11 @@ class DisraptorRoutesController < ApplicationController
     proxy_response = Net::HTTP.start(url.host, url.port) { |http| http.request(proxy_request) }
 
     if proxy_response.code == '404'
-      Rails.logger.info '👻 Disraptor: 404.'
+      Rails.logger.info '👻 Disraptor: Route responds with status code 404.'
       render body: nil, status: 404
-    elsif request.format == 'text/html'
-      Rails.logger.info '👻 Disraptor: Loading a document.'
-      render body: proxy_response.body.html_safe, content_type: request.format
     else
-      Rails.logger.info '👻 Disraptor: Loading a resource.'
-      render body: proxy_response.body, content_type: request.format
+      Rails.logger.info '👻 Disraptor: Responding with route content.'
+      render body: proxy_response.body, content_type: proxy_response.content_type
     end
   end
 
