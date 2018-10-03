@@ -33,13 +33,7 @@ The Disraptor wiki has a guide for setting up a Discourse development environmen
 **Local Development Server**:
 
 ```sh
-bundle exec rails server
-```
-
-Occasionally, it’s necessary to clear the cache:
-
-```sh
-rm -rf tmp/cache
+RAILS_ENV=development bundle exec rails server
 ```
 
 ### Run Tests
