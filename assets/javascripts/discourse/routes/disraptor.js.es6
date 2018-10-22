@@ -18,8 +18,9 @@ export default Discourse.Route.extend({
     // Load the Disraptor document
     return ajax(transition.intent.url, { dataType: 'html' })
       .then(result => {
-        this.injectLinkTags(result);
-        this.injectScriptTags(result);
+        this.injectTags(result, 'link');
+        this.injectTags(result, 'script');
+        this.injectTags(result, 'style');
 
         const bodyContent = this.extractTagContent('body', result);
         this.set('disraptorDocument', bodyContent);
@@ -38,20 +39,12 @@ export default Discourse.Route.extend({
     this.render('disraptor');
   },
 
-  injectLinkTags(result) {
+  injectTags(result, tagName) {
     const headContent = this.extractTagContent('head', result);
-    const linkTags = this.extractTags(headContent, 'link');
-    for (const linkTag of linkTags) {
-      linkTag.setAttribute('data-disraptor-link', '');
-      document.head.insertAdjacentElement('beforeend', linkTag);
-    }
-  },
-
-  injectScriptTags(result) {
-    const headContent = this.extractTagContent('head', result);
-    const scriptTags = this.extractTags(headContent, 'script');
-    for (const scriptTag of scriptTags) {
-      injectScript(scriptTag.src);
+    const tags = this.extractTags(headContent, tagName);
+    for (const tag of tags) {
+      tag.setAttribute(`data-disraptor-${tagName}`, '');
+      document.head.insertAdjacentElement('beforeend', tag);
     }
   },
 
@@ -87,7 +80,7 @@ export default Discourse.Route.extend({
       document.documentElement.classList.remove('disraptor-page');
 
       const disraptorElements = document.querySelectorAll(
-        '[data-disraptor-link], [data-disraptor-script]'
+        '[data-disraptor-link], [data-disraptor-script], [data-disraptor-style]'
       );
 
       disraptorElements.forEach(element => {
