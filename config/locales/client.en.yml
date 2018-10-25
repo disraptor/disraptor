@@ -9,7 +9,6 @@ en:
         source_path_placeholder: '/disraptor'
         target_url: 'Target URL'
         target_url_placeholder: 'http://127.0.0.1:8080/'
-        wildcard: 'Wildcard route'
         create: 'Create'
         delete_label: 'Delete'
 
@@ -31,5 +30,4 @@ en:
         loading: 'Loading active routes ...'
         table:
           route: 'Route'
-          wildcard: 'Wildcard?'
           manage: 'Manage'

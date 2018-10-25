@@ -9,31 +9,22 @@
   <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
 
   <form
-    {{ action 'createRoute' routeSourcePath routeTargetURL routeWildcard on='submit' }}
+    {{ action 'createRoute' routeSourcePath routeTargetURL on='submit' }}
     class="dr-new-route"
   >
-    <div class="dr-new-route__inputs">
-      <label class="dr-new-route__source-path dr-text-field">
-        <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
-        {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class='dr-text-field__control' type='text' pattern='^\/(?!admin).*' required=true }}
-      </label>
+    <label class="dr-new-route__source-path dr-text-field">
+      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
+      {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class='dr-text-field__control' type='text' pattern='^\/(?!admin).*' required=true }}
+    </label>
 
-      <span>→</span>
-
-      <label class="dr-new-route__target-url dr-text-field">
-        <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
-        {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="url" required=true }}
-      </label>
-    </div>
+    <label class="dr-new-route__target-url dr-text-field">
+      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
+      {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="url" required=true }}
+    </label>
 
     {{#if sourcePathExists}}
       <p class="dr-warning">{{ i18n 'disraptor.create_route.route_exists' }}</p>
     {{/if}}
-
-    <label class="dr-new-route__wildcard dr-checkbox">
-      {{ input checked=routeWildcard class='dr-checkbox__control' type='checkbox' }}
-      <span class="dr-checkbox__label">{{ i18n 'disraptor.routes.wildcard' }}</span>
-    </label>
 
     <h4>{{ i18n 'disraptor.create_route.preview_heading' }}</h4>
 
@@ -46,21 +37,6 @@
           routeTargetURL=routeTargetURL
         }}
       </li>
-
-      {{#if routeWildcard}}
-        <li>
-          {{route-preview
-            routeSourcePath=(concat routeSourcePath '/test')
-            routeTargetURL=(concat routeTargetURL '/test')
-          }}
-        </li>
-        <li>
-          {{route-preview
-            routeSourcePath=(concat routeSourcePath '/test/nest')
-            routeTargetURL=(concat routeTargetURL '/test/nest')
-          }}
-        </li>
-      {{/if}}
     </ul>
 
     <button type="submit" class="dr-new-route__submit btn btn-primary">
@@ -76,7 +52,6 @@
       <thead>
         <tr>
           <th>{{ i18n 'disraptor.route_list.table.route' }}</th>
-          <th width="15%">{{ i18n 'disraptor.route_list.table.wildcard' }}</th>
           <th width="25%">{{ i18n 'disraptor.route_list.table.manage' }}</th>
         </tr>
       </thead>
@@ -93,10 +68,6 @@
               {{else}}
                 {{ route.record.targetURL }}
               {{/if}}
-            </td>
-
-            <td>
-              {{ route.record.wildcard }}
             </td>
 
             <td class="dr-align-right">

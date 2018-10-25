@@ -11,8 +11,6 @@
 }
 
 .dr-new-route__inputs {
-  display: flex;
-  align-items: flex-end;
   margin-bottom: 9px;
 }
 
@@ -21,7 +19,8 @@
 }
 
 .dr-text-field {
-  margin-bottom: 0;
+  display: block;
+  margin-bottom: 9px;
 }
 
 .dr-text-field__label {
@@ -31,6 +30,7 @@
 
 /* Overqualify the selector in order to have higher specificity that Discourse’s default styles. */
 input.dr-text-field__control {
+  width: 100%;
   margin-bottom: 0;
 }
 

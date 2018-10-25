@@ -12,7 +12,7 @@ export default RestModel.extend({
    * Required when sending POST requests via Discourse’s store
    */
   createProperties() {
-    return this.getProperties('sourcePath', 'targetURL', 'wildcard');
+    return this.getProperties('sourcePath', 'targetURL');
   },
 
   /**

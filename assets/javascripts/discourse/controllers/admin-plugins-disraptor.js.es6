@@ -1,4 +1,5 @@
 import { hashString } from 'discourse/lib/hash';
+import { popupAjaxError } from 'discourse/lib/ajax-error';
 
 /**
  * Disraptor front end controller.
@@ -20,10 +21,6 @@ export default Ember.Controller.extend({
    * - DELETE /disraptor_routes/:route_id
    */
   storeType: 'disraptor-route',
-
-  // This controls the checked attribute of a checkbox; hence, if left unset, the
-  // attribute’s value is `undefined`, not `false`.
-  routeWildcard: false,
 
   // Used to display a warning when a route with the entered source path already exists.
   sourcePathExists: Ember.computed('routeSourcePath', function () {
@@ -98,11 +95,8 @@ export default Ember.Controller.extend({
      *
      * @param {String} sourcePath The source path of the route (e.g. `/test`)
      * @param {String} targetURL The target URL of the route (e.g. `http://127.0.0.1:8080/test`)
-     * @param {Boolean} wildcard Whether the route matches paths that start with `sourcePath` (e.g.
-     * `/css/styles.css` is matched by the wildcard path `/css`) instead of being exact matches
-     * (e.g. `/css/styles.css` is matched by only `/css/styles.css`).
      */
-    createRoute(sourcePath, targetURL, wildcard) {
+    createRoute(sourcePath, targetURL) {
       sourcePath = this.stripQueryString(sourcePath);
       targetURL = this.stripQueryString(targetURL);
 
@@ -112,7 +106,7 @@ export default Ember.Controller.extend({
       const id = hashString(sourcePath) >>> 0;
 
       this.store
-        .createRecord(this.storeType, { id, sourcePath, targetURL, wildcard })
+        .createRecord(this.storeType, { id, sourcePath, targetURL })
         .save()
         .then(result => {
           this.addRoute({
@@ -122,13 +116,11 @@ export default Ember.Controller.extend({
           });
 
           console.log(
-            `Saved ${result.payload.wildcard? 'wildcard ' : ''} route:`,
-            `${result.payload.sourcePath} → ${result.payload.targetURL}`
+            `Saved route: ${result.payload.sourcePath} → ${result.payload.targetURL}`
           );
         })
-        .catch(error => {
-          console.error('Failed to save route:', error);
-        });
+        .catch(popupAjaxError)
+        .catch(console.error);
     },
 
     /**
@@ -139,8 +131,7 @@ export default Ember.Controller.extend({
     updateRouteRecord(routeRecord) {
       const recordProperties = {
         sourcePath: routeRecord.sourcePath,
-        targetURL: routeRecord.targetURL,
-        wildcard: routeRecord.wildcard
+        targetURL: routeRecord.targetURL
       };
 
       routeRecord

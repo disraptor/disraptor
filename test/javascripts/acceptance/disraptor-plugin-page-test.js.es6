@@ -19,14 +19,7 @@ test('Disraptor works', async assert => {
           {
             'id': '46961985',
             'sourcePath': '/test',
-            'targetURL': targetHost,
-            'wildcard': false
-          },
-          {
-            'id': '3886754584',
-            'sourcePath': '/test_wildcard',
-            'targetURL': `${targetHost}wildcard`,
-            'wildcard': true
+            'targetURL': targetHost
           }
         ]
       }
@@ -38,7 +31,6 @@ test('Disraptor works', async assert => {
 
   // With the initial GET request, the following active routes should exist.
   assert.ok(exists('[data-route-id="46961985"]'), 'Route /test exists.');
-  assert.ok(exists('[data-route-id="3886754584"]'), 'Route /test_wildcard exists.');
 
   server.put('/disraptor_routes/1498996', () => {
     return [
@@ -48,8 +40,7 @@ test('Disraptor works', async assert => {
         disraptor_route: {
           'id': '1498996',
           'sourcePath': '/css',
-          'targetURL': `${targetHost}css`,
-          'wildcard': true
+          'targetURL': `${targetHost}css`
         }
       }
     ];
@@ -57,7 +48,6 @@ test('Disraptor works', async assert => {
 
   await fillIn('.dr-new-route__source-path input', '/css');
   await fillIn('.dr-new-route__target-url input', `${targetHost}css`);
-  await click('.dr-new-route__wildcard');
   await click('.dr-new-route__submit');
 
   assert.ok(exists('[data-route-id="1498996"]'), 'Route /css exists.');

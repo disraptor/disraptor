@@ -12,11 +12,11 @@ register_asset 'stylesheets/disraptor-view.scss'
 # Adds a link the Disraptor plugin on the `/admin/plugins` page with the route `disraptor`.
 add_admin_route 'disraptor.title', 'disraptor'
 
-  module ::Disraptor
-    PLUGIN_NAME ||= 'disraptor'.freeze
-  end
+module ::Disraptor
+  PLUGIN_NAME ||= 'disraptor'.freeze
+end
 
-  load File.expand_path('../lib/route_store.rb', __FILE__)
+load File.expand_path('../lib/route_store.rb', __FILE__)
 load File.expand_path('../app/models/route.rb', __FILE__)
 
 after_initialize do
@@ -32,19 +32,12 @@ after_initialize do
     delete '/disraptor_routes/:route_id' => 'disraptor_config#destroy', constraints: AdminConstraint.new
 
     Disraptor::RouteStore.get_routes.values.each do |route|
-      # Check for a wildcard path (e.g. `/css/*`)
-      if route['wildcard']
-        # Construct routes of the form `/css/*wildcard_segment` as described in:
-        # http://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments
-        #
-        # `DisraptorRoutesController#show` will now receive a `params` object including a
-        # `wildcard_segment` property. For a request to `/css/slidehub/styles.css`, its
-        # value will be `slidehub/styles`. Note that the extension (e.g. `.css`) is missing.
-        # Instead, the `format` property will be set to `CSS`
-        get "/#{route['sourcePath']}/*wildcard_segment" => 'disraptor_routes#show_wildcard_path'
-      else
-        get "/#{route['sourcePath']}" => 'disraptor_routes#show'
-      end
+      # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
+      # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
+      # to `styles.css` instead of just `styles`.
+      get route['sourcePath'] => 'disraptor_routes#show', segments: route['segments'], format: false
     end
   end
+
+  Rails.application.reload_routes!
 end
