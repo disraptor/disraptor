@@ -24,7 +24,12 @@ export default Discourse.Route.extend({
       .then(result => {
         this.initContent(result);
       })
-      .catch(console.error);
+      .catch(error => {
+        console.error(error);
+        if (error.jqXHR.status === 404) {
+          this.transitionTo('exception-unknown');
+        }
+      });
   },
 
   initContent(result) {
