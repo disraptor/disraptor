@@ -65,20 +65,6 @@ export default Ember.Controller.extend({
     this.routes.pushObject(route);
   },
 
-  /**
-   * Strips the query string from a URL or path.
-   *
-   * @param {String} url
-   * @returns {String}
-   */
-  stripQueryString(url) {
-    if (url.includes('?')) {
-      return url.substring(0, url.indexOf('?'));
-    }
-
-    return url;
-  },
-
   actions: {
     /**
      * Saves a record in Discourse’s store (see
@@ -97,8 +83,8 @@ export default Ember.Controller.extend({
      * @param {String} targetURL The target URL of the route (e.g. `http://127.0.0.1:8080/test`)
      */
     createRoute(sourcePath, targetURL) {
-      sourcePath = this.stripQueryString(sourcePath);
-      targetURL = this.stripQueryString(targetURL);
+      sourcePath = sourcePath.trim();
+      targetURL = targetURL.trim();
 
       // Hash the source path (e.g. /example) to obtain a number that can be
       // used as an ID for the store. This intentionally creates a conflict when
