@@ -1,15 +1,20 @@
 /**
- * Instructs Ember to render the “disraptor” template (i.e. `routes/disraptor.js.es6`) for all
- * paths.
+ * Maps all paths to Disraptor’s proxy route. This route map targets two routes, “disraptor-proxy”
+ * and “disraptor-proxy-duplicate”. The latter exports the implementation of the former route.
  *
- * Note: A plain wildcard route will not work here as Discourse already has a wildcard route that
- * seems to take precedence. For more information, see [“Defining Your Routes”][1].
+ * This is a workaround for a Discourse plugin’s inability to have a catch-all route based only on a
+ * wildcard path segment. Discourse already has such a route, and it takes precedence of that of a
+ * plugin. For more information, see:
+ *
+ * - guides.emberjs.com: [“Defining Your Routes”][1]
+ * - meta.discourse.org: [“Plugin with catch-all wildcard route map”][2]
+ * - discuss.emberjs.com: [“Override existing catch-all wildcard route”][3]
  *
  * [1]: https://guides.emberjs.com/release/routing/defining-your-routes/
+ * [2]: https://meta.discourse.org/t/plugin-with-catch-all-wildcard-route-map/100348
+ * [3]: https://discuss.emberjs.com/t/override-existing-catch-all-wildcard-route/15717
  */
 export default function () {
-  // Workaround for simple catch-all `*path` not working
-  this.route('disraptor', { path: '/:path' }, function () {
-    this.route('disraptor', { path: '*wildcard' });
-  });
+  this.route('disraptor-proxy.single-segment', { path: '/:path' });
+  this.route('disraptor-proxy.multi-segment', { path: '/:path/*wildcard' });
 }

@@ -1,7 +1,7 @@
 import { ajax } from 'discourse/lib/ajax';
 
 /**
- * Handles routing for Disraptor documents.
+ * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
   disraptorDocument: '',
@@ -11,21 +11,58 @@ export default Discourse.Route.extend({
    * the current route.
    */
   beforeModel(transition) {
+    console.log(this.routeName, '#beforeModel');
+
     // This is used to remove some Discourse styles from the main content area when serving a
     // Disraptor document.
-    document.documentElement.classList.add('disraptor-page');
+    if (!document.documentElement.classList.contains('disraptor-page')) {
+      document.documentElement.classList.add('disraptor-page');
+    }
 
     // Load the Disraptor document
     return ajax(transition.intent.url, { dataType: 'html' })
       .then(result => {
-        this.injectTags(result, 'link');
-        this.injectTags(result, 'script');
-        this.injectTags(result, 'style');
-
-        const bodyContent = this.extractTagContent('body', result);
-        this.set('disraptorDocument', bodyContent);
+        this.initContent(result);
       })
       .catch(console.error);
+  },
+
+  initContent(result) {
+    const headContent = this.extractTagContent('head', result);
+
+    this.injectTags(headContent, 'link');
+    this.injectTags(headContent, 'style');
+
+    // Special case for scripts. Weird.
+    const scriptTags = this.extractTags(headContent, 'script');
+    for (const scriptTag of scriptTags) {
+      injectScript(scriptTag);
+    }
+
+    const bodyContent = this.extractTagContent('body', result);
+    this.set('disraptorDocument', bodyContent);
+  },
+
+  injectTags(headContent, tagName) {
+    const tags = this.extractTags(headContent, tagName);
+    for (const tag of tags) {
+      tag.setAttribute(`data-disraptor-${tagName}`, '');
+      document.head.insertAdjacentElement('beforeend', tag);
+    }
+  },
+
+  /**
+   * Extracts all `Element`s from a string of the HTMLHeadElement.
+   *
+   * @param {String} headContent
+   * @param {'script'|'link'} tagName
+   * @returns {Array<Element>}
+   */
+  extractTags(headContent, tagName) {
+    // Use a <template> element to parse a DOM fragment
+    const headTemplate = document.createElement('template');
+    headTemplate.insertAdjacentHTML('beforeend', headContent);
+    return Array.from(headTemplate.children).filter(el => el.tagName === tagName.toUpperCase());
   },
 
   model() {
@@ -35,31 +72,7 @@ export default Discourse.Route.extend({
   },
 
   renderTemplate() {
-    // Renders the template `../templates/disraptor.hbs`
-    this.render('disraptor');
-  },
-
-  injectTags(result, tagName) {
-    const headContent = this.extractTagContent('head', result);
-    const tags = this.extractTags(headContent, tagName);
-    for (const tag of tags) {
-      tag.setAttribute(`data-disraptor-${tagName}`, '');
-      document.head.insertAdjacentElement('beforeend', tag);
-    }
-  },
-
-  /**
-   * Extracts all `HTMLLinkElement`s from a string of the HTMLHeadElement.
-   *
-   * @param {String} headMarkup
-   * @param {'script'|'link'} tagName
-   * @returns {Array<HTMLScriptElement>|Array<HTMLLinkElement>}
-   */
-  extractTags(headMarkup, tagName) {
-    // Use a <template> element to parse a DOM fragment
-    const headTemplate = document.createElement('template');
-    headTemplate.insertAdjacentHTML('beforeend', headMarkup);
-    return Array.from(headTemplate.children).filter(el => el.tagName === tagName.toUpperCase());
+    this.render('disraptor-proxy');
   },
 
   /**
@@ -76,18 +89,24 @@ export default Discourse.Route.extend({
   },
 
   actions: {
-    willTransition() {
-      document.documentElement.classList.remove('disraptor-page');
+    willTransition(transition) {
+      console.log(this.routeName, '#willTransition');
 
-      const disraptorElements = document.querySelectorAll(
+      this.set('disraptorDocument', '');
+
+      if (!transition.targetName.startsWith('disraptor-proxy')) {
+        document.documentElement.classList.remove('disraptor-page');
+      }
+
+      const injectedElements = document.querySelectorAll(
         '[data-disraptor-link], [data-disraptor-script], [data-disraptor-style]'
       );
 
-      disraptorElements.forEach(element => {
+      injectedElements.forEach(element => {
         element.remove();
       });
     }
-  }
+  },
 });
 
 /**
@@ -103,5 +122,5 @@ function injectScript(src) {
   script.async = false;
   script.src = src;
   script.setAttribute('data-disraptor-script', '');
-  document.head.appendChild(script);
+  document.head.insertAdjacentElement('beforeend', script);
 }
