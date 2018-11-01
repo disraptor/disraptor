@@ -7,12 +7,9 @@ class DisraptorRoutesController < ApplicationController
 
   # Handles requests for regular paths like /example for routes with a source path /example.
   def show
-    Rails.logger.info('❌❌❌❌❌❌❌❌❌❌')
     Rails.logger.info("👻 Disraptor: Requesting path '#{request.path}'")
 
     target_url = determine_target_url(request.path, params)
-
-    Rails.logger.info('❌❌❌❌❌❌❌❌❌❌')
 
     if target_url
       send_proxy_request(request, target_url)
