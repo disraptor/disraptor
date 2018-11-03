@@ -15,8 +15,6 @@ en:
       create_route:
         title: 'Create a New Route'
         route_exists: 'This route already exists. Adding it again will override the existing route.'
-        preview_heading: 'Preview'
-        preview_explanation: 'The above route will match like this'
         button_label: 'Create'
 
       edit_route:

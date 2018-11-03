@@ -26,19 +26,6 @@
       <p class="dr-warning">{{ i18n 'disraptor.create_route.route_exists' }}</p>
     {{/if}}
 
-    <h4>{{ i18n 'disraptor.create_route.preview_heading' }}</h4>
-
-    <p>{{ i18n 'disraptor.create_route.preview_explanation' }}:</p>
-
-    <ul class="dr-route-match-preview">
-      <li>
-        {{route-preview
-          routeSourcePath=routeSourcePath
-          routeTargetURL=routeTargetURL
-        }}
-      </li>
-    </ul>
-
     <button type="submit" class="dr-new-route__submit btn btn-primary">
       {{ d-icon 'plus'}}
       {{ i18n 'disraptor.create_route.button_label' }}
