@@ -10,6 +10,12 @@ class Disraptor::RouteStore
       return routes[route_id]
     end
 
+    def has_route(route_id)
+      routes = get_routes()
+
+      return routes.key?(route_id)
+    end
+
     def add_route(route_id, route)
       routes = get_routes()
       routes[route_id] = route

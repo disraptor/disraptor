@@ -43,8 +43,9 @@ class Disraptor::Route
 
     # Updates an existing route
     def edit(route_id, source_path, target_url)
-      # Remove the existing route
-      Disraptor::RouteStore.remove_route(route_id)
+      if Disraptor::RouteStore.has_route(route_id)
+        Disraptor::RouteStore.remove_route(route_id)
+      end
 
       return add(route_id, source_path, target_url)
     end
