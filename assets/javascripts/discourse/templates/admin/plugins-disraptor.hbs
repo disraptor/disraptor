@@ -9,7 +9,7 @@
   <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
 
   <form
-    {{ action 'createRoute' routeSourcePath routeTargetURL on='submit' }}
+    {{ action 'createRoute' routeSourcePath routeTargetURL routeRequestMethod on='submit' }}
     class="dr-new-route"
   >
     <label class="dr-new-route__source-path dr-text-field">
@@ -22,9 +22,10 @@
       {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="url" required=true }}
     </label>
 
-    {{#if sourcePathExists}}
-      <p class="dr-warning">{{ i18n 'disraptor.create_route.route_exists' }}</p>
-    {{/if}}
+    <label class="dr-select">
+      <span class="dr-select__label">{{ i18n 'disraptor.routes.request_method' }}:</span>
+      {{ combo-box value=routeRequestMethod valueAttribute="value" content=requestMethods class="dr-select__control" }}
+    </label>
 
     <button type="submit" class="dr-new-route__submit btn btn-primary">
       {{ d-icon 'plus'}}
@@ -39,6 +40,7 @@
       <thead>
         <tr>
           <th>{{ i18n 'disraptor.route_list.table.route' }}</th>
+          <th width="10%">{{ i18n 'disraptor.route_list.table.request_method' }}</th>
           <th width="25%">{{ i18n 'disraptor.route_list.table.manage' }}</th>
         </tr>
       </thead>
@@ -54,6 +56,14 @@
                 {{ input value=route.record.targetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') type='url' required=true }}
               {{else}}
                 {{ route.record.targetURL }}
+              {{/if}}
+            </td>
+
+            <td>
+              {{#if route.isBeingEdited}}
+                {{ combo-box value=route.record.requestMethod valueAttribute="value" content=requestMethods }}
+              {{else}}
+                {{ route.record.requestMethod }}
               {{/if}}
             </td>
 

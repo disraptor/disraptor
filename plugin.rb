@@ -35,7 +35,7 @@ after_initialize do
       # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
       # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
       # to `styles.css` instead of just `styles`.
-      get route['sourcePath'] => 'disraptor_routes#show', segments: route['segments'], format: false
+      match route['sourcePath'] => 'disraptor_routes#show', format: false, segments: route['segments'], via: route['requestMethod']
     end
   end
 

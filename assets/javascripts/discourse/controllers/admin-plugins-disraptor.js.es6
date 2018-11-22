@@ -22,26 +22,37 @@ export default Ember.Controller.extend({
    */
   storeType: 'disraptor-route',
 
-  // Used to display a warning when a route with the entered source path already exists.
-  sourcePathExists: Ember.computed('routeSourcePath', function () {
-    const existingRoute = this.routes.findBy('sourcePath', this.get('routeSourcePath'));
-    return existingRoute !== undefined;
+  requestMethods: ['get', 'post'],
+
+  routeId: Ember.computed('routeSourcePath', 'routeRequestMethod', function () {
+    // Hash the source path (e.g. /example) to obtain a number that can be
+    // used as an ID for the store. This intentionally creates a conflict when
+    // attemtping to create a route for the same path twice.
+    const routeSourcePath = this.get('routeSourcePath');
+    const routeRequestMethod = this.get('routeRequestMethod');
+
+    if (routeRequestMethod === undefined || routeSourcePath === undefined) {
+      return null;
+    }
+
+    return hashString(routeSourcePath + routeRequestMethod) >>> 0;
   }),
 
   init() {
     this._super();
 
+    this.set('routeRequestMethod', 'get');
     this.set('routesLoading', true);
     this.set('routes', []);
 
     // Populates the list of active routes
     this.store.findAll(this.storeType)
-      .then(result => {
+      .then(response => {
         this.set('routesLoading', false);
 
-        for (const record of result.content) {
+        for (const record of response.content) {
           this.routes.pushObject({
-            sourcePath: record.sourcePath,
+            id: record.id,
             record: record,
             isBeingEdited: false
           });
@@ -54,11 +65,11 @@ export default Ember.Controller.extend({
    * Adds a route to the user interface. Also removes a potentially existing route with the same
    * `sourcePath` property.
    *
-   * @param {object} route Route to add to the UI
+   * @param {Object} route Route to add to the UI
    */
   addRoute(route) {
-    const existingRoute = this.routes.findBy('sourcePath', route.record.sourcePath);
-    if (existingRoute) {
+    const existingRoute = this.routes.findBy('id', route.record.id);
+    if (existingRoute !== undefined) {
       this.routes.removeObject(existingRoute);
     }
 
@@ -81,22 +92,20 @@ export default Ember.Controller.extend({
      *
      * @param {String} sourcePath The source path of the route (e.g. `/test`)
      * @param {String} targetURL The target URL of the route (e.g. `http://127.0.0.1:8080/test`)
+     * @param {'GET'|'POST'} requestMethod
      */
-    createRoute(sourcePath, targetURL) {
+    createRoute(sourcePath, targetURL, requestMethod) {
       sourcePath = sourcePath.trim();
       targetURL = targetURL.trim();
 
-      // Hash the source path (e.g. /example) to obtain a number that can be
-      // used as an ID for the store. This intentionally creates a conflict when
-      // attemtping to create a route for the same path twice.
-      const id = hashString(sourcePath) >>> 0;
+      const id = this.get('routeId');
 
       this.store
-        .createRecord(this.storeType, { id, sourcePath, targetURL })
+        .createRecord(this.storeType, { id, sourcePath, targetURL, requestMethod })
         .save()
         .then(result => {
           this.addRoute({
-            sourcePath: result.payload.sourcePath,
+            id: result.payload.id,
             record: result.target,
             isBeingEdited: false
           });
@@ -117,14 +126,15 @@ export default Ember.Controller.extend({
     updateRouteRecord(routeRecord) {
       const recordProperties = {
         sourcePath: routeRecord.sourcePath,
-        targetURL: routeRecord.targetURL
+        targetURL: routeRecord.targetURL,
+        requestMethod: routeRecord.requestMethod
       };
 
       routeRecord
         .update(recordProperties)
         .then(result => {
           this.addRoute({
-            sourcePath: result.payload.sourcePath,
+            id: result.payload.id,
             record: result.target,
             isBeingEdited: false
           });

@@ -39,6 +39,16 @@ input.dr-checkbox__control:required:invalid {
   box-shadow: none;
 }
 
+.dr-select {
+  display: block;
+  margin-bottom: 9px;
+}
+
+.dr-select__label {
+  display: block;
+  margin-bottom: 5px;
+}
+
 .dr-routes-table {
   table-layout: fixed;
 }

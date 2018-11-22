@@ -9,12 +9,12 @@ en:
         source_path_placeholder: '/disraptor'
         target_url: 'Target URL'
         target_url_placeholder: 'http://127.0.0.1:8080/'
+        request_method: 'Request method'
         create: 'Create'
         delete_label: 'Delete'
 
       create_route:
         title: 'Create a New Route'
-        route_exists: 'This route already exists. Adding it again will override the existing route.'
         button_label: 'Create'
 
       edit_route:
@@ -28,4 +28,5 @@ en:
         loading: 'Loading active routes ...'
         table:
           route: 'Route'
+          request_method: 'Method'
           manage: 'Manage'

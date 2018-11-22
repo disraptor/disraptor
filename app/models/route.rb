@@ -18,7 +18,7 @@ class Disraptor::Route
     end
 
     # Adds a new route
-    def add(route_id, source_path, target_url)
+    def add(route_id, source_path, target_url, request_method)
       if source_path.start_with?('/admin')
         Rails.logger.error("😱 Attempt to add admin route '#{source_path}' was cancelled.")
         return
@@ -34,7 +34,7 @@ class Disraptor::Route
         )
       end
 
-      route = create_route_object(route_id, source_path, target_url)
+      route = create_route_object(route_id, source_path, target_url, request_method)
 
       Disraptor::RouteStore.add_route(route_id, route)
 
@@ -42,12 +42,12 @@ class Disraptor::Route
     end
 
     # Updates an existing route
-    def edit(route_id, source_path, target_url)
+    def edit(route_id, source_path, target_url, request_method)
       if Disraptor::RouteStore.has_route(route_id)
         Disraptor::RouteStore.remove_route(route_id)
       end
 
-      return add(route_id, source_path, target_url)
+      return add(route_id, source_path, target_url, request_method)
     end
 
     # Removes an existing route
@@ -65,11 +65,12 @@ class Disraptor::Route
     #   - +target_url+ -> a route’s target URL
     # * *Returns*:
     #   - a route hash
-    def create_route_object(route_id, source_path, target_url)
+    def create_route_object(route_id, source_path, target_url, request_method)
       route = {
         'id' => route_id,
         'sourcePath' => source_path,
         'targetURL' => target_url,
+        'requestMethod' => request_method.downcase.to_sym,
         'segments' => get_special_path_segments(source_path)
       }
 
