@@ -1,3 +1,7 @@
+.disraptor-page #main {
+  height: 100%;
+}
+
 .disraptor-page #main-outlet {
   max-width: initial;
 }
@@ -8,5 +12,9 @@
 }
 
 .disraptor-content {
-  position: relative;
+  position: absolute;
+  top: 4.2857em;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
