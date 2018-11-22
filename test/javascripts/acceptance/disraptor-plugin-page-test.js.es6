@@ -8,7 +8,7 @@ acceptance('Disraptor’s plugin page works', { loggedIn: true });
 
 const targetHost = 'http://127.0.0.1:2000/';
 
-test('Disraptor works', async assert => {
+test('Creating a route', async assert => {
   // Fake the HTTP endpoint for the initial GET request fetching all active routes
   server.get('/disraptor_routes', () => {
     return [
