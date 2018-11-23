@@ -85,13 +85,13 @@ class DisraptorRoutesController < ApplicationController
   # Discourse to send an AJAX request for that document. This is necessary for rendering Disraptor
   # documents inside the context of Discourse (e.g. with the top navigation bar).
   def check_xhr_for_documents
-    if request.format == 'text/html'
+    if request.format == 'text/html' && request.get?
       check_xhr
     end
   end
 
   def forgery_protection_for_documents
-    if request.format == 'text/html'
+    if request.format == 'text/html' && request.get?
       verify_authenticity_token
     end
   end
