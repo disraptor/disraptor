@@ -7,7 +7,7 @@ class DisraptorRoutesController < ApplicationController
 
   # Handles requests for regular paths like /example for routes with a source path /example.
   def show
-    Rails.logger.info("👻 Disraptor: Requesting path '#{request.path}'")
+    Rails.logger.info("👻 Disraptor: Routing '#{request.method} #{request.path}' ...")
 
     target_url = determine_target_url(request.path, params)
 
@@ -67,18 +67,60 @@ class DisraptorRoutesController < ApplicationController
   #   - +request+ -> the incoming request
   #   - +target_url+ -> the target URL for the proxy request
   def send_proxy_request(request, target_url)
-    Rails.logger.info('👻 Disraptor: Routing to ' + target_url)
+    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
     url = URI.parse(target_url)
-    proxy_request = Net::HTTP::Get.new(url.to_s, {'Content-Type' => request.format.to_s})
+
+    proxy_request = build_proxy_request(request, url.to_s, {'Content-Type' => request.format.to_s})
+    if proxy_request.nil?
+      Rails.logger.error("❌ Disraptor: Error: Unknown method '#{request.method}'")
+      render body: nil, status: 404
+    end
+
     proxy_response = Net::HTTP.start(url.host, url.port) { |http| http.request(proxy_request) }
 
-    if proxy_response.code == '404'
-      Rails.logger.info('👻 Disraptor: Target URL responds with status code 404.')
-      render body: nil, status: 404
-    else
-      Rails.logger.info('👻 Disraptor: Responding with route content.')
+    case proxy_response.code
+    when '200'
+      Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
+
       render body: proxy_response.body, content_type: proxy_response.content_type
+    when '303'
+      Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
+
+      see_other_url = proxy_response["location"]
+      cookies = get_cookies_map(proxy_response["set-cookie"])
+      see_other_headers = {'Cookie' => "JSESSIONID=" + cookies['JSESSIONID']}
+      see_other_request = Net::HTTP::Get.new(see_other_url, see_other_headers)
+      see_other_response = Net::HTTP.start(url.host, url.port) { |http| http.request(see_other_request) }
+
+      render body: see_other_response.body, content_type: see_other_response.content_type
+    when '404'
+      Rails.logger.info('👻 Disraptor: Status code 404.')
+
+      render body: nil, status: proxy_response.code
+    else
+      Rails.logger.error("❌ Disraptor: Error: Unhandled status code '#{proxy_response.code}'")
+
+      render json: failed_json, status: proxy_response.code
     end
+  end
+
+  def build_proxy_request(request, url, header)
+    case request.method
+    when 'GET'
+      return Net::HTTP::Get.new(url, header)
+    when 'HEAD'
+      return Net::HTTP::Head.new(url, header)
+    when 'POST'
+      proxy_request = Net::HTTP::Post.new(url, header)
+      proxy_request.set_form_data(request.request_parameters)
+      return proxy_request
+    else
+      return nil
+    end
+  end
+
+  def get_cookies_map(set_cookie_header)
+    return set_cookie_header.split(';').map{ |x| x.split('=') }.to_h
   end
 
   # Stops this controller from handling non-AJAX requests for HTML documents. Instead, it requires
