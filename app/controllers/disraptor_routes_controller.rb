@@ -114,6 +114,16 @@ class DisraptorRoutesController < ApplicationController
       proxy_request = Net::HTTP::Post.new(url, header)
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
+    when 'PUT'
+      proxy_request = Net::HTTP::Put.new(url, header)
+      proxy_request.set_form_data(request.request_parameters)
+      return proxy_request
+    when 'DELETE'
+      return Net::HTTP::Delete.new(url, header)
+    when 'OPTIONS'
+      return Net::HTTP::Options.new(url, header)
+    when 'TRACE'
+      return Net::HTTP::Trace.new(url, header)
     else
       return nil
     end

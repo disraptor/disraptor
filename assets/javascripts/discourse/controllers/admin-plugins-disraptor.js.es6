@@ -22,7 +22,7 @@ export default Ember.Controller.extend({
    */
   storeType: 'disraptor-route',
 
-  requestMethods: ['get', 'post'],
+  requestMethods: ['get', 'head', 'post', 'put', 'delete', 'options', 'trace'],
 
   routeId: Ember.computed('routeSourcePath', 'routeRequestMethod', function () {
     // Hash the source path (e.g. /example) to obtain a number that can be
