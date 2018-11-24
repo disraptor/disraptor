@@ -70,7 +70,7 @@ class DisraptorRoutesController < ApplicationController
     Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
     url = URI.parse(target_url)
 
-    proxy_request = build_proxy_request(request, url.to_s, {'Content-Type' => request.format.to_s})
+    proxy_request = build_proxy_request(request, url.to_s)
     if proxy_request.nil?
       Rails.logger.error("❌ Disraptor: Error: Unknown method '#{request.method}'")
       render body: nil, status: 404
@@ -86,13 +86,9 @@ class DisraptorRoutesController < ApplicationController
     when '303'
       Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
 
-      see_other_url = proxy_response["location"]
-      cookies = get_cookies_map(proxy_response["set-cookie"])
-      see_other_headers = {'Cookie' => "JSESSIONID=" + cookies['JSESSIONID']}
-      see_other_request = Net::HTTP::Get.new(see_other_url, see_other_headers)
-      see_other_response = Net::HTTP.start(url.host, url.port) { |http| http.request(see_other_request) }
-
-      render body: see_other_response.body, content_type: see_other_response.content_type
+      response.set_header('X-Disraptor-Set-Cookie', proxy_response['set-cookie'])
+      response.set_header('X-Disraptor-Location', proxy_response['location'])
+      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
     when '404'
       Rails.logger.info('👻 Disraptor: Status code 404.')
 
@@ -104,26 +100,31 @@ class DisraptorRoutesController < ApplicationController
     end
   end
 
-  def build_proxy_request(request, url, header)
+  def build_proxy_request(request, url)
+    proxy_headers = {
+      'Content-Type' => request.format.to_s,
+      'Cookie' => request.headers['X-Disraptor-Set-Cookie']
+    }
+
     case request.method
     when 'GET'
-      return Net::HTTP::Get.new(url, header)
+      return Net::HTTP::Get.new(url, proxy_headers)
     when 'HEAD'
-      return Net::HTTP::Head.new(url, header)
+      return Net::HTTP::Head.new(url, proxy_headers)
     when 'POST'
-      proxy_request = Net::HTTP::Post.new(url, header)
+      proxy_request = Net::HTTP::Post.new(url, proxy_headers)
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'PUT'
-      proxy_request = Net::HTTP::Put.new(url, header)
+      proxy_request = Net::HTTP::Put.new(url, proxy_headers)
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'DELETE'
-      return Net::HTTP::Delete.new(url, header)
+      return Net::HTTP::Delete.new(url, proxy_headers)
     when 'OPTIONS'
-      return Net::HTTP::Options.new(url, header)
+      return Net::HTTP::Options.new(url, proxy_headers)
     when 'TRACE'
-      return Net::HTTP::Trace.new(url, header)
+      return Net::HTTP::Trace.new(url, proxy_headers)
     else
       return nil
     end
