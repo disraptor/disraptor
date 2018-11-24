@@ -14,17 +14,16 @@ export default Discourse.Route.extend({
       document.documentElement.classList.add('disraptor-page');
     }
 
-    const headers = {
-      'Content-Type': 'text/html'
-    };
-
+    const fetchOptions = {};
     const disraptorCookie = localStorage.getItem('disraptor-set-cookie');
 
     if (disraptorCookie !== null) {
-      headers['X-Disraptor-Set-Cookie'] = disraptorCookie;
+      fetchOptions['headers'] = {
+        'X-Disraptor-Set-Cookie': disraptorCookie
+      };
     }
 
-    return fetch(transition.intent.url, { headers })
+    return fetch(transition.intent.url, fetchOptions)
       .then(response => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -152,7 +151,7 @@ function performPostRequest(event) {
   fetch(form.action, {
     method: 'post',
     headers: {
-      'Content-Type': `${form.enctype}; charset=UTF-8`
+      'Content-Type': `${form.enctype}; charset=utf-8`
     },
     body: constructRequestBody(form)
   })
