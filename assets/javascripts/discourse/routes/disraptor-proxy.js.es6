@@ -41,7 +41,7 @@ export default Discourse.Route.extend({
     // Special case for scripts. Weird.
     const scriptTags = this.extractTags(headContent, 'script');
     for (const scriptTag of scriptTags) {
-      injectScript(scriptTag);
+      injectScript(scriptTag.src);
     }
 
     const bodyContent = this.extractTagContent('body', result);
