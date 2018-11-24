@@ -11,6 +11,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
   - [Run Tests](#run-tests)
 - [Documentation](#documentation)
   - [Introduction](#introduction)
+  - [Current status](#current-status)
   - [Limitations for Disraptor documents and resources](#limitations-for-disraptor-documents-and-resources)
     - [URL references in documents and resources](#url-references-in-documents-and-resources)
     - [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
@@ -18,7 +19,6 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
   - [Configuring Routes](#configuring-routes)
   - [Server-side-only Routes](#server-side-only-routes)
 - [To Do](#to-do)
-- [Notes](#notes)
 
 
 
@@ -70,11 +70,23 @@ Assuming the *wildcard route* option was selected when creating that route, all 
 
 **(!) Note**: Disraptor doesn’t really distinquish between documents and resources. They’re treated exactly the same when configured the same way.
 
+### Current status
+
+The current prototype has the following features:
+
+- Render a web application document inside a Discourse document. The Disraptor document’s `link`, `style` and `script` tags are injected into the Discourse document’s `head`. This leads to a flash of unstyled content.
+- Navigate between pages via Ember transitions. Previously injected `link`, `style` and `script` tags are removed on transition.
+- Authenticate with the web application. Form submits are intercepted and sent to the server via asynchronous JavaScript. This allows Disraptor to handle the response with Ember transitions which in turn ensures that a Disraptor document is still rendered inside the Discourse document.
+
+  Successful authentication requets often respond with a “303 See Other” status, indicating which document to request in the response’s `Location` header. Disraptor keeps track of `Set-Cookie` headers from “303 See Other” responses and includes them in subsequent requests. This allows Disraptor’s back end to set the correct cookies when sending proxy requests to the web application server.
+
 
 
 ### Limitations for Disraptor documents and resources
 
 Disraptor can only operate reliably while imposing restrictions on its documents and resources.
+
+In the future, we will evaluate the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) API to avoid these restrictions if possible.
 
 - Scripts that are loaded by Discourse (e.g. jQuery) **must not** be loaded by a Disraptor document.
 - URLs **must not** be file-relative. Instead, root-relative (i.e. URLs starting with a slash) or absolute URLs **must** be used. Explanation: [URL references in documents and resources](#url-references-in-documents-and-resources).
@@ -276,13 +288,7 @@ Now this will finally produce the desired logging output. In other words, the ot
 
 ## To Do
 
-- [High Priority] Routes with query strings are not handled correctly
-- [Medium Priority] Test with Slidehub
-- [Medium Priority] Test with Tira
-- [Low Priority] Add *role* property to routes. This allows the Discourse instance to not send proxy requests if the current user lacks certain permissions.
-
-
-
-## Notes
-
-- Store `target_url` as URL? Is there a class for that in Rails?
+- Figure out if we should store `path` and `origin_host` instead of `source_path` and `target_url`.
+  - `path` would serve the same purpose as `source_path`
+  - `target_url` would be constructed by concatenating `origin_host` and `path`
+- [Low Priority] [Discourse Integration] Add *role* property to routes. This allows the Discourse instance to not send proxy requests if the current user lacks certain permissions.
