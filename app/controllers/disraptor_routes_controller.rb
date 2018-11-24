@@ -86,8 +86,14 @@ class DisraptorRoutesController < ApplicationController
     when '303'
       Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
 
-      response.set_header('X-Disraptor-Set-Cookie', proxy_response['set-cookie'])
-      response.set_header('X-Disraptor-Location', proxy_response['location'])
+      if proxy_response.key?('set-cookie')
+        response.set_header('X-Disraptor-Set-Cookie', proxy_response['set-cookie'])
+      end
+
+      if proxy_response.key?('location')
+        response.set_header('X-Disraptor-Location', proxy_response['location'])
+      end
+
       render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
     when '404'
       Rails.logger.info('👻 Disraptor: Status code 404.')
@@ -102,9 +108,12 @@ class DisraptorRoutesController < ApplicationController
 
   def build_proxy_request(request, url)
     proxy_headers = {
-      'Content-Type' => request.format.to_s,
-      'Cookie' => request.headers['X-Disraptor-Set-Cookie']
+      'Content-Type' => request.format.to_s
     }
+
+    if request.headers.key?('X-Disraptor-Set-Cookie')
+      proxy_headers['Cookie'] = request.headers['X-Disraptor-Set-Cookie']
+    end
 
     case request.method
     when 'GET'

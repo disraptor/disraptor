@@ -15,9 +15,14 @@ export default Discourse.Route.extend({
     }
 
     const headers = {
-      'Content-Type': 'text/html',
-      'X-Disraptor-Set-Cookie': localStorage.getItem('disraptor-set-cookie')
+      'Content-Type': 'text/html'
     };
+
+    const disraptorCookie = localStorage.getItem('disraptor-set-cookie');
+
+    if (disraptorCookie !== null) {
+      headers['X-Disraptor-Set-Cookie'] = disraptorCookie;
+    }
 
     return fetch(transition.intent.url, { headers })
       .then(response => {
