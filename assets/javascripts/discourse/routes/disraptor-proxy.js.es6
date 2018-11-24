@@ -26,13 +26,11 @@ export default Discourse.Route.extend({
 
     return fetch(transition.intent.url, { headers })
       .then(response => {
-        if (response.status === 404) {
-          this.transitionTo('exception-unknown');
+        if (!response.ok) {
+          throw new Error(response.statusText);
         }
 
-        if (response.ok) {
-          return response.text();
-        }
+        return response.text();
       })
       .then(responseBody => {
         injectHeadContent(responseBody);
@@ -41,7 +39,7 @@ export default Discourse.Route.extend({
           disraptorDocument: extractTagContent('body', responseBody)
         };
       })
-      .catch(console.error);
+      .catch(() => this.transitionTo('exception-unknown'));
   },
 
   renderTemplate() {
