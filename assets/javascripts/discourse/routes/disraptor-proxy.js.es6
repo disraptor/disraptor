@@ -14,16 +14,7 @@ export default Discourse.Route.extend({
       document.documentElement.classList.add('disraptor-page');
     }
 
-    const fetchOptions = {};
-    const disraptorCookie = localStorage.getItem('disraptor-set-cookie');
-
-    if (disraptorCookie !== null) {
-      fetchOptions['headers'] = {
-        'X-Disraptor-Set-Cookie': disraptorCookie
-      };
-    }
-
-    return fetch(transition.intent.url, fetchOptions)
+    return fetch(transition.intent.url)
       .then(response => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -156,12 +147,9 @@ function performPostRequest(event) {
     body: constructRequestBody(form)
   })
     .then(response => {
-      // Store the disraptor cookie to pass on to the server on subsequent XHR requests.
-      const disraptorCookie = response.headers.get('x-disraptor-set-cookie');
-      localStorage.setItem('disraptor-set-cookie', disraptorCookie);
-
-      const location = response.headers.get('x-disraptor-location');
-      this.transitionTo(location);
+      if (response.headers.has('X-Disraptor-Location')) {
+        this.transitionTo(response.headers.get('X-Disraptor-Location'));
+      }
     })
     .catch(console.error);
 }

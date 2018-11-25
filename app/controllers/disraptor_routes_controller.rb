@@ -86,12 +86,14 @@ class DisraptorRoutesController < ApplicationController
     when '303'
       Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
 
-      if proxy_response.key?('set-cookie')
-        response.set_header('X-Disraptor-Set-Cookie', proxy_response['set-cookie'])
+      if proxy_response.key?('Set-Cookie')
+        response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
       end
 
-      if proxy_response.key?('location')
-        response.set_header('X-Disraptor-Location', proxy_response['location'])
+      if proxy_response.key?('Location')
+        # Don’t use the “Location” header directly because the front end won’t be able to perform
+        # the redirect via Ember transitions otherwise.
+        response.set_header('X-Disraptor-Location', proxy_response['Location'])
       end
 
       render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
@@ -108,12 +110,9 @@ class DisraptorRoutesController < ApplicationController
 
   def build_proxy_request(request, url)
     proxy_headers = {
-      'Content-Type' => request.format.to_s
+      # 'Content-Type' => request.format.to_s,
+      'Cookie' => request.cookies.map{ |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }.join(';')
     }
-
-    if request.headers.key?('X-Disraptor-Set-Cookie')
-      proxy_headers['Cookie'] = request.headers['X-Disraptor-Set-Cookie']
-    end
 
     case request.method
     when 'GET'
@@ -122,10 +121,12 @@ class DisraptorRoutesController < ApplicationController
       return Net::HTTP::Head.new(url, proxy_headers)
     when 'POST'
       proxy_request = Net::HTTP::Post.new(url, proxy_headers)
+      proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(url, proxy_headers)
+      proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'DELETE'
