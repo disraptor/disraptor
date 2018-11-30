@@ -1,11 +1,13 @@
-import { ajax } from 'discourse/lib/ajax';
-
 /**
  * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
   /**
    * Retrieves the model with an asynchronous request to the transition URL.
+   *
+   * @param {Object} params
+   * @param {any} transition
+   * @returns {any | Promise<any>}
    */
   model(params, transition) {
     // This is used to remove some Discourse styles from the main content area when serving a
@@ -29,15 +31,18 @@ export default Discourse.Route.extend({
           disraptorDocument: extractTagContent('body', responseBody)
         };
       })
-      .catch(() => this.transitionTo('exception-unknown'));
+      .catch((error) => {
+        console.error(error);
+        return this.transitionTo('exception-unknown');
+      });
   },
 
   renderTemplate() {
     this.render('disraptor-proxy');
 
     Ember.run.scheduleOnce('afterRender', () => {
-      const disraptorRoot = document.querySelector('.disraptor-content');
-      const forms = disraptorRoot.querySelectorAll('form');
+      this.disraptorRoot = document.querySelector('.disraptor-content');
+      const forms = this.disraptorRoot.querySelectorAll('form');
 
       forms.forEach(form => {
         if (form.method.toLowerCase() === 'post') {
@@ -48,6 +53,13 @@ export default Discourse.Route.extend({
   },
 
   actions: {
+    /**
+     * See [emberjs.com: Route events: willTransition][1].
+     *
+     * [1]: https://www.emberjs.com/api/ember/3.5/classes/Route/events/willTransition?anchor=willTransition
+     *
+     * @param {any} transition
+     */
     willTransition(transition) {
       if (!transition.targetName.startsWith('disraptor-proxy')) {
         document.documentElement.classList.remove('disraptor-page');
@@ -172,11 +184,5 @@ function constructRequestBody(form) {
     return formData;
   }
 
-  const requestBody = new URLSearchParams();
-
-  for (const [name, value] of formData) {
-    requestBody.append(name, value);
-  }
-
-  return requestBody;
+  return new URLSearchParams(formData);
 }
