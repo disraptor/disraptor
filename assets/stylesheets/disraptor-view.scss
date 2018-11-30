@@ -1,20 +1,21 @@
-.disraptor-page #main {
-  height: 100%;
+.disraptor-page html,
+.disraptor-page body,
+.disraptor-page #main,
+.disraptor-page #main > div,
+.disraptor-page .disraptor-content {
+  height: 100% !important;
 }
 
+/*
+1: Account for Discourse’s header height
+*/
 .disraptor-page #main-outlet {
   max-width: initial;
+  height: calc(100% - 4.2857em - 3px) !important; /* [1] */
+  padding-top: calc(4.2857em + 3px); /* [1] */
 }
 
-.disraptor-page #main-outlet.wrap {
+.disraptor-page .wrap {
   padding-right: 0;
   padding-left: 0;
-}
-
-.disraptor-content {
-  position: absolute;
-  top: 4.2857em;
-  right: 0;
-  bottom: 0;
-  left: 0;
 }
