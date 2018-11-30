@@ -25,6 +25,10 @@ export default Discourse.Route.extend({
         return response.text();
       })
       .then(responseBody => {
+        // return {
+        //   disraptorDocument: this.getDocumentHostNode(responseBody)
+        // };
+
         injectHeadContent(responseBody);
 
         return {
@@ -35,6 +39,21 @@ export default Discourse.Route.extend({
         console.error(error);
         return this.transitionTo('exception-unknown');
       });
+  },
+
+  /**
+   *
+   * @param {String} responseBody the complete markup of an HTML document
+   * @returns {HTMLElement}
+   */
+  getDocumentHostNode(responseBody) {
+    const doc = new DOMParser().parseFromString(responseBody, 'text/html');
+
+    const documentHostNode = document.createElement('div');
+    documentHostNode.classList.add('disraptor-content');
+    this.disraptorRoot = documentHostNode.attachShadow({ mode: 'open' });
+    this.disraptorRoot.appendChild(doc.documentElement);
+    return documentHostNode;
   },
 
   renderTemplate() {
