@@ -110,7 +110,6 @@ class DisraptorRoutesController < ApplicationController
 
   def build_proxy_request(request, url)
     proxy_headers = {
-      # 'Content-Type' => request.format.to_s,
       'Cookie' => request.cookies.map{ |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }.join(';')
     }
 
