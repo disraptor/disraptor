@@ -1,7 +1,11 @@
+import DiscourseURL from 'discourse/lib/url';
+
 /**
  * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
+  usingShadowDOM: true,
+
   /**
    * Retrieves the model with an asynchronous request to the transition URL.
    *
@@ -25,14 +29,12 @@ export default Discourse.Route.extend({
         return response.text();
       })
       .then(responseBody => {
-        // return {
-        //   disraptorDocument: this.getDocumentHostNode(responseBody)
-        // };
-
-        injectHeadContent(responseBody);
+        if (!this.usingShadowDOM) {
+          injectHeadContent(responseBody);
+        }
 
         return {
-          disraptorDocument: extractTagContent('body', responseBody)
+          disraptorDocument: this.getDocumentHostNode(responseBody)
         };
       })
       .catch((error) => {
@@ -44,25 +46,34 @@ export default Discourse.Route.extend({
   /**
    *
    * @param {String} responseBody the complete markup of an HTML document
-   * @returns {HTMLElement}
+   * @returns {HTMLElement|String}
    */
   getDocumentHostNode(responseBody) {
-    const doc = new DOMParser().parseFromString(responseBody, 'text/html');
+    if (this.usingShadowDOM) {
+      const doc = new DOMParser().parseFromString(responseBody, 'text/html');
 
-    const documentHostNode = document.createElement('div');
-    documentHostNode.classList.add('disraptor-content');
-    this.disraptorRoot = documentHostNode.attachShadow({ mode: 'open' });
-    this.disraptorRoot.appendChild(doc.documentElement);
-    return documentHostNode;
+      const documentHostNode = document.createElement('div');
+      documentHostNode.classList.add('disraptor-content');
+      this.disraptorRoot = documentHostNode.attachShadow({ mode: 'open' });
+      this.disraptorRoot.appendChild(doc.documentElement);
+      return documentHostNode;
+    }
+
+    const bodyContent = extractTagContent('body', responseBody);
+    return `<div class="disraptor-content">${bodyContent}</div>`;
   },
 
   renderTemplate() {
     this.render('disraptor-proxy');
 
     Ember.run.scheduleOnce('afterRender', () => {
-      this.disraptorRoot = document.querySelector('.disraptor-content');
-      const forms = this.disraptorRoot.querySelectorAll('form');
+      if (this.usingShadowDOM) {
+        this.disraptorRoot.host.addEventListener('click', interceptClick);
+      } else {
+        this.disraptorRoot = document.querySelector('.disraptor-content');
+      }
 
+      const forms = this.disraptorRoot.querySelectorAll('form');
       forms.forEach(form => {
         if (form.method.toLowerCase() === 'post') {
           form.addEventListener('submit', performPostRequest.bind(this));
@@ -91,6 +102,19 @@ export default Discourse.Route.extend({
     }
   },
 });
+
+function interceptClick(event) {
+  for (const target of event.composedPath()) {
+    if (
+      target.tagName === 'A'
+      && target.href !== ''
+    ) {
+      event.preventDefault();
+      DiscourseURL.routeTo(target.href);
+      return;
+    }
+  }
+}
 
 function injectHeadContent(responseBody) {
   const headContent = extractTagContent('head', responseBody);
