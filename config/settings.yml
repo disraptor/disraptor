@@ -1,3 +1,6 @@
 plugins:
   disraptor_enabled:
     default: false
+  disraptor_shadow_dom:
+    default: false
+    client: true

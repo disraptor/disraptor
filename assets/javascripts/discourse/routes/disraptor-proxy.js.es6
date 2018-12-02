@@ -4,8 +4,6 @@ import DiscourseURL from 'discourse/lib/url';
  * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
-  usingShadowDOM: true,
-
   /**
    * Retrieves the model with an asynchronous request to the transition URL.
    *
@@ -18,6 +16,11 @@ export default Discourse.Route.extend({
     // Disraptor document.
     if (!document.documentElement.classList.contains('disraptor-page')) {
       document.documentElement.classList.add('disraptor-page');
+    }
+
+    this.usingShadowDOM = this.siteSettings.disraptor_shadow_dom;
+    if (this.usingShadowDOM) {
+      console.info('Disraptor: Using experimental shadow DOM document embedding.');
     }
 
     return fetch(transition.intent.url)

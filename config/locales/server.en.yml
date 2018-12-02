@@ -1,6 +1,7 @@
 en:
   site_settings:
     disraptor_enabled: 'Enable Disraptor'
+    disraptor_shadow_dom: 'Enable experimental Shadow DOM document embedding'
 
   disraptor:
     errors:
