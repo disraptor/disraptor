@@ -4,3 +4,6 @@ plugins:
   disraptor_shadow_dom:
     default: false
     client: true
+  disraptor_app_secret_key:
+    default: ''
+    client: true

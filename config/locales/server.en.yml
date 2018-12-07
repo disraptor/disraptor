@@ -2,6 +2,7 @@ en:
   site_settings:
     disraptor_enabled: 'Enable Disraptor'
     disraptor_shadow_dom: 'Enable experimental Shadow DOM document embedding'
+    disraptor_app_secret_key: 'Disraptor application secret key'
 
   disraptor:
     errors:

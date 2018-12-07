@@ -18,12 +18,25 @@ export default Discourse.Route.extend({
       document.documentElement.classList.add('disraptor-page');
     }
 
-    this.usingShadowDOM = this.siteSettings.disraptor_shadow_dom;
-    if (this.usingShadowDOM) {
+    if (this.siteSettings.disraptor_shadow_dom) {
       console.info('Disraptor: Using experimental shadow DOM document embedding.');
     }
 
-    return fetch(transition.intent.url)
+    const fetchInit = {};
+    if (this.siteSettings.disraptor_app_secret_key !== '') {
+      fetchInit['headers'] = {
+        'X-Disraptor-App-Secret-Key': this.siteSettings.disraptor_app_secret_key
+      };
+
+      if (Discourse.User.current()) {
+        const userGroups = Discourse.User.current().groups
+          .filter(group => group.startsWith('Disraptor'));
+        fetchInit['headers']['X-Disraptor-Groups'] = userGroups;
+        fetchInit['headers']['X-Disraptor-User'] = Discourse.User.currentProp('username');
+      }
+    }
+
+    return fetch(transition.intent.url, fetchInit)
       .then(response => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -32,7 +45,7 @@ export default Discourse.Route.extend({
         return response.text();
       })
       .then(responseBody => {
-        if (!this.usingShadowDOM) {
+        if (!this.siteSettings.disraptor_shadow_dom) {
           injectHeadContent(responseBody);
         }
 
@@ -52,7 +65,7 @@ export default Discourse.Route.extend({
    * @returns {HTMLElement|String}
    */
   getDocumentHostNode(responseBody) {
-    if (this.usingShadowDOM) {
+    if (this.siteSettings.disraptor_shadow_dom) {
       const doc = new DOMParser().parseFromString(responseBody, 'text/html');
 
       const documentHostNode = document.createElement('div');
@@ -70,7 +83,7 @@ export default Discourse.Route.extend({
     this.render('disraptor-proxy');
 
     Ember.run.scheduleOnce('afterRender', () => {
-      if (this.usingShadowDOM) {
+      if (this.siteSettings.disraptor_shadow_dom) {
         this.disraptorRoot.host.addEventListener('click', interceptClick);
       } else {
         this.disraptorRoot = document.querySelector('.disraptor-content');
@@ -108,10 +121,7 @@ export default Discourse.Route.extend({
 
 function interceptClick(event) {
   for (const target of event.composedPath()) {
-    if (
-      target.tagName === 'A'
-      && target.href !== ''
-    ) {
+    if (target.tagName === 'A' && target.href !== '') {
       event.preventDefault();
       DiscourseURL.routeTo(target.href);
       return;
