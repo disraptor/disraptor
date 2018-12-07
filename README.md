@@ -86,12 +86,24 @@ The current prototype has the following features:
 
 Disraptor can only operate reliably while imposing restrictions on its documents and resources.
 
-In the future, we will evaluate the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) API to avoid these restrictions if possible.
-
-- Scripts that are loaded by Discourse (e.g. jQuery) **must not** be loaded by a Disraptor document.
 - URLs **must not** be file-relative. Instead, root-relative (i.e. URLs starting with a slash) or absolute URLs **must** be used. Explanation: [URL references in documents and resources](#url-references-in-documents-and-resources).
 - HTML IDs, classes and custom attributes **should not** conflict with Discourse. Instead, HTML ID, class and custom attribute names **should** be prefixed. Explanation: [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
 - Stylesheets and scripts **must not** select or query DOM nodes outside of a Disraptor document. Instead, only DOM nodes inside a Disraptor document **must** be selected/queried. Explanation: [Selecting and querying DOM nodes](#selecting-and-querying-dom-nodes)
+
+#### Experimental document embedding with shadow DOM
+
+We’re currently evaluating the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) API for embedding documents in a Discourse context. This is an experimental feature and can be turned on in the Discourse settings under “disraptor shadow dom”.
+
+**Advantages**:
+
+- Style isolation (and therefor no more selector restrictions for stylesheets).
+- Full document markup including `html`, `head`, and `body` elements.
+
+**Known issues**:
+
+- [Mousetrap.js doesn’t properly stop callbacks for events originating from a shadow DOM](https://meta.discourse.org/t/mousetrap-js-doesn-t-properly-stop-callbacks-for-events-originating-from-a-shadow-dom/102757): Can be fixed in mousetrap.js (upstream) or in Discourse’s fork of mousetrap.
+- [Shadow tree navigation doesn’t go through Ember router](https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712): Fixed in the plugin; can be fixed in Discourse.
+- [Firefox] Unstyled document: Occasionally, a document will appear completely unstyled until the user opens or closes the developer tools. That’s potentially a browser bug.
 
 
 
