@@ -1,6 +1,6 @@
 /**
- * Maps all paths to Disraptor’s proxy route. This route map targets two routes, “disraptor-proxy”
- * and “disraptor-proxy-duplicate”. The latter exports the implementation of the former route.
+ * Maps all paths to Disraptor’s proxy route. This route map targets two routes which both export
+ * the implementation of the actual route.
  *
  * This is a workaround for a Discourse plugin’s inability to have a catch-all route based only on a
  * wildcard path segment. Discourse already has such a route, and it takes precedence of that of a
