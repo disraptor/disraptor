@@ -23,6 +23,10 @@ after_initialize do
   load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
   load File.expand_path('../app/controllers/disraptor_routes_controller.rb', __FILE__)
 
+  add_to_serializer(:current_user, :groups, false) {
+    object.groups.pluck(:name)
+  }
+
   Discourse::Application.routes.append do
     # Serve the default plugins content when the user directly opens the Disraptor plugin.
     get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
