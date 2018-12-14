@@ -30,7 +30,7 @@ export default Discourse.Route.extend({
 
       if (Discourse.User.current()) {
         const userGroups = Discourse.User.current().groups
-          .filter(group => group.startsWith('Disraptor'));
+          .filter(group => group.toLowerCase().startsWith('disraptor'));
         fetchInit['headers']['X-Disraptor-Groups'] = userGroups;
         fetchInit['headers']['X-Disraptor-User'] = Discourse.User.currentProp('username');
       }
