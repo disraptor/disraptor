@@ -5,7 +5,7 @@ import DiscourseURL from 'discourse/lib/url';
  */
 export default Discourse.Route.extend({
   /**
-   * Retrieves the model with an asynchronous request to the transition URL.
+   * Retrieves the Disraptor document with an asynchronous request to the transition URL.
    *
    * @param {Object} params
    * @param {any} transition
@@ -49,20 +49,21 @@ export default Discourse.Route.extend({
           injectHeadContent(responseBody);
         }
 
-        return {
-          disraptorDocument: this.getDocumentHostNode(responseBody)
-        };
+        return this.getDocumentHostNode(responseBody);
       })
       .catch((error) => {
         console.error(error);
+        this.leaveDisraptor();
         return this.transitionTo('exception-unknown');
       });
   },
 
   /**
+   * Injects the Disraptor document.
    *
-   * @param {String} responseBody the complete markup of an HTML document
-   * @returns {HTMLElement|String}
+   * @param {String} responseBody the complete markup of the Disraptor document
+   * @returns {HTMLElement | String} the Disraptor document (either as markup or a document
+   * fragment)
    */
   getDocumentHostNode(responseBody) {
     if (this.siteSettings.disraptor_shadow_dom) {
@@ -108,20 +109,36 @@ export default Discourse.Route.extend({
      */
     willTransition(transition) {
       if (!transition.targetName.startsWith('disraptor-proxy')) {
-        document.documentElement.classList.remove('disraptor-page');
+        this.leaveDisraptor();
       }
+    }
+  },
 
+  /**
+   * Cleans up when leaving a Disraptor route.
+   */
+  leaveDisraptor() {
+    document.documentElement.classList.remove('disraptor-page');
+
+    if (!this.siteSettings.disraptor_shadow_dom) {
       const injectedElements = document.querySelectorAll('[data-disraptor-tag]');
       injectedElements.forEach(element => {
         element.remove();
       });
     }
-  },
+  }
 });
 
+/**
+ * Workaround for [shadow tree navigation not using Ember’s router][1].
+ *
+ * [1]: https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712
+ *
+ * @param {MouseEvent} event
+ */
 function interceptClick(event) {
   for (const target of event.composedPath()) {
-    if (target.tagName === 'A' && target.href !== '') {
+    if (target.tagName === 'A' && target.href !== '' && !target.href.startsWith('#')) {
       event.preventDefault();
       DiscourseURL.routeTo(target.href);
       return;
@@ -129,16 +146,21 @@ function interceptClick(event) {
   }
 }
 
+/**
+ * Injects `link`, `style`, and `script` tags in Discourse’s `head` element.
+ *
+ * @param {String} responseBody the complete markup of the Disraptor document
+ */
 function injectHeadContent(responseBody) {
   const headContent = extractTagContent('head', responseBody);
 
-  injectTags(headContent, 'link');
-  injectTags(headContent, 'style');
+  injectTagsIntoHead(headContent, 'link');
+  injectTagsIntoHead(headContent, 'style');
 
   // Special case for scripts. Weird.
   const scriptTags = extractTags(headContent, 'script');
   for (const scriptTag of scriptTags) {
-    injectScript(scriptTag.src);
+    injectScriptIntoHead(scriptTag.src);
   }
 }
 
@@ -155,7 +177,7 @@ function extractTagContent(tagName, htmlContent) {
   return htmlContent.substring(openTagEndPos + 1, closeTagBeginPos);
 }
 
-function injectTags(headContent, tagName) {
+function injectTagsIntoHead(headContent, tagName) {
   const tags = extractTags(headContent, tagName);
   for (const tag of tags) {
     tag.setAttribute('data-disraptor-tag', '');
@@ -185,7 +207,7 @@ function extractTags(headContent, tagName) {
  *
  * @param {String} src
  */
-function injectScript(src) {
+function injectScriptIntoHead(src) {
   const script = document.createElement('script');
   script.async = false;
   script.src = src;
@@ -207,13 +229,15 @@ function performPostRequest(event) {
 
   const form = event.target;
 
-  fetch(form.action, {
+  const fetchInit = {
     method: 'post',
     headers: {
       'Content-Type': `${form.enctype}; charset=utf-8`
     },
     body: constructRequestBody(form)
-  })
+  };
+
+  fetch(form.action, fetchInit)
     .then(response => {
       if (response.headers.has('X-Disraptor-Location')) {
         this.transitionTo(response.headers.get('X-Disraptor-Location'));
