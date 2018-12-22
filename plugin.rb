@@ -23,6 +23,8 @@ after_initialize do
   load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
   load File.expand_path('../app/controllers/disraptor_routes_controller.rb', __FILE__)
 
+  # No longer needed with the following commit:
+  # https://github.com/discourse/discourse/commit/98d09c90acc503051d02094a9f25113eb5fdf293
   add_to_serializer(:current_user, :groups, false) {
     object.groups.pluck(:name)
   }
