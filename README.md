@@ -63,12 +63,12 @@ The above example would be a route for a document. In the same way, one can setu
 Now, opening `example.org/css/styles.css` would result in loading the resource at `http://localhost:8080/css/styles.css`. Doing this for a lot resources (e.g. a lot of CSS files) would be tedious. This is why Disraptor allows to setup routes as wildcard routes.
 
 ```
-/css → http://localhost:8080/css
+/css/*wildcard → http://localhost:8080/css/*wildcard
 ```
 
-Assuming the *wildcard route* option was selected when creating that route, all requests for paths *starting* with the specified source path (i.e. `/css`) will match. This route would cover the example from before (i.e. `example.org/css/styles.css`), but also all other paths starting with `/css` after the domain (e.g. `example.org/css/colors.css` or `example.org/css/tricked.html`).
+Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments).
 
-**(!) Note**: Disraptor doesn’t really distinquish between documents and resources. They’re treated exactly the same when configured the same way.
+The wildcard route above will match all request paths under the `example.org/css/` prefix (e.g. `example.org/css/styles.css`, `example.org/css/logo.png`).
 
 ### Current status
 
@@ -78,7 +78,11 @@ The current prototype has the following features:
 - Navigate between pages via Ember transitions. Previously injected `link`, `style` and `script` tags are removed on transition.
 - Authenticate with the web application. Form submits are intercepted and sent to the server via asynchronous JavaScript. This allows Disraptor to handle the response with Ember transitions which in turn ensures that a Disraptor document is still rendered inside the Discourse document.
 
-  Successful authentication requets often respond with a “303 See Other” status, indicating which document to request in the response’s `Location` header. Disraptor keeps track of `Set-Cookie` headers from “303 See Other” responses and includes them in subsequent requests. This allows Disraptor’s back end to set the correct cookies when sending proxy requests to the web application server.
+  Successful authentication requets often respond with a “303 See Other” status, indicating which document to request in the response’s `Location` header. Disraptor keeps track of `Set-Cookie` headers from “303 See Other” responses and includes them in subsequent requests. This allows Disraptor’s backend to set the correct cookies when sending proxy requests to the web application server.
+- Disraptor sends the following information to the web application in its requests:
+  - `x-disraptor-app-secret-key`: A signal indicating that the Discourse instance is allowed to send requests to the web application server. If it is not set, no proxy requests will be send.
+  - `x-disraptor-user`: The username of the currently logged-in Discourse user.
+  - `x-disraptor-groups`: Disraptor-specific groups (groups starting with the string `disraptor`) of the currently logged-in Discourse user.
 
 
 
