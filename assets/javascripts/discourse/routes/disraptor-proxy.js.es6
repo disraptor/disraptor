@@ -23,17 +23,16 @@ export default Discourse.Route.extend({
     }
 
     const fetchInit = {};
-    if (this.siteSettings.disraptor_app_secret_key !== '') {
+    if (
+      this.siteSettings.disraptor_app_secret_key !== ''
+      && Discourse.User.current()
+      && Discourse.User.current().groups
+    ) {
+      const userGroups = Discourse.User.current().groups
+        .filter(group => group.toLowerCase().startsWith('disraptor'));
       fetchInit['headers'] = {
-        'X-Disraptor-App-Secret-Key': this.siteSettings.disraptor_app_secret_key
+        'X-Disraptor-Groups': userGroups
       };
-
-      if (Discourse.User.current()) {
-        const userGroups = Discourse.User.current().groups
-          .filter(group => group.toLowerCase().startsWith('disraptor'));
-        fetchInit['headers']['X-Disraptor-Groups'] = userGroups;
-        fetchInit['headers']['X-Disraptor-User'] = Discourse.User.currentProp('username');
-      }
     }
 
     return fetch(transition.intent.url, fetchInit)

@@ -11,10 +11,10 @@ class DisraptorRoutesController < ApplicationController
 
     target_url = determine_target_url(request.path, params)
 
-    if target_url
-      send_proxy_request(request, target_url)
-    else
+    if SiteSetting.disraptor_app_secret_key == '' || target_url.nil?
       render body: nil, status: 404
+    else
+      send_proxy_request(request, target_url)
     end
   end
 
@@ -49,7 +49,7 @@ class DisraptorRoutesController < ApplicationController
     if route.nil?
       error_message = "Couldn’t find route for source path '#{source_path}'."
       Rails.logger.error('❌ Disraptor: Error: ' + error_message)
-      return
+      return nil
     end
 
     target_url = route['targetURL']
@@ -113,6 +113,8 @@ class DisraptorRoutesController < ApplicationController
       'Cookie' => request.cookies.map{ |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }.join(';')
     }
 
+    proxy_headers = pass_on_disraptor_headers(proxy_headers, request)
+
     case request.method
     when 'GET'
       return Net::HTTP::Get.new(url, proxy_headers)
@@ -139,8 +141,12 @@ class DisraptorRoutesController < ApplicationController
     end
   end
 
-  def get_cookies_map(set_cookie_header)
-    return set_cookie_header.split(';').map{ |x| x.split('=') }.to_h
+  def pass_on_disraptor_headers(proxy_headers, request)
+    proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
+    proxy_headers['x-disraptor-groups'] = request.headers['x-disraptor-groups']
+    proxy_headers['x-disraptor-user'] = current_user.username
+
+    return proxy_headers
   end
 
   # Stops this controller from handling non-AJAX requests for HTML documents. Instead, it requires
