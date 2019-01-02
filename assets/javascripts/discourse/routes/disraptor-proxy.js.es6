@@ -22,20 +22,7 @@ export default Discourse.Route.extend({
       console.info('Disraptor: Using experimental shadow DOM document embedding.');
     }
 
-    const fetchInit = {};
-    if (
-      this.siteSettings.disraptor_app_secret_key !== ''
-      && Discourse.User.current()
-      && Discourse.User.current().groups
-    ) {
-      const userGroups = Discourse.User.current().groups
-        .filter(group => group.toLowerCase().startsWith('disraptor'));
-      fetchInit['headers'] = {
-        'X-Disraptor-Groups': userGroups
-      };
-    }
-
-    return fetch(transition.intent.url, fetchInit)
+    return fetch(transition.intent.url)
       .then(response => {
         if (!response.ok) {
           throw new Error(response.statusText);

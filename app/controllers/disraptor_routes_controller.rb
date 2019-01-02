@@ -142,8 +142,12 @@ class DisraptorRoutesController < ApplicationController
   end
 
   def pass_on_disraptor_headers(proxy_headers, request)
+    disraptor_groups = current_user.groups
+      .select{ |group| group.name.start_with?('disraptor') }
+      .map{ |group| group.name }
+
     proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
-    proxy_headers['x-disraptor-groups'] = request.headers['x-disraptor-groups']
+    proxy_headers['x-disraptor-groups'] = disraptor_groups.join(',')
     proxy_headers['x-disraptor-user'] = current_user.username
 
     return proxy_headers
