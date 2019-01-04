@@ -6,4 +6,4 @@ plugins:
     client: true
   disraptor_app_secret_key:
     default: ''
-    client: true
+    secret: true
