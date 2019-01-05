@@ -5,16 +5,47 @@ class DisraptorRoutesController < ApplicationController
   # Generally, skip the XHR check and respond directly with this controller.
   skip_before_action :check_xhr, :verify_authenticity_token
 
-  # Handles requests for regular paths like /example for routes with a source path /example.
   def show
     Rails.logger.info("👻 Disraptor: Routing '#{request.method} #{request.path}' ...")
 
     target_url = determine_target_url(request.path, params)
 
-    if SiteSetting.disraptor_app_secret_key == '' || target_url.nil?
+    if SiteSetting.disraptor_app_secret_key.blank? || target_url.nil?
       render body: nil, status: 404
+      return
+    end
+
+    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
+
+    proxy_response = send_proxy_request(request, target_url)
+
+    case proxy_response.code
+    when '200'
+      Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
+
+      render body: proxy_response.body, content_type: proxy_response.content_type
+    when '303'
+      Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
+
+      if proxy_response.key?('Set-Cookie')
+        response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
+      end
+
+      if proxy_response.key?('Location')
+        # Don’t use the “Location” header directly because the front end won’t be able to perform
+        # the redirect via Ember transitions otherwise.
+        response.set_header('X-Disraptor-Location', proxy_response['Location'])
+      end
+
+      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
+    when '404'
+      Rails.logger.info('👻 Disraptor: Status code 404.')
+
+      render body: nil, status: proxy_response.code
     else
-      send_proxy_request(request, target_url)
+      Rails.logger.error("❌ Disraptor: Error: Unhandled status code '#{proxy_response.code}'")
+
+      render json: failed_json, status: proxy_response.code
     end
   end
 
@@ -67,88 +98,73 @@ class DisraptorRoutesController < ApplicationController
   #   - +request+ -> the incoming request
   #   - +target_url+ -> the target URL for the proxy request
   def send_proxy_request(request, target_url)
-    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
-    url = URI.parse(target_url)
+    target_url = URI.parse(target_url)
 
-    proxy_request = build_proxy_request(request, url.to_s)
-    if proxy_request.nil?
-      Rails.logger.error("❌ Disraptor: Error: Unknown method '#{request.method}'")
-      render body: nil, status: 404
-    end
+    proxy_request = build_proxy_request(request, target_url.to_s)
 
-    proxy_response = Net::HTTP.start(url.host, url.port) { |http| http.request(proxy_request) }
-
-    case proxy_response.code
-    when '200'
-      Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
-
-      render body: proxy_response.body, content_type: proxy_response.content_type
-    when '303'
-      Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
-
-      if proxy_response.key?('Set-Cookie')
-        response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
-      end
-
-      if proxy_response.key?('Location')
-        # Don’t use the “Location” header directly because the front end won’t be able to perform
-        # the redirect via Ember transitions otherwise.
-        response.set_header('X-Disraptor-Location', proxy_response['Location'])
-      end
-
-      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
-    when '404'
-      Rails.logger.info('👻 Disraptor: Status code 404.')
-
-      render body: nil, status: proxy_response.code
-    else
-      Rails.logger.error("❌ Disraptor: Error: Unhandled status code '#{proxy_response.code}'")
-
-      render json: failed_json, status: proxy_response.code
-    end
+    return Net::HTTP.start(target_url.host, target_url.port) { |http| http.request(proxy_request) }
   end
 
-  def build_proxy_request(request, url)
+  # Constructs a new request object to the +target_url+ based on the incoming +request+’s method.
+  #
+  # * *Args*:
+  #   - +request+ -> the incoming request
+  #   - +target_url+ -> the target URL for the proxy request
+  # * *Returns*:
+  #   - a newly constructed proxy request object
+  def build_proxy_request(request, target_url)
     proxy_headers = {
       'Cookie' => request.cookies.map{ |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }.join(';')
     }
 
-    proxy_headers = pass_on_disraptor_headers(proxy_headers, request)
+    proxy_headers = set_disraptor_headers(proxy_headers)
 
     case request.method
     when 'GET'
-      return Net::HTTP::Get.new(url, proxy_headers)
+      return Net::HTTP::Get.new(target_url, proxy_headers)
     when 'HEAD'
-      return Net::HTTP::Head.new(url, proxy_headers)
+      return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
-      proxy_request = Net::HTTP::Post.new(url, proxy_headers)
+      proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
       proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'PUT'
-      proxy_request = Net::HTTP::Put.new(url, proxy_headers)
+      proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
       proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'DELETE'
-      return Net::HTTP::Delete.new(url, proxy_headers)
+      return Net::HTTP::Delete.new(target_url, proxy_headers)
     when 'OPTIONS'
-      return Net::HTTP::Options.new(url, proxy_headers)
+      return Net::HTTP::Options.new(target_url, proxy_headers)
     when 'TRACE'
-      return Net::HTTP::Trace.new(url, proxy_headers)
+      return Net::HTTP::Trace.new(target_url, proxy_headers)
     else
       return nil
     end
   end
 
-  def pass_on_disraptor_headers(proxy_headers, request)
-    proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
+  # Sets the following headers if data for them is available:
+  #
+  # - X-Disraptor-App-Secret-Key
+  # - X-Disraptor-User
+  # - X-Disraptor-Groups
+  #
+  # * *Args*:
+  #   - +proxy_headers+ -> header fields for the proxy request
+  # * *Returns*:
+  #   - the proxy request headers
+  def set_disraptor_headers(proxy_headers)
+    if not SiteSetting.disraptor_app_secret_key.blank?
+      proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
+    end
 
     if current_user&.username
       proxy_headers['x-disraptor-user'] = current_user.username
     end
 
-    if current_user&.groups
+    if current_user&.groups and not current_user&.groups.empty?
       disraptor_groups = current_user.groups
         .select{ |group| group.name.start_with?('disraptor') }
         .map{ |group| group.name }
