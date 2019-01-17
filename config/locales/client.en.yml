@@ -29,3 +29,4 @@ en:
         table:
           route: 'Route'
           request_method: 'Method'
+          manage: 'Manage'
