@@ -108,6 +108,7 @@ We’re currently evaluating the [Shadow DOM](https://developer.mozilla.org/en-U
 - [Mousetrap.js doesn’t properly stop callbacks for events originating from a shadow DOM](https://meta.discourse.org/t/mousetrap-js-doesn-t-properly-stop-callbacks-for-events-originating-from-a-shadow-dom/102757): Can be fixed in mousetrap.js (upstream) or in Discourse’s fork of mousetrap.
 - [Shadow tree navigation doesn’t go through Ember router](https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712): Fixed in the plugin; can be fixed in Discourse.
 - [Firefox] Unstyled document: Occasionally, a document will appear completely unstyled until the user opens or closes the developer tools. That’s potentially a browser bug.
+- [`@font-face`]: Loading fonts with the CSS `@font-face` at rule doesn’t work when the rule is inside the shadow DOM.
 
 
 
