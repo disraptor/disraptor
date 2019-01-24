@@ -8,7 +8,7 @@ acceptance('Disraptor’s plugin page works', { loggedIn: true });
 
 const targetHost = 'http://127.0.0.1:2000/';
 
-test('Creating a route', async assert => {
+QUnit.test('Creating a route', async assert => {
   // Fake the HTTP endpoint for the initial GET request fetching all active routes
   server.get('/disraptor_routes', () => {
     return [
@@ -19,7 +19,8 @@ test('Creating a route', async assert => {
           {
             'id': '46961985',
             'sourcePath': '/test',
-            'targetURL': targetHost
+            'targetURL': targetHost,
+            'requestMethod': 'get'
           }
         ]
       }
@@ -40,7 +41,8 @@ test('Creating a route', async assert => {
         disraptor_route: {
           'id': '1498996',
           'sourcePath': '/css',
-          'targetURL': `${targetHost}css`
+          'targetURL': `${targetHost}css`,
+          'requestMethod': 'get'
         }
       }
     ];
