@@ -25,7 +25,9 @@ export default Discourse.Route.extend({
     return fetch(transition.intent.url)
       .then(response => {
         if (!response.ok) {
-          throw new Error(response.statusText);
+          throw new Error(
+            `Disraptor: Route ${transition.intent.url} reported: ${response.statusText}`
+          );
         }
 
         return response.text();
@@ -37,10 +39,11 @@ export default Discourse.Route.extend({
 
         return this.getDocumentHostNode(responseBody);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
         this.leaveDisraptor();
-        return this.transitionTo('exception-unknown');
+        return fetch('/404-body')
+          .then(response => response.text());
       });
   },
 
@@ -69,20 +72,22 @@ export default Discourse.Route.extend({
   renderTemplate() {
     this.render('disraptor-proxy');
 
-    Ember.run.scheduleOnce('afterRender', () => {
-      if (this.siteSettings.disraptor_shadow_dom) {
-        this.disraptorRoot.host.addEventListener('click', interceptClick);
-      } else {
-        this.disraptorRoot = document.querySelector('.disraptor-content');
-      }
-
-      const forms = this.disraptorRoot.querySelectorAll('form');
-      forms.forEach(form => {
-        if (form.method.toLowerCase() === 'post') {
-          form.addEventListener('submit', performPostRequest.bind(this));
+    if (this.disraptorRoot !== undefined) {
+      Ember.run.scheduleOnce('afterRender', () => {
+        if (this.siteSettings.disraptor_shadow_dom) {
+          this.disraptorRoot.host.addEventListener('click', interceptClick);
+        } else {
+          this.disraptorRoot = document.querySelector('.disraptor-content');
         }
+
+        const forms = this.disraptorRoot.querySelectorAll('form');
+        forms.forEach(form => {
+          if (form.method.toLowerCase() === 'post') {
+            form.addEventListener('submit', performPostRequest.bind(this));
+          }
+        });
       });
-    });
+    }
   },
 
   actions: {
