@@ -38,7 +38,7 @@ RAILS_ENV=development bundle exec rails server
 
 ### Run Tests
 
-- Frontend tests: Start the development server and go to [localhost:3000/qunit?module=Acceptance%3A%20Disraptor](http://localhost:3000/qunit?module=Acceptance%3A%20Disraptor)
+- Frontend tests: Start the development server and go to [127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1](127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1)
 
 
 

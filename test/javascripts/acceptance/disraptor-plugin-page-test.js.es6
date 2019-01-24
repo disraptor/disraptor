@@ -5,7 +5,7 @@ import { acceptance } from 'helpers/qunit-helpers';
  *
  * Run tests:
  *
- * http://127.0.0.1:3000/qunit?module=Acceptance%3A%20Disraptor
+ * 127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1
  *
  * Or run:
  *
