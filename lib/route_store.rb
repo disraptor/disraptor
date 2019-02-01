@@ -25,9 +25,14 @@ class Disraptor::RouteStore
 
     def remove_route(route_id)
       routes = PluginStore.get(Disraptor::PLUGIN_NAME, 'routes')
-      routes.delete(route_id)
 
-      return PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+      if has_route(route_id)
+        routes.delete(route_id)
+
+        return PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+      end
+
+      return get_routes()
     end
   end
 end
