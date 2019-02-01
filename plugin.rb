@@ -6,7 +6,6 @@
 
 enabled_site_setting :disraptor_enabled
 
-register_asset 'stylesheets/disraptor-plugin.scss'
 register_asset 'stylesheets/disraptor-view.scss'
 
 # Adds a link the Disraptor plugin on the `/admin/plugins` page with the route `disraptor`.

@@ -1,99 +1,117 @@
-<h2>{{ i18n 'disraptor.title' }}</h2>
+<h2>{{ i18n "disraptor.title" }}</h2>
 
-{{#if disallow}}
+<h3>{{ i18n "disraptor.create_route.title" }}</h3>
 
-  <p>{{ i18n 'disraptor.disallowed_message' }}</p>
+<form {{ action "createRoute" routeSourcePath routeTargetURL routeRequestMethod on="submit" }}>
+  {{#d-section class="form-horizontal settings"}}
+    <div class="row setting">
+      <div class="setting-label">
+        <label for="route-source-path">
+          {{ i18n "disraptor.routes.source_path" }}
+        </label>
+      </div>
+      <div class="setting-value">
+        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.routes.source_path_placeholder") pattern="^\/(?!admin).*" type="text" class="input-setting-string" }}
+      </div>
+    </div>
+  {{/d-section}}
 
-{{else}}
+  {{#d-section class="form-horizontal settings"}}
+    <div class="row setting">
+      <div class="setting-label">
+        <label for="route-target-url">
+          {{ i18n "disraptor.routes.target_url" }}
+        </label>
+      </div>
+      <div class="setting-value">
+        {{ input id="route-target-url" value=routeTargetURL placeholder=(i18n "disraptor.routes.target_url_placeholder") type="url" class="input-setting-string" }}
+      </div>
+    </div>
+  {{/d-section}}
 
-  <h3>{{ i18n 'disraptor.create_route.title' }}</h3>
+  {{#d-section class="form-horizontal settings"}}
+    <div class="row setting">
+      <div class="setting-label">
+        <label for="route-request-method">
+          {{ i18n "disraptor.routes.request_method" }}
+        </label>
+      </div>
+      <div class="setting-value">
+        {{ combo-box id="route-request-method" value=routeRequestMethod valueAttribute="value" content=requestMethods class="select-kit" }}
+      </div>
+    </div>
+  {{/d-section}}
 
-  <form
-    {{ action 'createRoute' routeSourcePath routeTargetURL routeRequestMethod on='submit' }}
-    class="dr-new-route"
-  >
-    <label class="dr-new-route__source-path dr-text-field">
-      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.source_path' }}:</span>
-      {{ input value=routeSourcePath placeholder=(i18n 'disraptor.routes.source_path_placeholder') class='dr-text-field__control' type='text' pattern='^\/(?!admin).*' required=true }}
-    </label>
+  <button type="submit" id="submit-route" class="btn btn-primary">
+    {{ d-icon "plus"}}
+    {{ i18n "disraptor.create_route.button_label" }}
+  </button>
+</form>
 
-    <label class="dr-new-route__target-url dr-text-field">
-      <span class="dr-text-field__label">{{ i18n 'disraptor.routes.target_url' }}:</span>
-      {{ input value=routeTargetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') class="dr-text-field__control" type="url" required=true }}
-    </label>
 
-    <label class="dr-select">
-      <span class="dr-select__label">{{ i18n 'disraptor.routes.request_method' }}:</span>
-      {{ combo-box value=routeRequestMethod valueAttribute="value" content=requestMethods class="dr-select__control" }}
-    </label>
 
-    <button type="submit" class="dr-new-route__submit btn btn-primary">
-      {{ d-icon 'plus'}}
-      {{ i18n 'disraptor.create_route.button_label' }}
-    </button>
-  </form>
+<h3>{{ i18n "disraptor.route_list.title" }}</h3>
 
-  <h3>{{ i18n 'disraptor.route_list.title' }}</h3>
+{{#if routes}}
+  <table style="table-layout: fixed;">
+    <thead>
+      <tr>
+        <th>{{ i18n "disraptor.route_list.table.route" }}</th>
+        <th width="10%">{{ i18n "disraptor.route_list.table.request_method" }}</th>
+        <th width="25%">{{ i18n "disraptor.route_list.table.manage" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each routes as |route|}}
+        <tr data-route-id="{{ route.record.id }}">
+          <td>
+            From:
+            {{ route.record.sourcePath }}
 
-  {{#if routes}}
-    <table class="dr-routes-table">
-      <thead>
-        <tr>
-          <th>{{ i18n 'disraptor.route_list.table.route' }}</th>
-          <th width="10%">{{ i18n 'disraptor.route_list.table.request_method' }}</th>
-          <th width="25%">{{ i18n 'disraptor.route_list.table.manage' }}</th>
+            <br>
+
+            To:
+
+            {{#if route.isBeingEdited}}
+              {{ input value=route.record.targetURL placeholder=(i18n "disraptor.routes.target_url_placeholder") type="url" required=true }}
+            {{else}}
+              {{ route.record.targetURL }}
+            {{/if}}
+          </td>
+
+          <td>
+            {{#if route.isBeingEdited}}
+              {{ combo-box value=route.record.requestMethod valueAttribute="value" content=requestMethods }}
+            {{else}}
+              {{ route.record.requestMethod }}
+            {{/if}}
+          </td>
+
+          <td style="text-align: right;">
+            {{#if route.isBeingEdited}}
+              <button type="button" class="btn btn-primary" {{ action "updateRouteRecord" route.record }}>
+                {{ i18n "disraptor.edit_route.save" }}
+              </button>
+            {{/if}}
+
+            <button type="button" class="btn" {{ action "toggleEditingRoute" route }}>
+              {{#if route.isBeingEdited}}
+                {{ i18n "disraptor.edit_route.stop" }}
+              {{else}}
+                {{ i18n "disraptor.edit_route.start" }}
+              {{/if}}
+            </button>
+
+            <button type="button" class="btn btn-danger" {{ action "deleteRoute" route }}>
+              {{ i18n "disraptor.routes.delete_label" }}
+            </button>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {{#each routes as |route|}}
-          <tr data-route-id="{{ route.record.id }}">
-            <td>
-              {{ route.record.sourcePath }}
-
-              <span>→</span>
-
-              {{#if route.isBeingEdited}}
-                {{ input value=route.record.targetURL placeholder=(i18n 'disraptor.routes.target_url_placeholder') type='url' required=true }}
-              {{else}}
-                {{ route.record.targetURL }}
-              {{/if}}
-            </td>
-
-            <td>
-              {{#if route.isBeingEdited}}
-                {{ combo-box value=route.record.requestMethod valueAttribute="value" content=requestMethods }}
-              {{else}}
-                {{ route.record.requestMethod }}
-              {{/if}}
-            </td>
-
-            <td class="dr-align-right">
-              {{#if route.isBeingEdited}}
-                <button type="button" class="btn btn-primary" {{ action 'updateRouteRecord' route.record }}>
-                  {{ i18n 'disraptor.edit_route.save' }}
-                </button>
-              {{/if}}
-
-              <button type="button" class="btn" {{ action 'toggleEditingRoute' route }}>
-                {{#if route.isBeingEdited}}
-                  {{ i18n 'disraptor.edit_route.stop' }}
-                {{else}}
-                  {{ i18n 'disraptor.edit_route.start' }}
-                {{/if}}
-              </button>
-
-              <button type="button" class="btn btn-danger" {{ action 'deleteRoute' route }}>
-                {{ i18n 'disraptor.routes.delete_label' }}
-              </button>
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  {{else if routesLoading}}
-    <p>{{ i18n 'disraptor.route_list.loading' }}</p>
-  {{else}}
-    <p>{{ i18n 'disraptor.route_list.no_routes' }}</p>
-  {{/if}}
-
+      {{/each}}
+    </tbody>
+  </table>
+{{else if routesLoading}}
+  <p>{{ i18n "disraptor.route_list.loading" }}</p>
+{{else}}
+  <p>{{ i18n "disraptor.route_list.no_routes" }}</p>
 {{/if}}

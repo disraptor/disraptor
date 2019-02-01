@@ -54,9 +54,9 @@ QUnit.test('Creating a route', async assert => {
     ];
   });
 
-  await fillIn('.dr-new-route__source-path input', '/test2');
-  await fillIn('.dr-new-route__target-url input', `${targetHost}test2`);
-  await click('.dr-new-route__submit');
+  await fillIn('#route-source-path', '/test2');
+  await fillIn('#route-target-url', `${targetHost}test2`);
+  await click('#submit-route');
 
   assert.ok(exists('[data-route-id="3180226165"]'), 'Route /test exists.');
   assert.ok(exists('[data-route-id="4096153253"]'), 'Route /test2 exists.');
