@@ -1,10 +1,6 @@
 require 'rails_helper'
 
 describe Disraptor::RouteStore do
-  before do
-    # PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', {})
-  end
-
   describe ".get_routes()" do
     it "should return a Hash" do
       expect(described_class.get_routes().is_a?(Hash)).to be true
