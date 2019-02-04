@@ -8,7 +8,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 - [Development](#development)
   - [Start Discourse](#start-discourse)
-  - [Run Tests](#run-tests)
+  - [Tests](#tests)
 - [Getting started](#getting-started)
 - [Documentation](#documentation)
   - [Introduction](#introduction)
@@ -30,12 +30,29 @@ The Disraptor wiki has a guide for setting up a Discourse development environmen
 ### Start Discourse in development mode
 
 ```sh
+cd discourse
 RAILS_ENV=development bundle exec rails server
 ```
 
-### Run Tests
+### Tests
 
-- Frontend tests: Start the development server and go to [127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1](127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1)
+#### Frontend tests
+
+1. Start the development server:
+
+   ```sh
+   cd discourse
+   RAILS_ENV=development bundle exec rails server
+   ```
+
+2. Go to [127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1](http://127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1).
+
+#### Backend tests
+
+```sh
+cd discourse
+bundle exec rake plugin:spec["disraptor"]
+```
 
 
 
