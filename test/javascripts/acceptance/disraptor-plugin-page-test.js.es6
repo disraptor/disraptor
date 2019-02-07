@@ -2,14 +2,6 @@ import { acceptance } from 'helpers/qunit-helpers';
 
 /**
  * Runs Disraptor acceptance tests as a logged-in administrator.
- *
- * Run tests:
- *
- * 127.0.0.1:3000/qunit?qunit_single_plugin=disraptor&qunit_skip_core=1
- *
- * Or run:
- *
- * LOAD_PLUGINS=1 QUNIT_SKIP_CORE=1 QUNIT_SINGLE_PLUGIN='disraptor' rake qunit:test
  */
 acceptance('Disraptor’s plugin page works', {
   loggedIn: true,
