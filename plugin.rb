@@ -24,6 +24,7 @@ after_initialize do
 
   # No longer needed with the following commit:
   # https://github.com/discourse/discourse/commit/98d09c90acc503051d02094a9f25113eb5fdf293
+  # Tagged to be released with 2.3
   add_to_serializer(:current_user, :groups, false) {
     object.groups.pluck(:name)
   }
