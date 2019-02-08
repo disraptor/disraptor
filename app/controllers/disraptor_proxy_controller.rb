@@ -1,4 +1,4 @@
-class DisraptorRoutesController < ApplicationController
+class DisraptorProxyController < ApplicationController
   # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
   # Instead, wait for an XHR request from the Discourse frontend.
   before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents

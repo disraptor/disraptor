@@ -6,6 +6,9 @@ import RestModel from 'discourse/models/rest';
  *
  * When extending `RestModel`, the methods `createProperties` and `updateProperties` need to be
  * implemented.
+ *
+ * `RestModel` is implemented in
+ * `$discourseDir/app/assets/javascripts/discourse/models/rest.js.es6`.
  */
 export default RestModel.extend({
   /**

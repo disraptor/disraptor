@@ -20,7 +20,7 @@ load File.expand_path('../app/models/route.rb', __FILE__)
 
 after_initialize do
   load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
-  load File.expand_path('../app/controllers/disraptor_routes_controller.rb', __FILE__)
+  load File.expand_path('../app/controllers/disraptor_proxy_controller.rb', __FILE__)
 
   # No longer needed with the following commit:
   # https://github.com/discourse/discourse/commit/98d09c90acc503051d02094a9f25113eb5fdf293
@@ -41,7 +41,7 @@ after_initialize do
       # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
       # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
       # to `styles.css` instead of just `styles`.
-      match route['sourcePath'] => 'disraptor_routes#show', format: false, segments: route['segments'], via: route['requestMethod']
+      match route['sourcePath'] => 'disraptor_proxy#show', format: false, segments: route['segments'], via: route['requestMethod']
     end
   end
 
