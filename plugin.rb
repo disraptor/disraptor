@@ -33,10 +33,6 @@ after_initialize do
     # Serve the default plugins content when the user directly opens the Disraptor plugin.
     get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
 
-    get '/disraptor_routes' => 'disraptor/routes#index', constraints: AdminConstraint.new
-    put '/disraptor_routes/:route_id' => 'disraptor/routes#update', constraints: AdminConstraint.new
-    delete '/disraptor_routes/:route_id' => 'disraptor/routes#destroy', constraints: AdminConstraint.new
-
     Disraptor::RouteStore.get_routes.values.each do |route|
       # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
       # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
@@ -46,4 +42,23 @@ after_initialize do
   end
 
   Rails.application.reload_routes!
+
+  # For some reason the leading `::` segment is important and also
+  # for another reason, the engine has to be defined here, not in some file. ¯\_(ツ)_/¯
+  module ::Disraptor
+    class Engine < ::Rails::Engine
+      engine_name Disraptor::PLUGIN_NAME
+      isolate_namespace Disraptor
+    end
+  end
+
+  Disraptor::Engine.routes.draw do
+    get '/routes' => 'routes#index'
+    put '/routes/:route_id' => 'routes#update'
+    delete '/routes/:route_id' => 'routes#destroy'
+  end
+
+  Discourse::Application.routes.append do
+    mount Disraptor::Engine, at: '/disraptor'
+  end
 end

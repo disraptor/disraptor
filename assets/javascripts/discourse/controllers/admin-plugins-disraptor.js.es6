@@ -8,19 +8,20 @@ import { popupAjaxError } from 'discourse/lib/ajax-error';
  */
 export default Ember.Controller.extend({
   /**
-   * Needs to match the filename of `assets/javascripts/discourse/models/disraptor-route.js.es6`.
-   * This determines the HTTP endpoint to which AJAX requests will me made. Note that the endpoint
+   * Needs to match the filename of `assets/javascripts/discourse/models/disraptor/route.js.es6`.
+   *
+   * Determines the HTTP end point to which AJAX requests will me made. Note that the endpoint
    * will have any dashes (i.e. `-`) replaced with underscores (i.e. `_`) and that it will be
-   * pluralized: `disraptor-route` becomes `disraptor_routes`.
+   * pluralized: `disraptor/route` becomes `disraptor/routes`.
    *
    * **Example HTTP requests**:
    *
-   * - GET /disraptor_routes
-   * - GET /disraptor_routes/:route_id
-   * - PUT /disraptor_routes/:route_id
-   * - DELETE /disraptor_routes/:route_id
+   * - GET /disraptor/routes
+   * - GET /disraptor/routes/:route_id
+   * - PUT /disraptor/routes/:route_id
+   * - DELETE /disraptor/routes/:route_id
    */
-  storeType: 'disraptor-route',
+  endPoint: 'disraptor/route',
 
   requestMethods: ['get', 'head', 'post', 'put', 'delete', 'options', 'trace'],
 
@@ -46,7 +47,7 @@ export default Ember.Controller.extend({
     this.set('routes', []);
 
     // Populates the list of active routes
-    this.store.findAll(this.storeType)
+    this.store.findAll(this.endPoint)
       .then(response => {
         this.set('routesLoading', false);
 
@@ -101,7 +102,7 @@ export default Ember.Controller.extend({
       const id = this.get('routeId');
 
       this.store
-        .createRecord(this.storeType, { id, sourcePath, targetURL, requestMethod })
+        .createRecord(this.endPoint, { id, sourcePath, targetURL, requestMethod })
         .save()
         .then(result => {
           this.addRoute({
@@ -154,7 +155,7 @@ export default Ember.Controller.extend({
     deleteRoute(route) {
       // Sends a DELETE request to the HTTP end point
       this.store
-        .destroyRecord(this.storeType, route.record)
+        .destroyRecord(this.endPoint, route.record)
         .then(() => {
           this.routes.removeObject(route);
           console.log('Deleted route record', route.record.sourcePath);

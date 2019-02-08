@@ -9,7 +9,7 @@ class Disraptor::RoutesController < ApplicationController
 
     routes = Disraptor::Route.find_all()
 
-    render json: { disraptor_routes: routes }
+    render json: { 'disraptor/routes': routes }
   end
 
   # Corresponds to requests in the form
@@ -17,10 +17,10 @@ class Disraptor::RoutesController < ApplicationController
   def update
     Rails.logger.info('👻 Disraptor: Updating route.')
 
-    route_id = params[:route_id]
-    source_path = params[:disraptor_route][:sourcePath]
-    target_url = params[:disraptor_route][:targetURL]
-    request_method = params[:disraptor_route][:requestMethod]
+    route_id = params['route_id']
+    source_path = params['disraptor/route']['sourcePath']
+    target_url = params['disraptor/route']['targetURL']
+    request_method = params['disraptor/route']['requestMethod']
 
     if source_path.end_with?('/')
       error_message = 'A route’s source path must not end in a slash.'
@@ -33,7 +33,7 @@ class Disraptor::RoutesController < ApplicationController
 
     Rails.application.reload_routes!
 
-    render json: { disraptor_route: route }
+    render json: { 'disraptor/route': route }
   end
 
   # Corresponds to requests in the form
