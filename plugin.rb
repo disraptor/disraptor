@@ -19,7 +19,7 @@ load File.expand_path('../lib/route_store.rb', __FILE__)
 load File.expand_path('../app/models/route.rb', __FILE__)
 
 after_initialize do
-  load File.expand_path('../app/controllers/disraptor_config_controller.rb', __FILE__)
+  load File.expand_path('../app/controllers/disraptor_routes_controller.rb', __FILE__)
   load File.expand_path('../app/controllers/disraptor_proxy_controller.rb', __FILE__)
 
   # No longer needed with the following commit:
@@ -33,9 +33,9 @@ after_initialize do
     # Serve the default plugins content when the user directly opens the Disraptor plugin.
     get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
 
-    get '/disraptor_routes' => 'disraptor_config#index', constraints: AdminConstraint.new
-    put '/disraptor_routes/:route_id' => 'disraptor_config#update', constraints: AdminConstraint.new
-    delete '/disraptor_routes/:route_id' => 'disraptor_config#destroy', constraints: AdminConstraint.new
+    get '/disraptor_routes' => 'disraptor_routes#index', constraints: AdminConstraint.new
+    put '/disraptor_routes/:route_id' => 'disraptor_routes#update', constraints: AdminConstraint.new
+    delete '/disraptor_routes/:route_id' => 'disraptor_routes#destroy', constraints: AdminConstraint.new
 
     Disraptor::RouteStore.get_routes.values.each do |route|
       # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
