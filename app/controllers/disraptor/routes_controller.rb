@@ -1,5 +1,5 @@
 # Controller for handling all requests regarding the configuration of Disraptor routes.
-class DisraptorRoutesController < ApplicationController
+class Disraptor::RoutesController < ApplicationController
   before_action :check_if_disraptor_enabled
 
   # Corresponds to requests in the form
