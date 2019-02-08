@@ -1,11 +1,11 @@
-class DisraptorProxyController < ApplicationController
+class Disraptor::ProxyController < ApplicationController
   # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
   # Instead, wait for an XHR request from the Discourse frontend.
   before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents
   # Generally, skip the XHR check and respond directly with this controller.
   skip_before_action :check_xhr, :verify_authenticity_token
 
-  def show
+  def resolve
     Rails.logger.info("👻 Disraptor: Routing '#{request.method} #{request.path}' ...")
 
     target_url = determine_target_url(request.path, params)
