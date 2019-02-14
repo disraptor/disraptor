@@ -42,12 +42,13 @@ class Disraptor::RoutesController < ApplicationController
   def destroy
     Rails.logger.info('👻 Disraptor: Destroying route.')
 
-    route_id = params[:route_id]
-    route = Disraptor::Route.remove(route_id)
+    if Disraptor::Route.remove(params[:route_id])
+      Rails.application.reload_routes!
 
-    Rails.application.reload_routes!
-
-    render json: success_json
+      render json: success_json
+    else
+      render json: failed_json
+    end
   end
 
   private
