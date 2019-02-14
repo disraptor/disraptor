@@ -3,7 +3,7 @@ class Disraptor::RoutesController < ApplicationController
   before_action :check_if_disraptor_enabled
 
   # Corresponds to requests in the form
-  # GET /disraptor_routes
+  # GET /disraptor/routes
   def index
     Rails.logger.info('👻 Disraptor: Showing available routes.')
 
@@ -13,14 +13,15 @@ class Disraptor::RoutesController < ApplicationController
   end
 
   # Corresponds to requests in the form
-  # PUT /disraptor_routes/:route_id
+  # PUT /disraptor/routes/:route_id
   def update
     Rails.logger.info('👻 Disraptor: Updating route.')
 
-    route_id = params['route_id']
-    source_path = params['disraptor/route']['sourcePath']
-    target_url = params['disraptor/route']['targetURL']
-    request_method = params['disraptor/route']['requestMethod']
+    route_id = params.require(:route_id)
+    payload = params.require('disraptor/route')
+    source_path = payload['sourcePath']
+    target_url = payload['targetURL']
+    request_method = payload['requestMethod']
 
     if source_path.end_with?('/')
       error_message = 'A route’s source path must not end in a slash.'
@@ -37,7 +38,7 @@ class Disraptor::RoutesController < ApplicationController
   end
 
   # Corresponds to requests in the form
-  # DELETE /disraptor_routes/:route_id
+  # DELETE /disraptor/routes/:route_id
   def destroy
     Rails.logger.info('👻 Disraptor: Destroying route.')
 
