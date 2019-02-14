@@ -46,19 +46,19 @@ after_initialize do
   # For some reason the leading `::` segment is important and also
   # for another reason, the engine has to be defined here, not in some file. ¯\_(ツ)_/¯
   module ::Disraptor
-    class Engine < ::Rails::Engine
+    class RoutesEngine < ::Rails::Engine
       engine_name Disraptor::PLUGIN_NAME
       isolate_namespace Disraptor
     end
   end
 
-  Disraptor::Engine.routes.draw do
+  Disraptor::RoutesEngine.routes.draw do
     get '/routes' => 'routes#index'
     put '/routes/:route_id' => 'routes#update'
     delete '/routes/:route_id' => 'routes#destroy'
   end
 
   Discourse::Application.routes.append do
-    mount Disraptor::Engine, at: '/disraptor'
+    mount Disraptor::RoutesEngine, at: '/disraptor'
   end
 end

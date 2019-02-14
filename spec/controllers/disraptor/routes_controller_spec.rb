@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe Disraptor::RoutesController do
-  routes { Disraptor::Engine.routes }
+  routes { Disraptor::RoutesEngine.routes }
 
   before do
     SiteSetting.disraptor_enabled = true
