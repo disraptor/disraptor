@@ -47,4 +47,36 @@ describe Disraptor::RoutesController do
       expect(::JSON.parse(response.body)['disraptor/routes'].length).to eq(1)
     end
   end
+
+  describe 'destroy' do
+    it 'returns the failed JSON' do
+      delete :destroy, params: {
+        'route_id' => '1'
+      }, format: :json
+
+      expect(response.status).to eq(200)
+      expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
+    end
+
+    it 'returns the success JSON' do
+      put :update, params: {
+        'route_id' => '1',
+        'disraptor/route' => {
+          'sourcePath' => '/test',
+          'targetURL' => 'http://localhost:8080/test',
+          'requestMethod' => 'get'
+        },
+        'segments' => []
+      }, format: :json
+
+      expect(response.status).to eq(200)
+
+      delete :destroy, params: {
+        'route_id' => '1'
+      }, format: :json
+
+      expect(response.status).to eq(200)
+      expect(::JSON.parse(response.body)).to eq({'success' => 'OK'})
+    end
+  end
 end
