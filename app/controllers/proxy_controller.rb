@@ -1,4 +1,4 @@
-class Disraptor::ProxyController < ApplicationController
+class ProxyController < ApplicationController
   # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
   # Instead, wait for an XHR request from the Discourse frontend.
   before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents
@@ -10,8 +10,8 @@ class Disraptor::ProxyController < ApplicationController
 
     target_url = determine_target_url(request.path, params)
 
-    if SiteSetting.disraptor_app_secret_key.blank? || target_url.nil?
-      render body: nil, status: 404
+    if SiteSetting.disraptor_app_secret_key.empty? || target_url.nil?
+      render json: failed_json, status: 404
       return
     end
 
@@ -41,7 +41,7 @@ class Disraptor::ProxyController < ApplicationController
     when '404'
       Rails.logger.info('👻 Disraptor: Status code 404.')
 
-      render body: nil, status: proxy_response.code
+      render json: failed_json, status: 404
     else
       Rails.logger.error("❌ Disraptor: Error: Unhandled status code '#{proxy_response.code}'")
 
@@ -63,13 +63,15 @@ class Disraptor::ProxyController < ApplicationController
     segments_map = {}
 
     # Construct the source path for lookup
-    params[:segments].each do |segment|
-      segment_name = segment.sub(/^[:*]/, '')
+    if params[:segments].kind_of?(Array)
+      params[:segments].each do |segment|
+        segment_name = segment.sub(/^[:*]/, '')
 
-      if params.has_key?(segment_name)
-        segment_value = params[segment_name]
-        segments_map[segment] = segment_value
-        source_path.sub!(segment_value, segment)
+        if params.has_key?(segment_name)
+          segment_value = params[segment_name]
+          segments_map[segment] = segment_value
+          source_path.sub!(segment_value, segment)
+        end
       end
     end
 
