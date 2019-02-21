@@ -115,9 +115,13 @@ class ProxyController < ApplicationController
   # * *Returns*:
   #   - a newly constructed proxy request object
   def build_proxy_request(request, target_url)
-    proxy_headers = {
-      'Cookie' => request.cookies.map{ |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }.join(';')
-    }
+    proxy_headers = {}
+
+    if request.cookies.any?
+      escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
+
+      proxy_headers['Cookie'] = escaped_cookies.join(';')
+    end
 
     proxy_headers = set_disraptor_headers(proxy_headers)
 
