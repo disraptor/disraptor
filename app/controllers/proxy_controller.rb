@@ -22,8 +22,6 @@ class ProxyController < ApplicationController
     case proxy_response.code
     when '200'
       Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
-
-      render body: proxy_response.body, content_type: proxy_response.content_type
     when '303'
       Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
 
@@ -36,15 +34,15 @@ class ProxyController < ApplicationController
         # the redirect via Ember transitions otherwise.
         response.set_header('X-Disraptor-Location', proxy_response['Location'])
       end
-
-      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
     when '404'
       Rails.logger.info('👻 Disraptor: Status code 404.')
-
-      render json: failed_json, status: 404
     else
       Rails.logger.error("❌ Disraptor: Error: Unhandled status code '#{proxy_response.code}'")
+    end
 
+    if Integer(proxy_response.code) < 400
+      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
+    else
       render json: failed_json, status: proxy_response.code
     end
   end
