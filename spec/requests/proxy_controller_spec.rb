@@ -32,13 +32,13 @@ describe ProxyController do
       .with(headers: {
         'X-Disraptor-App-Secret-Key' => 'x'
       })
-      .to_return(status: 404, body: '', headers: {})
+      .to_return(status: 404, body: '')
 
     stub_request(:get, 'http://localhost:8080/test-200')
       .with(headers: {
         'X-Disraptor-App-Secret-Key' => 'x'
       })
-      .to_return(status: 200, body: 'Actual content', headers: {})
+      .to_return(status: 200, body: 'Actual content')
 
     stub_request(:get, 'http://localhost:8080/test-303')
       .with(headers: {
