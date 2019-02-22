@@ -16,32 +16,34 @@ describe ProxyController do
   before do
     SiteSetting.disraptor_enabled = true
 
+    @test_route = {
+      'id' => '1',
+      'sourcePath' => '/test',
+      'targetURL' => 'http://localhost:8080/test',
+      'requestMethod' => 'get',
+      'segments' => []
+    }
+
     @routes.draw do
       get '/test' => 'proxy#resolve', format: false
     end
 
     stub_request(:get, 'http://localhost:8080/test-404')
-      .with(
-        headers: {
-          'X-Disraptor-App-Secret-Key' => 'x'
-        }
-      )
+      .with(headers: {
+        'X-Disraptor-App-Secret-Key' => 'x'
+      })
       .to_return(status: 404, body: '', headers: {})
 
     stub_request(:get, 'http://localhost:8080/test-200')
-      .with(
-        headers: {
-          'X-Disraptor-App-Secret-Key' => 'x'
-        }
-      )
+      .with(headers: {
+        'X-Disraptor-App-Secret-Key' => 'x'
+      })
       .to_return(status: 200, body: 'Actual content', headers: {})
 
     stub_request(:get, 'http://localhost:8080/test-303')
-      .with(
-        headers: {
-          'X-Disraptor-App-Secret-Key' => 'x'
-        }
-      )
+      .with(headers: {
+        'X-Disraptor-App-Secret-Key' => 'x'
+      })
       .to_return(status: 303, body: 'Actual content', headers: {
         'Location' => 'http://localhost:8080/test-200'
       })
@@ -61,57 +63,32 @@ describe ProxyController do
     it 'responds with status code 404 when secret key is missing' do
       SiteSetting.disraptor_app_secret_key = ''
 
-      routes = {
-        '1' => {
-          'id' => '1',
-          'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test-doesnt-exist',
-          'requestMethod' => 'get',
-          'segments' => []
-        }
-      }
-
-      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+      @test_route['targetURL'] = 'http://localhost:8080/test-doesnt-exist'
+      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
       expect(response.status).to eq(404)
+      expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
     end
 
     it 'responds with status code 404 when targetURL produces a status code 404' do
       SiteSetting.disraptor_app_secret_key = 'x'
 
-      routes = {
-        '1' => {
-          'id' => '1',
-          'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test-404',
-          'requestMethod' => 'get',
-          'segments' => []
-        }
-      }
-
-      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+      @test_route['targetURL'] = 'http://localhost:8080/test-404'
+      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
       expect(response.status).to eq(404)
+      expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
     end
 
     it 'responds with status code 200 when targetURL produces a status code 200' do
       SiteSetting.disraptor_app_secret_key = 'x'
 
-      routes = {
-        '1' => {
-          'id' => '1',
-          'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test-200',
-          'requestMethod' => 'get',
-          'segments' => []
-        }
-      }
-
-      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+      @test_route['targetURL'] = 'http://localhost:8080/test-200'
+      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
@@ -122,17 +99,8 @@ describe ProxyController do
     it 'responds with status code 303 when targetURL produces a status code 303' do
       SiteSetting.disraptor_app_secret_key = 'x'
 
-      routes = {
-        '1' => {
-          'id' => '1',
-          'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test-303',
-          'requestMethod' => 'get',
-          'segments' => []
-        }
-      }
-
-      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+      @test_route['targetURL'] = 'http://localhost:8080/test-303'
+      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
