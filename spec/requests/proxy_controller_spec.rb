@@ -20,15 +20,31 @@ describe ProxyController do
       get '/test' => 'proxy#resolve', format: false
     end
 
-    stub_request(:get, 'http://localhost:8090/test').
-      with(
+    stub_request(:get, 'http://localhost:8080/test-404')
+      .with(
         headers: {
-          'Accept' => '*/*',
-          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent' => 'Ruby',
           'X-Disraptor-App-Secret-Key' => 'x'
-        }).
-      to_return(status: 404, body: '', headers: {})
+        }
+      )
+      .to_return(status: 404, body: '', headers: {})
+
+    stub_request(:get, 'http://localhost:8080/test-200')
+      .with(
+        headers: {
+          'X-Disraptor-App-Secret-Key' => 'x'
+        }
+      )
+      .to_return(status: 200, body: 'Actual content', headers: {})
+
+    stub_request(:get, 'http://localhost:8080/test-303')
+      .with(
+        headers: {
+          'X-Disraptor-App-Secret-Key' => 'x'
+        }
+      )
+      .to_return(status: 303, body: 'Actual content', headers: {
+        'Location' => 'http://localhost:8080/test-200'
+      })
   end
 
   describe 'resolve' do
@@ -49,7 +65,7 @@ describe ProxyController do
         '1' => {
           'id' => '1',
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test',
+          'targetURL' => 'http://localhost:8080/test-doesnt-exist',
           'requestMethod' => 'get',
           'segments' => []
         }
@@ -69,7 +85,7 @@ describe ProxyController do
         '1' => {
           'id' => '1',
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8090/test',
+          'targetURL' => 'http://localhost:8080/test-404',
           'requestMethod' => 'get',
           'segments' => []
         }
@@ -80,6 +96,49 @@ describe ProxyController do
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
       expect(response.status).to eq(404)
+    end
+
+    it 'responds with status code 200 when targetURL produces a status code 200' do
+      SiteSetting.disraptor_app_secret_key = 'x'
+
+      routes = {
+        '1' => {
+          'id' => '1',
+          'sourcePath' => '/test',
+          'targetURL' => 'http://localhost:8080/test-200',
+          'requestMethod' => 'get',
+          'segments' => []
+        }
+      }
+
+      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+
+      get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
+
+      expect(response.status).to eq(200)
+      expect(response.body).to eq('Actual content')
+    end
+
+    it 'responds with status code 303 when targetURL produces a status code 303' do
+      SiteSetting.disraptor_app_secret_key = 'x'
+
+      routes = {
+        '1' => {
+          'id' => '1',
+          'sourcePath' => '/test',
+          'targetURL' => 'http://localhost:8080/test-303',
+          'requestMethod' => 'get',
+          'segments' => []
+        }
+      }
+
+      PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', routes)
+
+      get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
+
+      expect(response.status).to eq(303)
+      expect(response.body).to eq('Actual content')
+      expect(response.headers['x-disraptor-location']).to eq('http://localhost:8080/test-200')
     end
   end
 end
