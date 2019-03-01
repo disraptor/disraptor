@@ -63,6 +63,7 @@ After deploying Discourse and installing the Disraptor plugin, the following ste
 1. Open Discourse’s settings and configure the value for “disraptor app secret key”.
 
    Use this secret key in your web application as a signal that the Discourse instance is properly set up and allowed to communicate with the server your web application is running on. Only if the key is correct can you be sure that requests made to the server are legitimately coming from the Discourse instance.
+
 2. Open Discourse’s “Plugins” page. From there, open the Disraptor plugin page.
 
    Configure all routes that your web application needs to expose. You can use Rails’ route syntax to configure wildcard routes like `/static/*wildcard`. See Rails’ documentation on [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) for more examples.
@@ -79,37 +80,29 @@ At its core, the plugin allows an administrator of a Discourse forum to configur
 /test → http://localhost:8080/
 ```
 
-With the Discourse forum running on `example.org` and having a route configured as shown above, opening `example.org/test` would be a match for that route. Disraptor will load the document at `http://localhost:8080/` with all its styles and scripts if possible (see [Limitations](#limitations) for more information).
+Requests to matching source paths are then resolved to their target URL from which the resources like HTML documents, CSS files, or images are retrieved. In other words, Disraptor effectively turns Discourse in a reverse proxy for your web application.
 
-The above example would be a route for a document. In the same way, one can setup routes for resources like CSS or images:
-
-```
-/css/styles.css → http://localhost:8080/css/styles.css
-```
-
-Now, opening `example.org/css/styles.css` would result in loading the resource at `http://localhost:8080/css/styles.css`. Doing this for a lot resources (e.g. a lot of CSS files) would be tedious. This is why Disraptor allows to setup routes as wildcard routes.
-
-```
-/css/*wildcard → http://localhost:8080/css/*wildcard
-```
-
-Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments).
-
-The wildcard route above will match all request paths under the `example.org/css/` prefix (e.g. `example.org/css/styles.css`, `example.org/css/logo.png`).
+Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) when setting up routes on the plugin page.
 
 ### Current status
 
-The current prototype has the following features:
+Disraptor is able to render your web application’s HTML documents inside a Discourse page. Requests to assets (stylesheets, scripts, fonts, images, etc.) that are my made by that document are handled accordingly. You only need to configure routes mapping from requests to the Discourse instance to your web application server.
 
-- Render a web application document inside a Discourse document. The Disraptor document’s `link`, `style` and `script` tags are injected into the Discourse document’s `head`. This leads to a flash of unstyled content.
-- Navigate between pages via Ember transitions. Previously injected `link`, `style` and `script` tags are removed on transition.
-- Authenticate with the web application. Form submits are intercepted and sent to the server via asynchronous JavaScript. This allows Disraptor to handle the response with Ember transitions which in turn ensures that a Disraptor document is still rendered inside the Discourse document.
+Any form submits in your documents are intercepted in order to resolve them via asynchronous requests. This allows Disraptor to handle things like “303 See Other” statusses and redirect to the URL in the “Location” header via Ember transitions.
 
-  Successful authentication requets often respond with a “303 See Other” status, indicating which document to request in the response’s `Location` header. Disraptor keeps track of `Set-Cookie` headers from “303 See Other” responses and includes them in subsequent requests. This allows Disraptor’s backend to set the correct cookies when sending proxy requests to the web application server.
-- Disraptor sends the following information to the web application in its requests:
-  - `x-disraptor-app-secret-key`: A signal indicating that the Discourse instance is allowed to send requests to the web application server. If it is not set, no proxy requests will be send.
-  - `x-disraptor-user`: The username of the currently logged-in Discourse user.
-  - `x-disraptor-groups`: Disraptor-specific groups (groups starting with the string `disraptor`) of the currently logged-in Discourse user.
+Disraptor sends the following information to the web application in its requests:
+
+- `x-disraptor-app-secret-key`: A signal indicating that the Discourse instance is allowed to send requests to the web application server. If it is not set, no proxy requests will be send.
+- `x-disraptor-user`: The username of the currently logged-in Discourse user.
+- `x-disraptor-groups`: Disraptor-specific groups (groups starting with the string `disraptor`) of the currently logged-in Discourse user.
+
+### Rendering modes
+
+Disraptor has two rendering modes for HTML.
+
+The legacy mode (the current default) parses your web application’s HTML and injects the contents of the `<body>` tag into a Discourse page. All `<link>`, `<style>`, and `<script>` tags are injected into the `head` element of the Discourse page.
+
+The experimental shadow DOM mode parses the HTML and hooks it into the host document as a shadow tree. This way, no `head` content needs to be transferred to the host document manually.
 
 
 
@@ -117,9 +110,9 @@ The current prototype has the following features:
 
 Disraptor can only operate reliably while imposing restrictions on its documents and resources.
 
-- URLs **must not** be file-relative. Instead, root-relative (i.e. URLs starting with a slash) or absolute URLs **must** be used. Explanation: [URL references in documents and resources](#url-references-in-documents-and-resources).
-- HTML IDs, classes and custom attributes **should not** conflict with Discourse. Instead, HTML ID, class and custom attribute names **should** be prefixed. Explanation: [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
-- Stylesheets and scripts **must not** select or query DOM nodes outside of a Disraptor document. Instead, only DOM nodes inside a Disraptor document **must** be selected/queried. Explanation: [Selecting and querying DOM nodes](#selecting-and-querying-dom-nodes)
+- URLs **must not** be file-relative. Instead, root-relative (i.e. URLs starting with a slash) or absolute URLs **must** be used. This rule applies to all rendering modes. Explanation: [URL references in documents and resources](#url-references-in-documents-and-resources).
+- HTML IDs, classes and custom attributes **should not** conflict with Discourse. Instead, HTML ID, class and custom attribute names **should** be prefixed. This rule applies to the legacy rendering mode in particular. The shadow DOM rendering mode does not have the potential for conflicts in most cases. Explanation: [Conflict-free naming of HTML IDs, classes and custom attributes](#conflict-free-naming-of-html-ids-classes-and-custom-attributes)
+- Stylesheets and scripts **must not** select or query DOM nodes outside of a Disraptor document. Instead, only DOM nodes inside a Disraptor document **must** be selected/queried. This rule applies to both rendering modes. Explanation: [Selecting and querying DOM nodes](#selecting-and-querying-dom-nodes)
 
 #### Experimental document embedding with shadow DOM
 
@@ -132,16 +125,16 @@ We’re currently evaluating the [Shadow DOM](https://developer.mozilla.org/en-U
 
 **Known issues**:
 
-- [Mousetrap.js doesn’t properly stop callbacks for events originating from a shadow DOM](https://meta.discourse.org/t/mousetrap-js-doesn-t-properly-stop-callbacks-for-events-originating-from-a-shadow-dom/102757): Can be fixed in mousetrap.js (upstream) or in Discourse’s fork of mousetrap.
+- [Mousetrap.js doesn’t properly stop callbacks for events originating from a shadow DOM](https://meta.discourse.org/t/mousetrap-js-doesn-t-properly-stop-callbacks-for-events-originating-from-a-shadow-dom/102757): Can be fixed in mousetrap.js (upstream, a [pull request](https://github.com/ccampbell/mousetrap/pull/445) was submitted) or in Discourse’s fork of mousetrap (The Discourse folks prefer a fix upstream).
 - [Shadow tree navigation doesn’t go through Ember router](https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712): Fixed in the plugin; can be fixed in Discourse.
-- [Firefox] Unstyled document: Occasionally, a document will appear completely unstyled until the user opens or closes the developer tools. That’s potentially a browser bug.
-- [`@font-face`]: Loading fonts with the CSS `@font-face` at rule doesn’t work when the rule is inside the shadow DOM.
+- [Firefox] Unstyled document: Occasionally, a document will appear completely unstyled until the user opens or closes the developer tools. That’s potentially a browser bug in Firefox.
+- [`@font-face`]: Loading fonts with the CSS `@font-face` at rule doesn’t work when the rule is inside the shadow DOM. This should be evaluated again in the future.
 
 
 
 #### URL references in documents and resources
 
-URL references in Disraptor documents and resources must either be absolute or root-relative. The correct context of file-relative URLs cannot be recovered; hence, they’re forbidden.
+URL references in Disraptor documents and resources must either be absolute or root-relative. The correct context of file-relative URLs cannot be recovered; hence, they should be avoided.
 
 In the following example, two routes are specified. One for a document (`/example → http://localhost:8080/`) and a wildcard route for stylesheets (`/css → http://localhost:8080/css`). In the example document, there is a reference to a stylesheet at `/css/styles.css`:
 
@@ -163,23 +156,20 @@ The stylesheet contains the following styles of URL references: absolute, root-r
 
 The first two styles (absolute and root-relative URLs) can always be handled. The root-relative URL will recover its context via the wildcard route and resolve to `http://localhost:8080/css/colors.css`.
 
-The third style (a file-relative URL) causes an issue. This will not match any Disraptor route because a Disraptor route has to begin with a slash: It’s always root-relative to the Discourse instance. Therefor, the last reference will resolve to a `typography.css` file on the Discourse instance if it exists. It’s not possible to recover the original context of this reference without looking at the content of each document or resource at the language level.
+The third style (a file-relative URL) causes an issue. This will not match any Disraptor route because a Disraptor route has to begin with a slash: It’s always root-relative to the Discourse instance. Therefore, the last reference will resolve to `typography.css` (note the missing `http://localhost:8080/), potentially a file on the Discourse instance. It’s not possible for us to recover the original context of this reference without looking at the content of each document or resource at the language level.
 
-For this reason, file-relative URLs are forbidden in Disraptor applications. Every URL reference in your stylesheets and scripts has to be absolute or root-relative.
+For this reason, file-relative URLs should not be used in Disraptor applications. Every URL reference in your stylesheets and scripts has to be absolute or root-relative.
 
 #### Conflict-free naming of HTML IDs, classes and custom attributes
 
-In order to make sure that as little as possible Discourse styles and scripts affect Disraptor documents, you should prefix your HTML IDs, class names and custom attribute names and update all references (e.g. in CSS or JavaScript selectors) to these identifiers and names accordingly. One exception to this rule is reusing Discourse styles for your own components (e.g. reusing `<button>` styles).
+In order to make sure that as little as possible styles and scripts of Discourse affect Disraptor documents, you should prefix your HTML IDs, class names and custom attribute names and update all references (e.g. in CSS or JavaScript selectors) to these identifiers and names accordingly. One exception to this rule is reusing Discourse styles for your own components (e.g. reusing `<button>` styles).
 
 #### Selecting and querying DOM nodes
 
-In order to avoid side-effects of stylesheets and scripts of a Disraptor document on Discourse’s parent document, only DOM nodes of the Disraptor document must be selected/queried by these styles and scripts.
+In order to avoid side-effects of stylesheets and scripts of a Disraptor document on Discourse’s host document, only DOM nodes of the Disraptor document must be selected/queried by these styles and scripts.
 
 
 
 ## To Do
 
-- Test as many components of Disraptor as possible
-  - Route configuration
-  - Route resolution
 - Add user-specific meta data (needs clear specification and use cases → meeting)
