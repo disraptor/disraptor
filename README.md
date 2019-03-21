@@ -64,7 +64,7 @@ After deploying Discourse and installing the Disraptor plugin, the following ste
 2. Open Discourse’s “Plugins” page. From there, open the Disraptor plugin page.
 
    Configure all routes that your web application needs to expose. You can use Rails’ route syntax to configure wildcard routes like `/static/*wildcard`. See Rails’ documentation on [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) for more examples.
-   
+
 Any Disraptor application is subject to a set of limitations that are necessary for Discourse and Disraptor to interact nicely: [Disraptor: Limitations for documents and resources](https://github.com/disraptor/disraptor/wiki/Disraptor:-Limitations-for-documents-and-resources#url-paths-must-not-be-file-relative)
 
 
@@ -86,7 +86,7 @@ Requests to matching source paths are then resolved to their target URL from whi
 Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) when setting up routes on the plugin page. For example, a route can be configured like this:
 
 ```
-/static/* → http://localhost:8080/static/*
+/static/*wildcard → http://localhost:8080/static/*wildcard
 ```
 
 
