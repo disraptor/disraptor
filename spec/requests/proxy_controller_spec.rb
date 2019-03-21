@@ -28,6 +28,12 @@ describe ProxyController do
       get '/test' => 'proxy#resolve', format: false
     end
 
+    stub_request(:get, 'http://localhost:8080/test-no-secret-key')
+      .with(headers: {
+        'X-Disraptor-App-Secret-Key' => ''
+      })
+      .to_return(status: 403, body: '')
+
     stub_request(:get, 'http://localhost:8080/test-404')
       .with(headers: {
         'X-Disraptor-App-Secret-Key' => 'not-an-empty-string'
@@ -50,25 +56,24 @@ describe ProxyController do
   end
 
   describe 'resolve' do
-    it 'responds with status code 404 for non-existing route' do
-      # This ensures that the second condition for the initial 404 check isn’t true.
-      SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
-
-      get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
-
-      expect(response.status).to eq(404)
-      expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
-    end
-
-    it 'responds with status code 404 when secret key is missing' do
+    it 'responds with status code 403 when secret key is missing' do
       SiteSetting.disraptor_app_secret_key = ''
 
-      @test_route['targetURL'] = 'http://localhost:8080/test-doesnt-exist'
+      @test_route['targetURL'] = 'http://localhost:8080/test-no-secret-key'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
-      expect(response.status).to eq(404)
+      expect(response.status).to eq(403)
+      expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
+    end
+
+    it 'responds with status code 500 when the targetURL cannot be resolved' do
+      SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
+
+      get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
+
+      expect(response.status).to eq(500)
       expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
     end
 

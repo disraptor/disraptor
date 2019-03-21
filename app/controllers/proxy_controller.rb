@@ -8,10 +8,15 @@ class ProxyController < ApplicationController
   def resolve
     Rails.logger.info("👻 Disraptor: Routing '#{request.method} #{request.path}' ...")
 
+    if SiteSetting.disraptor_app_secret_key.empty?
+      render json: failed_json, status: 403
+      return
+    end
+
     target_url = determine_target_url(request.path, params)
 
-    if SiteSetting.disraptor_app_secret_key.empty? || target_url.nil?
-      render json: failed_json, status: 404
+    if target_url.nil?
+      render json: failed_json, status: 500
       return
     end
 
