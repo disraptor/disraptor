@@ -42,7 +42,7 @@ class ProxyController < ApplicationController
     when '404'
       Rails.logger.info('👻 Disraptor: Status code 404.')
     else
-      Rails.logger.error("❌ Disraptor: Error: Unhandled status code '#{proxy_response.code}'")
+      Rails.logger.warning("❌ Disraptor: Warning: Unhandled status code '#{proxy_response.code}'")
     end
 
     if Integer(proxy_response.code) < 400
