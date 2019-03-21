@@ -23,7 +23,7 @@ class Disraptor::RoutesController < ApplicationController
     target_url = payload['targetURL']
     request_method = payload['requestMethod']
 
-    if source_path.end_with?('/')
+    if source_path != '/' and source_path.end_with?('/')
       error_message = 'A route’s source path must not end in a slash.'
       Rails.logger.error('❌ Disraptor: Error: ' + error_message)
 
