@@ -30,19 +30,19 @@ describe ProxyController do
 
     stub_request(:get, 'http://localhost:8080/test-404')
       .with(headers: {
-        'X-Disraptor-App-Secret-Key' => 'x'
+        'X-Disraptor-App-Secret-Key' => 'not-an-empty-string'
       })
       .to_return(status: 404, body: '')
 
     stub_request(:get, 'http://localhost:8080/test-200')
       .with(headers: {
-        'X-Disraptor-App-Secret-Key' => 'x'
+        'X-Disraptor-App-Secret-Key' => 'not-an-empty-string'
       })
       .to_return(status: 200, body: 'Actual content')
 
     stub_request(:get, 'http://localhost:8080/test-303')
       .with(headers: {
-        'X-Disraptor-App-Secret-Key' => 'x'
+        'X-Disraptor-App-Secret-Key' => 'not-an-empty-string'
       })
       .to_return(status: 303, body: 'Actual content', headers: {
         'Location' => 'http://localhost:8080/test-200'
@@ -52,7 +52,7 @@ describe ProxyController do
   describe 'resolve' do
     it 'responds with status code 404 for non-existing route' do
       # This ensures that the second condition for the initial 404 check isn’t true.
-      SiteSetting.disraptor_app_secret_key = 'x'
+      SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
 
@@ -73,7 +73,7 @@ describe ProxyController do
     end
 
     it 'responds with status code 404 when targetURL produces a status code 404' do
-      SiteSetting.disraptor_app_secret_key = 'x'
+      SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
       @test_route['targetURL'] = 'http://localhost:8080/test-404'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
@@ -85,7 +85,7 @@ describe ProxyController do
     end
 
     it 'responds with status code 200 when targetURL produces a status code 200' do
-      SiteSetting.disraptor_app_secret_key = 'x'
+      SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
       @test_route['targetURL'] = 'http://localhost:8080/test-200'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
@@ -97,7 +97,7 @@ describe ProxyController do
     end
 
     it 'responds with status code 303 when targetURL produces a status code 303' do
-      SiteSetting.disraptor_app_secret_key = 'x'
+      SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
       @test_route['targetURL'] = 'http://localhost:8080/test-303'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
