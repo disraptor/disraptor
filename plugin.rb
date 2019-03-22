@@ -44,7 +44,9 @@ after_initialize do
     delete '/routes/:route_id' => 'routes#destroy'
   end
 
-  Discourse::Application.routes.append do
+  # `Discourse::Application.routes` is an `ActionDispatch::Routing::RouteSet` object. Source code:
+  # https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/routing/route_set.rb
+  Discourse::Application.routes.prepend do
     # Serve the default plugins content when the user directly opens the Disraptor plugin.
     get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
 
