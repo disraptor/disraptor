@@ -12,6 +12,12 @@ export default Discourse.Route.extend({
    * @returns {any | Promise<any>}
    */
   model(params, transition) {
+    // This ensures that the Discourse forum is available under `/latest`
+    if (transition.intent.url === '/latest' && window.location.href.endsWith('/latest')) {
+      this.transitionTo('discovery.latest');
+      return;
+    }
+
     // This is used to remove some Discourse styles from the main content area when serving a
     // Disraptor document.
     if (!document.documentElement.classList.contains('disraptor-page')) {
@@ -22,11 +28,12 @@ export default Discourse.Route.extend({
       console.info('Disraptor: Using experimental shadow DOM document embedding.');
     }
 
-    return fetch(transition.intent.url)
+    const proxyUrl = transition.intent.url === '/latest' ? '/' : transition.intent.url;
+    return fetch(proxyUrl)
       .then(response => {
         if (!response.ok) {
           throw new Error(
-            `Disraptor: Route ${transition.intent.url} reported: ${response.statusText}`
+            `Disraptor: Route ${proxyUrl} reported: ${response.statusText}`
           );
         }
 
