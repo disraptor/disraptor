@@ -4,6 +4,13 @@ import DiscourseURL from 'discourse/lib/url';
  * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
+  beforeModel(transition) {
+    // This ensures that the Discourse forum is available under `/latest`
+    if (transition.intent.url === '/latest' && window.location.href.endsWith('/latest')) {
+      this.transitionTo('discovery.latest');
+    }
+  },
+
   /**
    * Retrieves the Disraptor document with an asynchronous request to the transition URL.
    *
@@ -12,12 +19,6 @@ export default Discourse.Route.extend({
    * @returns {any | Promise<any>}
    */
   model(params, transition) {
-    // This ensures that the Discourse forum is available under `/latest`
-    if (transition.intent.url === '/latest' && window.location.href.endsWith('/latest')) {
-      this.transitionTo('discovery.latest');
-      return;
-    }
-
     // This is used to remove some Discourse styles from the main content area when serving a
     // Disraptor document.
     if (!document.documentElement.classList.contains('disraptor-page')) {
