@@ -107,7 +107,6 @@ This way, no `head` content needs to be transferred to the host document manuall
 
 Known issues with the shadow DOM mode:
 
-- [Mousetrap.js doesn’t properly stop callbacks for events originating from a shadow DOM](https://meta.discourse.org/t/mousetrap-js-doesn-t-properly-stop-callbacks-for-events-originating-from-a-shadow-dom/102757): This was fixed in [mousetrap.js](https://github.com/ccampbell/mousetrap), but Discourse currently maintains and uses [a fork of mousetrap.js](https://github.com/discourse/mousetrap) and therefor doesn’t have this fix, yet.
 - [Shadow tree navigation doesn’t go through Ember router](https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712): Fixed in the plugin; can be fixed in Discourse.
 - Unstyled document: Occasionally, a document will appear completely unstyled in Firefox until the user opens or closes the developer tools. That’s potentially a browser bug in Firefox.
 - @font-face issue: Loading fonts with the CSS `@font-face` at rule doesn’t work when the rule is inside the shadow DOM. This should be evaluated again in the future.
