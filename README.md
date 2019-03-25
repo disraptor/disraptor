@@ -131,5 +131,17 @@ Disraptor sends the following information to the web application in its requests
 
 ## To do
 
+- Changing plugin GUI to set “targetDomain” and “URL path” instead of “source path” and “target URL”:
+
+  ```
+  http://localhost:8080 + /tira9-client-web
+  ```
+
+  instead of
+
+  ```
+  /tira9-client-web + http://localhost:8080/tira9-client-web
+  ```
+
 - Deploy Discourse with Disraptor
 - Add user-specific meta data (needs clear specification and use cases → meeting)
