@@ -1,4 +1,3 @@
-.disraptor-page html,
 .disraptor-page body,
 .disraptor-page #main,
 .disraptor-page #main > div,
@@ -10,12 +9,18 @@
 1: Account for Discourse’s header height
 */
 .disraptor-page #main-outlet {
-  max-width: initial;
+  max-width: none;
   height: calc(100% - 4.2857em - 3px) !important; /* [1] */
   padding-top: calc(4.2857em + 3px); /* [1] */
 }
 
-.disraptor-page .wrap {
+.disraptor-page #main-outlet.wrap {
   padding-right: 0;
   padding-left: 0;
+}
+
+.disraptor-page .menu-panel.slide-in {
+  position: absolute;
+  top: 100% !important; /* Override inline styles */
+  right: -8px;
 }
