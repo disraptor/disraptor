@@ -10,8 +10,10 @@
 */
 .disraptor-page #main-outlet {
   max-width: none;
-  height: calc(100% - 4.2857em - 3px) !important; /* [1] */
-  padding-top: calc(4.2857em + 3px); /* [1] */
+  //height: calc(100% - 4.2857em - 3px) !important; /* [1] */
+  //padding-top: calc(4.2857em + 3px); /* [1] */
+  height: calc(100% - 4em) !important; /* [1] */
+  padding-top: 4em; /* [1] */
 }
 
 .disraptor-page #main-outlet.wrap {
@@ -23,4 +25,9 @@
   position: absolute;
   top: 100% !important; /* Override inline styles */
   right: -8px;
+}
+
+.disraptor-page #user-card:not(.show),
+.disraptor-page #group-card:not(.show) {
+  display: none;
 }

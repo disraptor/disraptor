@@ -8,6 +8,8 @@ export default Discourse.Route.extend({
     // This ensures that the Discourse forum is available under `/latest`
     if (transition.intent.url === '/latest' && window.location.href.endsWith('/latest')) {
       this.transitionTo('discovery.latest');
+    } else {
+      this.enterDisraptorDocument();
     }
   },
 
@@ -19,12 +21,6 @@ export default Discourse.Route.extend({
    * @returns {any | Promise<any>}
    */
   model(params, transition) {
-    // This is used to remove some Discourse styles from the main content area when serving a
-    // Disraptor document.
-    if (!document.documentElement.classList.contains('disraptor-page')) {
-      document.documentElement.classList.add('disraptor-page');
-    }
-
     if (this.siteSettings.disraptor_shadow_dom) {
       console.info('Disraptor: Using experimental shadow DOM document embedding.');
     }
@@ -49,7 +45,7 @@ export default Discourse.Route.extend({
       })
       .catch(error => {
         console.error(error);
-        this.leaveDisraptor();
+        this.leaveDisraptorDocument();
         return fetch('/404-body')
           .then(response => response.text());
       });
@@ -108,23 +104,34 @@ export default Discourse.Route.extend({
      */
     willTransition(transition) {
       if (!transition.targetName.startsWith('disraptor-proxy')) {
-        this.leaveDisraptor();
+        this.leaveDisraptorDocument();
       }
+
+      if (!this.siteSettings.disraptor_shadow_dom) {
+        const injectedElements = document.head.querySelectorAll('[data-disraptor-tag]');
+        injectedElements.forEach(element => {
+          element.remove();
+        });
+      }
+    }
+  },
+
+  /**
+   * Setup when entering a Disraptor route.
+   */
+  enterDisraptorDocument() {
+    // This is used to remove some Discourse styles from the main content area when serving a
+    // Disraptor document.
+    if (!document.documentElement.classList.contains('disraptor-page')) {
+      document.documentElement.classList.add('disraptor-page');
     }
   },
 
   /**
    * Cleans up when leaving a Disraptor route.
    */
-  leaveDisraptor() {
+  leaveDisraptorDocument() {
     document.documentElement.classList.remove('disraptor-page');
-
-    if (!this.siteSettings.disraptor_shadow_dom) {
-      const injectedElements = document.querySelectorAll('[data-disraptor-tag]');
-      injectedElements.forEach(element => {
-        element.remove();
-      });
-    }
   }
 });
 
