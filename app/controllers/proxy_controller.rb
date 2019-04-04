@@ -165,9 +165,7 @@ class ProxyController < ApplicationController
   # * *Returns*:
   #   - the proxy request headers
   def set_disraptor_headers(proxy_headers)
-    if not SiteSetting.disraptor_app_secret_key.blank?
-      proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
-    end
+    proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
 
     if current_user&.username
       proxy_headers['x-disraptor-user'] = current_user.username
