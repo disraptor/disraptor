@@ -9,11 +9,13 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 - [Development](#development)
   - [Start Discourse](#start-discourse)
   - [Tests](#tests)
-- [Getting started](#getting-started)
+- [Production](#production)
+  - [Getting started](#getting-started)
 - [Documentation](#documentation)
   - [Introduction](#introduction)
+  - [Authentication](#authentication)
+  - [App secret key](#app-secret-key)
   - [Rendering modes](#rendering-modes)
-  - [Features](#features)
 - [To do](#to-do)
 
 
@@ -22,7 +24,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 ### Setup Discourse & Disraptor
 
-Follow [Discourse: Setup development environment (Ubuntu)](https://github.com/disraptor/disraptor/wiki/Discourse:-Setup-development-environment-(Ubuntu)) to setup a Discourse development environment.
+[Setup a Discourse development environment (Ubuntu)](docs/setup-a-discourse-development-environment-ubuntu.md)
 
 ### Start Discourse in development mode
 
@@ -53,7 +55,13 @@ bundle exec rake plugin:spec["disraptor"]
 
 
 
-## Getting started
+## Production
+
+[Deploy Discourse with Disraptor](docs/deploy-discourse-with-disraptor.md)
+
+
+
+### Getting started
 
 After deploying Discourse and installing the Disraptor plugin, the following steps need to be performed for Disraptor to operate reliably:
 
@@ -71,23 +79,33 @@ Any Disraptor application is subject to a set of limitations that are necessary 
 
 ## Documentation
 
-
-
 ### Introduction
 
-At its core, the plugin allows an administrator of a Discourse forum to configure routes in the form of `source-path → target-url`:
+The plugin does two things. *One*, it allows an administrator of a Discourse forum to configure routes from the Discourse instance to your web application. *Two*, it hooks into Discourse’s routing mechanism and redirects all requests to the configured source paths to their target URLs. Disraptor will render documents obtain with such a redirection inside the Discourse instance. In other words, Disraptor effectively turns Discourse in a reverse proxy for your web application.
 
-```
-/test → http://localhost:8080/
-```
+Here are a few examples of possible route configurations:
 
-Requests to matching source paths are then resolved to their target URL from which the resources like HTML documents, CSS files, or images are retrieved. In other words, Disraptor effectively turns Discourse in a reverse proxy for your web application.
+- `/` → `http://192.168.1.1/`
+- `/tasks` → `http://192.168.1.1/tasks/`
+- `/static/*wildcard` → `http://192.168.1.1/static/*wildcard`
 
-Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) when setting up routes on the plugin page. For example, a route can be configured like this:
+Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) when setting up routes as shown in the third route configuration.
 
-```
-/static/*wildcard → http://localhost:8080/static/*wildcard
-```
+
+
+### Authentication
+
+Your web application can make use of Discourse’s own authentication infrastructure. If a user is logged in via Discourse, Disraptor sends a `X-Disraptor-User` header with their user name to your web application. Similarly, the `X-Disraptor-Groups` header contains a list of associated groups. For now, only groups with the prefix `disraptor` are sent.
+
+Since Disraptor will only populate these header fields if there is any information to send, you can use the presence of the `X-Disraptor-User` header as the signal that the user is logged in.
+
+Note that Disraptor will also allow authentication via POST requests. Any responses with status “303 See Other” will redirect to the URL in the `Location` header.
+
+
+
+### App secret key
+
+Disraptor requires a secret key in order to communicate with your web application. In essence, the secret key is really just a signal that *allows the Discourse instance to send requests to your web application*. Without it, Disraptor will not send requests to your web application. If set up, Disraptor will always send a `X-Disraptor-App-Secret-Key` header with its requests to your web application. **Your web application has to evaluate whether the secret key is correct**.
 
 
 
@@ -110,20 +128,6 @@ Known issues with the shadow DOM mode:
 - [Shadow tree navigation doesn’t go through Ember router](https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712): Fixed in the plugin; can be fixed in Discourse.
 - Unstyled document: Occasionally, a document will appear completely unstyled in Firefox until the user opens or closes the developer tools. That’s potentially a browser bug in Firefox.
 - @font-face issue: Loading fonts with the CSS `@font-face` at rule doesn’t work when the rule is inside the shadow DOM. This should be evaluated again in the future.
-
-
-
-### Features
-
-Disraptor is able to render your web application’s HTML documents inside a Discourse page. Requests to assets (stylesheets, scripts, fonts, images, etc.) that are my made by that document are handled accordingly. You only need to configure routes mapping from requests to the Discourse instance to your web application server.
-
-Any form submits in your documents are intercepted in order to resolve them via asynchronous requests. This allows Disraptor to handle things like “303 See Other” statusses and redirect to the URL in the “Location” header via Ember transitions.
-
-Disraptor sends the following information to the web application in its requests:
-
-- `x-disraptor-app-secret-key`: A signal indicating that the Discourse instance is allowed to send requests to the web application server. If it is not set, no proxy requests will be send.
-- `x-disraptor-user`: The username of the currently logged-in Discourse user.
-- `x-disraptor-groups`: Disraptor-specific groups (groups starting with the string `disraptor`) of the currently logged-in Discourse user.
 
 
 
