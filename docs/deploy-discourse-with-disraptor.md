@@ -1,4 +1,4 @@
-# Disraptor: Deploy Discourse
+# Deploy Discourse with Disraptor
 
 *(based on [discourse/discourse: INSTALL-cloud.md](https://github.com/discourse/discourse/blob/master/docs/INSTALL-cloud.md) and [discourse/discourse_docker: README.md](https://github.com/discourse/discourse_docker/blob/master/README.md).)*
 
