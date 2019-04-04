@@ -1,4 +1,4 @@
-# Discourse: Setup development environment (Ubuntu)
+# Setup a Discourse development environment (Ubuntu)
 
 *(Closely following [discourse.org: Beginners Guide to Install Discourse on Ubuntu for Development](https://meta.discourse.org/t/beginners-guide-to-install-discourse-on-ubuntu-for-development/14727))*
 
