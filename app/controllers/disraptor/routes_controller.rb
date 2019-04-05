@@ -13,6 +13,23 @@ class Disraptor::RoutesController < ApplicationController
   end
 
   # Corresponds to requests in the form
+  # GET /disraptor/routes/:route_id
+  def show
+    route_id = params.require(:route_id)
+
+    route = Disraptor::RouteStore.get_route(route_id)
+
+    if route.nil?
+      error_message = "Couldn’t find route for the ID '#{route_id}'."
+      Rails.logger.error('❌ Disraptor: Error: ' + error_message)
+
+      return render json: { error: error_message }, status: 404
+    end
+
+    render json: { 'disraptor/route': route }
+  end
+
+  # Corresponds to requests in the form
   # PUT /disraptor/routes/:route_id
   def update
     Rails.logger.info('👻 Disraptor: Updating route.')

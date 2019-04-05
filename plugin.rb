@@ -43,28 +43,27 @@ after_initialize do
     end
   end
 
-  if SiteSetting.disraptor_enabled
-    Discourse::Application.routes.append do
-      mount Disraptor::RoutesEngine => '/disraptor'
-    end
-
-    Disraptor::RoutesEngine.routes.draw do
-      get '/routes' => 'routes#index'
-      put '/routes/:route_id' => 'routes#update'
-      delete '/routes/:route_id' => 'routes#destroy'
-    end
-
-    # `Discourse::Application.routes` is an `ActionDispatch::Routing::RouteSet` object. Source code:
-    # https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/routing/route_set.rb
-    Discourse::Application.routes.prepend do
-      Disraptor::RouteStore.get_routes.values.each do |route|
-        # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
-        # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
-        # to `styles.css` instead of just `styles`.
-        match route['sourcePath'] => 'proxy#resolve', format: false, segments: route['segments'], via: route['requestMethod']
-      end
-    end
-
-    Rails.application.reload_routes!
+  Discourse::Application.routes.append do
+    mount Disraptor::RoutesEngine => '/disraptor'
   end
+
+  Disraptor::RoutesEngine.routes.draw do
+    get '/routes' => 'routes#index'
+    get '/routes/:route_id' => 'routes#show'
+    put '/routes/:route_id' => 'routes#update'
+    delete '/routes/:route_id' => 'routes#destroy'
+  end
+
+  # `Discourse::Application.routes` is an `ActionDispatch::Routing::RouteSet` object. Source code:
+  # https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/routing/route_set.rb
+  Discourse::Application.routes.prepend do
+    Disraptor::RouteStore.get_routes.values.each do |route|
+      # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
+      # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
+      # to `styles.css` instead of just `styles`.
+      match route['sourcePath'] => 'proxy#resolve', format: false, segments: route['segments'], via: route['requestMethod']
+    end
+  end
+
+  Rails.application.reload_routes!
 end
