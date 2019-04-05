@@ -47,17 +47,19 @@ after_initialize do
   # `Discourse::Application.routes` is an `ActionDispatch::Routing::RouteSet` object. Source code:
   # https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/routing/route_set.rb
   Discourse::Application.routes.prepend do
-    # Serve the default plugins content when the user directly opens the Disraptor plugin.
-    get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
-
-    mount Disraptor::RoutesEngine => '/disraptor'
-
     Disraptor::RouteStore.get_routes.values.each do |route|
       # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
       # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
       # to `styles.css` instead of just `styles`.
       match route['sourcePath'] => 'proxy#resolve', format: false, segments: route['segments'], via: route['requestMethod']
     end
+  end
+
+  Discourse::Application.routes.append do
+    # Serve the default plugins content when the user directly opens the Disraptor plugin.
+    get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
+
+    mount Disraptor::RoutesEngine => '/disraptor'
   end
 
   Rails.application.reload_routes!
