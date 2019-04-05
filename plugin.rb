@@ -22,6 +22,11 @@ after_initialize do
   load File.expand_path('../app/controllers/disraptor/routes_controller.rb', __FILE__)
   load File.expand_path('../app/controllers/proxy_controller.rb', __FILE__)
 
+  Discourse::Application.routes.append do
+    # Serve the default plugins content when the user directly opens the Disraptor plugin.
+    get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
+  end
+
   # No longer needed with the following commit:
   # https://github.com/discourse/discourse/commit/98d09c90acc503051d02094a9f25113eb5fdf293
   # Tagged to be released with 2.3
@@ -38,29 +43,28 @@ after_initialize do
     end
   end
 
-  Disraptor::RoutesEngine.routes.draw do
-    get '/routes' => 'routes#index'
-    put '/routes/:route_id' => 'routes#update'
-    delete '/routes/:route_id' => 'routes#destroy'
-  end
-
-  # `Discourse::Application.routes` is an `ActionDispatch::Routing::RouteSet` object. Source code:
-  # https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/routing/route_set.rb
-  Discourse::Application.routes.prepend do
-    Disraptor::RouteStore.get_routes.values.each do |route|
-      # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
-      # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
-      # to `styles.css` instead of just `styles`.
-      match route['sourcePath'] => 'proxy#resolve', format: false, segments: route['segments'], via: route['requestMethod']
+  if SiteSetting.disraptor_enabled
+    Discourse::Application.routes.append do
+      mount Disraptor::RoutesEngine => '/disraptor'
     end
+
+    Disraptor::RoutesEngine.routes.draw do
+      get '/routes' => 'routes#index'
+      put '/routes/:route_id' => 'routes#update'
+      delete '/routes/:route_id' => 'routes#destroy'
+    end
+
+    # `Discourse::Application.routes` is an `ActionDispatch::Routing::RouteSet` object. Source code:
+    # https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/routing/route_set.rb
+    Discourse::Application.routes.prepend do
+      Disraptor::RouteStore.get_routes.values.each do |route|
+        # Use `format: false` to ensure wildcard path segments include extensions, e.g.:
+        # Requesting /styles.css and having a wildcard path /*wildcard yields a `wildcard` field set
+        # to `styles.css` instead of just `styles`.
+        match route['sourcePath'] => 'proxy#resolve', format: false, segments: route['segments'], via: route['requestMethod']
+      end
+    end
+
+    Rails.application.reload_routes!
   end
-
-  Discourse::Application.routes.append do
-    # Serve the default plugins content when the user directly opens the Disraptor plugin.
-    get '/admin/plugins/disraptor' => 'admin/plugins#index', constraints: AdminConstraint.new
-
-    mount Disraptor::RoutesEngine => '/disraptor'
-  end
-
-  Rails.application.reload_routes!
 end
