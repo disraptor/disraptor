@@ -134,6 +134,14 @@ Known issues with the shadow DOM mode:
 
 ## To do
 
+- Test: Disraptor disabled, requesting '/'
+- Test: Disraptor disabled, requesting '/latest'
+- Test: Disraptor enabled, root route **is not** configured, requesting '/'
+- Test: Disraptor enabled, root route **is not** configured, requesting '/latest'
+- Test: Disraptor enabled, root route **is** configured, requesting '/'
+- Test: Disraptor enabled, root route **is** configured, requesting '/latest'
+- Critical bug: Discourse loads a plugin’s client routes even if the plugin is not enabled.
+- Critical bug: If no root route is configured, Disraptor treats the root route as a Disraptor document and fails to load the main page. Disraptor’s front end somehow needs to know whether a root route was configured.
 - Changing plugin GUI to set “targetDomain” and “URL path” instead of “source path” and “target URL”:
 
   ```
