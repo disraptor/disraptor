@@ -33,7 +33,7 @@ This document describes how to deploy Discourse with Disraptor. You will need ro
 
 
 
-## Install Discourse via Docker
+## Install Discourse with Disraptor via Docker
 
 1. Clone the Discourse Docker repository into `/var/discourse`:
 
@@ -51,3 +51,37 @@ This document describes how to deploy Discourse with Disraptor. You will need ro
    ```
 
    This produces an `app.yml` file and starts a bootstrap process.
+
+3. Open the previously generated `app.yml` file:
+
+   ```sh
+   sudo vim containers/app.yml
+   ```
+
+   In the section containing the `hooks` key, add a command to clone the Disraptor repository as shown below:
+
+   ```yaml
+   hooks:
+     after_code:
+       - exec:
+         cd: $home/plugins
+         cmd:
+           - git clone https://github.com/discourse/docker_manager.git
+           - git clone https://github.com/disraptor/disraptor.git
+   ```
+
+4. Restart the bootstrap process:
+
+   ```sh
+   ./launcher rebuild app
+   ```
+
+
+
+## Troubleshooting
+
+- List running Docker containers:
+
+  ```sh
+  docker container ls
+  ```
