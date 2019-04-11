@@ -134,15 +134,7 @@ Known issues with the shadow DOM mode:
 
 ## To do
 
-- Test: Disraptor disabled, requesting '/'
-- Test: Disraptor disabled, requesting '/latest'
-- Test: Disraptor enabled, root route **is not** configured, requesting '/'
-- Test: Disraptor enabled, root route **is not** configured, requesting '/latest'
-- Test: Disraptor enabled, root route **is** configured, requesting '/'
-- Test: Disraptor enabled, root route **is** configured, requesting '/latest'
-- Critical bug: Discourse loads a plugin’s client routes even if the plugin is not enabled.
-- Critical bug: If no root route is configured, Disraptor treats the root route as a Disraptor document and fails to load the main page. Disraptor’s front end somehow needs to know whether a root route was configured.
-- Changing plugin GUI to set “targetDomain” and “URL path” instead of “source path” and “target URL”:
+- Change semantic of routes to have “targetDomain” and “URL path” instead of “source path” and “target URL”:
 
   ```
   http://localhost:8080 + /tira9-client-web
@@ -154,5 +146,4 @@ Known issues with the shadow DOM mode:
   /tira9-client-web + http://localhost:8080/tira9-client-web
   ```
 
-- Deploy Discourse with Disraptor
 - Add user-specific meta data (needs clear specification and use cases → meeting)
