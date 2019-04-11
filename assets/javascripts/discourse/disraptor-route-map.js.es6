@@ -15,7 +15,9 @@
  * [3]: https://discuss.emberjs.com/t/override-existing-catch-all-wildcard-route/15717
  */
 export default function () {
-  this.route('disraptor-proxy.latest', { path: '/latest' });
-  this.route('disraptor-proxy.single-segment', { path: '/:path' });
-  this.route('disraptor-proxy.multi-segment', { path: '/:path/*wildcard' });
+  if (this.site.siteSettings['disraptor_enabled']) {
+    this.route('disraptor-proxy.latest', { path: '/latest' });
+    this.route('disraptor-proxy.single-segment', { path: '/:path' });
+    this.route('disraptor-proxy.multi-segment', { path: '/:path/*wildcard' });
+  }
 }
