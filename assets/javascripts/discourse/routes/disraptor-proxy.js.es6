@@ -5,38 +5,29 @@ import DiscourseURL from 'discourse/lib/url';
  * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
-  init() {
-    if (!this.siteSettings.disraptor_enabled) {
-      // This is not ideal. If the Discourse instance was configured with a home page other than
-      // `/latest`, this will cause unexpected results. Also, this changes the URL path from `/`
-      // to `/latest` in the address bar.
-      this.transitionTo('discovery.latest');
-    }
-  },
-
   beforeModel(transition) {
-    // !!! BUG !!! This logic does not account for the scenario where
-    // transition.intent.url === '/latest' &&
-    // window.location.href === 'domain.tld/' &&
-    // this.siteSettings.disraptor_enabled &&
-    // “no root route is configured”
-    // Then, Disraptor tries to handle the root route which it has not matching root route.
-    // Question: How do I know if a root route is configured
-
     if (transition.intent.url === '/latest') {
-      if (window.location.href.endsWith('/latest')) {
+      if (window.location.pathname === '/latest') {
         // This ensures that the Discourse forum is available when the user requests `/latest`.
         this.transitionTo('discovery.latest');
       } else {
+        /*
+        We want to continue serving Discourse’s home page *if* there is no root route configured
+        via Disraptor. Currently, I cannot think of another way than querying the server for
+        whether a route with the key parameters for a root route exists. If such a route doesn’t
+        exist (i.e. the end point responds with a status 404), we transition to Discourse’s home
+        page.
+        */
         const routeRequestMethod = 'get';
         const rootRouteId = hashString('/' + routeRequestMethod) >>> 0;
 
         this.store.find('disraptor/route', rootRouteId)
+          .then(() => {
+            this.enterDisraptorDocument();
+          })
           .catch(error => {
             if (error.jqXHR.status === 404) {
               this.transitionTo('discovery.latest');
-            } else {
-              console.error(error);
             }
           });
       }
