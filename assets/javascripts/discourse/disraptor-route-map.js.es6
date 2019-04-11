@@ -15,6 +15,11 @@
  * [3]: https://discuss.emberjs.com/t/override-existing-catch-all-wildcard-route/15717
  */
 export default function () {
+  /*
+  This check to see whether the plugin is enabled might not be necessary in the future.
+  For any updates on this, check:
+  https://meta.discourse.org/t/plugin-route-map-loaded-even-when-it-s-disabled/114725
+  */
   if (this.site.siteSettings['disraptor_enabled']) {
     this.route('disraptor-proxy.latest', { path: '/latest' });
     this.route('disraptor-proxy.single-segment', { path: '/:path' });
