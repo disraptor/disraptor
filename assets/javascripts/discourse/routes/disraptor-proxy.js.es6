@@ -43,10 +43,6 @@ export default Discourse.Route.extend({
    * @returns {any | Promise<any>}
    */
   model(params, transition) {
-    if (this.siteSettings.disraptor_shadow_dom) {
-      console.info('Disraptor: Using experimental shadow DOM document embedding.');
-    }
-
     const proxyUrl = transition.intent.url === '/latest' ? '/' : transition.intent.url;
     return fetch(proxyUrl)
       .then(response => {
@@ -142,6 +138,14 @@ export default Discourse.Route.extend({
    * Setup when entering a Disraptor route.
    */
   enterDisraptorDocument() {
+    if (this.siteSettings.disraptor_shadow_dom) {
+      console.info('Disraptor: Using experimental shadow DOM document embedding.');
+
+      if (!document.documentElement.classList.contains('disraptor-uses-shadow-dom')) {
+        document.documentElement.classList.add('disraptor-uses-shadow-dom');
+      }
+    }
+
     // This is used to remove some Discourse styles from the main content area when serving a
     // Disraptor document.
     if (!document.documentElement.classList.contains('disraptor-page')) {
@@ -153,7 +157,7 @@ export default Discourse.Route.extend({
    * Cleans up when leaving a Disraptor route.
    */
   leaveDisraptorDocument() {
-    document.documentElement.classList.remove('disraptor-page');
+    document.documentElement.classList.remove('disraptor-page', 'disraptor-uses-shadow-dom');
   }
 });
 
