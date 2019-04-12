@@ -1,5 +1,5 @@
-import { hashString } from 'discourse/lib/hash';
 import { popupAjaxError } from 'discourse/lib/ajax-error';
+import { generateRouteId } from '../lib/generate-route-id';
 
 /**
  * Disraptor front end controller.
@@ -36,7 +36,7 @@ export default Ember.Controller.extend({
       return null;
     }
 
-    return hashString(routeSourcePath + routeRequestMethod) >>> 0;
+    return generateRouteId(routeRequestMethod, routeSourcePath);
   }),
 
   init() {
@@ -96,10 +96,13 @@ export default Ember.Controller.extend({
      * @param {'GET'|'POST'} requestMethod
      */
     createRoute(sourcePath, targetURL, requestMethod) {
+      const id = this.get('routeId');
+      if (id === null) {
+        return;
+      }
+
       sourcePath = sourcePath.trim();
       targetURL = targetURL.trim();
-
-      const id = this.get('routeId');
 
       this.store
         .createRecord(this.endPoint, { id, sourcePath, targetURL, requestMethod })

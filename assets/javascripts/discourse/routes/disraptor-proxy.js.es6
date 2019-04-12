@@ -1,5 +1,5 @@
-import { hashString } from 'discourse/lib/hash';
 import DiscourseURL from 'discourse/lib/url';
+import { generateRouteId } from '../lib/generate-route-id';
 
 /**
  * This is the “disraptor-proxy” route.
@@ -18,8 +18,7 @@ export default Discourse.Route.extend({
         exist (i.e. the end point responds with a status 404), we transition to Discourse’s home
         page.
         */
-        const routeRequestMethod = 'get';
-        const rootRouteId = hashString('/' + routeRequestMethod) >>> 0;
+        const rootRouteId = generateRouteId('get', '/');
 
         this.store.find('disraptor/route', rootRouteId)
           .then(() => {
