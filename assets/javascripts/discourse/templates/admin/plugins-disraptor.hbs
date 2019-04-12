@@ -3,15 +3,37 @@
 <h3>{{ i18n "disraptor.create_route.title" }}</h3>
 
 <form {{ action "createRoute" routeSourcePath routeTargetURL routeRequestMethod on="submit" }}>
+
+  {{#d-section class="form-horizontal settings"}}
+    <div class="row setting">
+      <div class="setting-label">
+        <label for="route-request-method">
+          {{ i18n "disraptor.routes.request_method_label" }}
+        </label>
+      </div>
+
+      <div class="setting-value">
+        {{ combo-box id="route-request-method" value=routeRequestMethod valueAttribute="value" content=requestMethods class="select-kit" }}
+        <div class="desc">
+          {{ i18n "disraptor.routes.request_method_description" }}
+        </div>
+      </div>
+    </div>
+  {{/d-section}}
+
   {{#d-section class="form-horizontal settings"}}
     <div class="row setting">
       <div class="setting-label">
         <label for="route-source-path">
-          {{ i18n "disraptor.routes.source_path" }}
+          {{ i18n "disraptor.routes.source_path_label" }}
         </label>
       </div>
+
       <div class="setting-value">
-        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.routes.source_path_placeholder") pattern="^\/(?!admin).*" type="text" class="input-setting-string" }}
+        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.routes.source_path_placeholder") pattern="^\/(?!(admin|latest)).*" type="text" class="input-setting-string" }}
+        <div class="desc">
+          {{ i18n "disraptor.routes.source_path_description" }}
+        </div>
       </div>
     </div>
   {{/d-section}}
@@ -20,24 +42,15 @@
     <div class="row setting">
       <div class="setting-label">
         <label for="route-target-url">
-          {{ i18n "disraptor.routes.target_url" }}
+          {{ i18n "disraptor.routes.target_url_label" }}
         </label>
       </div>
+
       <div class="setting-value">
         {{ input id="route-target-url" value=routeTargetURL placeholder=(i18n "disraptor.routes.target_url_placeholder") type="url" class="input-setting-string" }}
-      </div>
-    </div>
-  {{/d-section}}
-
-  {{#d-section class="form-horizontal settings"}}
-    <div class="row setting">
-      <div class="setting-label">
-        <label for="route-request-method">
-          {{ i18n "disraptor.routes.request_method" }}
-        </label>
-      </div>
-      <div class="setting-value">
-        {{ combo-box id="route-request-method" value=routeRequestMethod valueAttribute="value" content=requestMethods class="select-kit" }}
+        <div class="desc">
+          {{ i18n "disraptor.routes.target_url_description" }}
+        </div>
       </div>
     </div>
   {{/d-section}}
