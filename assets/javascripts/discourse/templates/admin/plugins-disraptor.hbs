@@ -1,6 +1,6 @@
 <h2>{{ i18n "disraptor.title" }}</h2>
 
-<h3>{{ i18n "disraptor.create_route.title" }}</h3>
+<h3>{{ i18n "disraptor.new_route.title" }}</h3>
 
 <form {{ action "createRoute" routeSourcePath routeTargetURL routeRequestMethod on="submit" }}>
 
@@ -8,14 +8,14 @@
     <div class="row setting">
       <div class="setting-label">
         <label for="route-request-method">
-          {{ i18n "disraptor.routes.request_method_label" }}
+          {{ i18n "disraptor.new_route.request_method.label" }}
         </label>
       </div>
 
       <div class="setting-value">
         {{ combo-box id="route-request-method" value=routeRequestMethod valueAttribute="value" content=requestMethods class="select-kit" }}
         <div class="desc">
-          {{ i18n "disraptor.routes.request_method_description" }}
+          {{ i18n "disraptor.new_route.request_method.description" }}
         </div>
       </div>
     </div>
@@ -25,12 +25,12 @@
     <div class="row setting">
       <div class="setting-label">
         <label for="route-source-path">
-          {{ i18n "disraptor.routes.source_path_label" }}
+          {{ i18n "disraptor.new_route.source_path.label" }}
         </label>
       </div>
 
       <div class="setting-value">
-        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.routes.source_path_placeholder") pattern="^\/(?!(admin|latest)).*" type="text" class="input-setting-string" }}
+        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.new_route.source_path.placeholder") pattern="^\/(?!(admin|latest)).*" type="text" class="input-setting-string" }}
 
         <div>
           Normalized path:
@@ -42,11 +42,11 @@
         </div>
 
         {{#if sourcePathIsInvalid}}
-          {{setting-validation-message message=(i18n "disraptor.routes.source_path_invalid")}}
+          {{setting-validation-message message=(i18n "disraptor.new_route.source_path.invalid")}}
         {{/if}}
 
         <div class="desc">
-          {{ i18n "disraptor.routes.source_path_description" }}
+          {{ i18n "disraptor.new_route.source_path.description" }}
         </div>
       </div>
     </div>
@@ -56,14 +56,14 @@
     <div class="row setting">
       <div class="setting-label">
         <label for="route-target-url">
-          {{ i18n "disraptor.routes.target_url_label" }}
+          {{ i18n "disraptor.new_route.target_url.label" }}
         </label>
       </div>
 
       <div class="setting-value">
-        {{ input id="route-target-url" value=routeTargetURL placeholder=(i18n "disraptor.routes.target_url_placeholder") type="url" class="input-setting-string" }}
+        {{ input id="route-target-url" value=routeTargetURL placeholder=(i18n "disraptor.new_route.target_url.placeholder") type="url" class="input-setting-string" }}
         <div class="desc">
-          {{ i18n "disraptor.routes.target_url_description" }}
+          {{ i18n "disraptor.new_route.target_url.description" }}
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
 
   <button type="submit" id="submit-route" class="btn btn-primary">
     {{ d-icon "plus"}}
-    {{ i18n "disraptor.create_route.button_label" }}
+    {{ i18n "disraptor.new_route.submit_button.label" }}
   </button>
 
   {{#if routeCreatedMessage}}
@@ -104,7 +104,7 @@
             To:
 
             {{#if route.isBeingEdited}}
-              {{ input value=route.record.targetURL placeholder=(i18n "disraptor.routes.target_url_placeholder") type="url" required=true }}
+              {{ input value=route.record.targetURL placeholder=(i18n "disraptor.new_route.target_url.placeholder") type="url" required=true }}
             {{else}}
               {{ route.record.targetURL }}
             {{/if}}
@@ -121,20 +121,20 @@
           <td style="text-align: right;">
             {{#if route.isBeingEdited}}
               <button type="button" class="btn btn-primary" {{ action "updateRouteRecord" route.record }}>
-                {{ i18n "disraptor.edit_route.save" }}
+                {{ i18n "disraptor.manage_routes.save" }}
               </button>
             {{/if}}
 
             <button type="button" class="btn" {{ action "toggleEditingRoute" route }}>
               {{#if route.isBeingEdited}}
-                {{ i18n "disraptor.edit_route.stop" }}
+                {{ i18n "disraptor.manage_routes.cancel" }}
               {{else}}
-                {{ i18n "disraptor.edit_route.start" }}
+                {{ i18n "disraptor.manage_routes.edit" }}
               {{/if}}
             </button>
 
             <button type="button" class="btn btn-danger" {{ action "deleteRoute" route }}>
-              {{ i18n "disraptor.routes.delete_label" }}
+              {{ i18n "disraptor.manage_routes.delete" }}
             </button>
           </td>
         </tr>

@@ -2,29 +2,23 @@ en:
   js:
     disraptor:
       title: 'Disraptor'
-      disallowed_message: 'Only administrators are allowed to setup Disraptor.'
 
-      routes:
-        source_path_label: 'Source path'
-        source_path_placeholder: '/disraptor'
-        source_path_description: 'The source path that, when it gets requested, will be forwarded to the target URL.'
-        source_path_invalid: 'The source path must not start with either “/latest” or “/admin”.'
-        target_url_label: 'Target URL'
-        target_url_placeholder: 'http://127.0.0.1:8080/'
-        target_url_description: 'The URL from your web application you want to expose via the source path.'
-        request_method_label: 'Request method'
-        request_method_description: 'The request method that is used when requesting the source path.'
-        create: 'Create'
-        delete_label: 'Delete'
-
-      create_route:
+      new_route:
         title: 'Create a New Route'
-        button_label: 'Create'
-
-      edit_route:
-        start: 'Edit'
-        save: 'Save'
-        stop: 'Cancel'
+        request_method:
+          label: 'Request method'
+          description: 'The request method that is used when requesting the source path.'
+        source_path:
+          label: 'Source path'
+          placeholder: '/disraptor'
+          description: 'The source path that, when it gets requested, will be forwarded to the target URL.'
+          invalid: 'The source path must not start with either “/latest” or “/admin”.'
+        target_url:
+          label: 'Target URL'
+          placeholder: 'http://127.0.0.1:8080/'
+          description: 'The URL from your web application you want to expose via the source path.'
+        submit_button:
+          label: 'Create'
 
       route_list:
         title: 'Active Routes'
@@ -34,3 +28,9 @@ en:
           route: 'Route'
           request_method: 'Method'
           manage: 'Manage'
+
+      manage_routes:
+        edit: 'Edit'
+        delete: 'Delete'
+        save: 'Save'
+        cancel: 'Cancel'
