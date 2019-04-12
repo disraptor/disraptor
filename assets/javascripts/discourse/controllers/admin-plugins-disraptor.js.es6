@@ -26,6 +26,7 @@ export default Ember.Controller.extend({
   requestMethods: ['get', 'head', 'post', 'put', 'delete', 'options', 'trace'],
   routeRequestMethod: 'get',
   routeSourcePath: '',
+  routeCreatedMessage: '',
 
   routeId: Ember.computed('routeSourcePath', 'routeRequestMethod', function () {
     // Hash the source path (e.g. /example) to obtain a number that can be
@@ -136,12 +137,13 @@ export default Ember.Controller.extend({
             isBeingEdited: false
           });
 
-          console.log(
-            `Saved route: ${result.payload.sourcePath} → ${result.payload.targetURL}`
-          );
+          const successMessage = `Saved route: ${result.payload.sourcePath} → ${result.payload.targetURL}`;
+          this.set('routeCreatedMessage', successMessage);
         })
         .catch(popupAjaxError)
-        .catch(console.error);
+        .catch(() => {
+          this.set('routeCreatedMessage', '');
+        });
     },
 
     /**

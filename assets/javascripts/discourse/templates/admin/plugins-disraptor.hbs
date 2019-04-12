@@ -73,6 +73,10 @@
     {{ d-icon "plus"}}
     {{ i18n "disraptor.create_route.button_label" }}
   </button>
+
+  {{#if routeCreatedMessage}}
+    <p>{{ routeCreatedMessage }}</p>
+  {{/if}}
 </form>
 
 
