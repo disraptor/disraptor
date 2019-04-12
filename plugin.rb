@@ -1,6 +1,6 @@
 # name: disraptor
 # about: Disraptor tries to separate web application development from the development of other, often crucial features like user management, authentication, mailing, social networking, etc.
-# version: 0.2.1
+# version: 0.2.2
 # authors: Philipp Rudloff
 # url: https://disraptor.org
 
