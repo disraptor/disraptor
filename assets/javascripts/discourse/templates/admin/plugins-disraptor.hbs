@@ -111,11 +111,7 @@
           </td>
 
           <td>
-            {{#if route.isBeingEdited}}
-              {{ combo-box value=route.record.requestMethod valueAttribute="value" content=requestMethods }}
-            {{else}}
-              {{ route.record.requestMethod }}
-            {{/if}}
+            {{ route.record.requestMethod }}
           </td>
 
           <td style="text-align: right;">
