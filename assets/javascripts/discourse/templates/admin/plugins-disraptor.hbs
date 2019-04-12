@@ -31,6 +31,20 @@
 
       <div class="setting-value">
         {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.routes.source_path_placeholder") pattern="^\/(?!(admin|latest)).*" type="text" class="input-setting-string" }}
+
+        <div>
+          Normalized path:
+          {{#if normalizedSourcePath}}
+            {{ normalizedSourcePath }}
+          {{else}}
+            —
+          {{/if}}
+        </div>
+
+        {{#if sourcePathIsInvalid}}
+          {{setting-validation-message message=(i18n "disraptor.routes.source_path_invalid")}}
+        {{/if}}
+
         <div class="desc">
           {{ i18n "disraptor.routes.source_path_description" }}
         </div>

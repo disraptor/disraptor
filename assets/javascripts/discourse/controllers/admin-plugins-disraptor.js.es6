@@ -24,6 +24,8 @@ export default Ember.Controller.extend({
   endPoint: 'disraptor/route',
 
   requestMethods: ['get', 'head', 'post', 'put', 'delete', 'options', 'trace'],
+  routeRequestMethod: 'get',
+  routeSourcePath: '',
 
   routeId: Ember.computed('routeSourcePath', 'routeRequestMethod', function () {
     // Hash the source path (e.g. /example) to obtain a number that can be
@@ -39,10 +41,30 @@ export default Ember.Controller.extend({
     return generateRouteId(routeRequestMethod, routeSourcePath);
   }),
 
+  normalizedSourcePath: Ember.computed('routeSourcePath', function () {
+    const sourcePath = this.get('routeSourcePath').trim().replace(/\/+/g, '/');
+
+    const pathSegments = [];
+    for (const segment of sourcePath.split('/')) {
+      if (segment === '..') {
+        pathSegments.pop();
+      } else {
+        pathSegments.push(segment);
+      }
+    }
+
+    return pathSegments.join('/');
+  }),
+
+  sourcePathIsInvalid: Ember.computed('normalizedSourcePath', function () {
+    const path = this.get('normalizedSourcePath');
+
+    return path.startsWith('/latest') || path.startsWith('/admin');
+  }),
+
   init() {
     this._super();
 
-    this.set('routeRequestMethod', 'get');
     this.set('routesLoading', true);
     this.set('routes', []);
 
