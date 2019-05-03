@@ -88,7 +88,7 @@ class ProxyController < ApplicationController
       return nil
     end
 
-    target_url = route['targetURL']
+    target_url = route['targetUrl']
 
     segments_map.each do |segment_name, segment_value|
       target_url.sub!(segment_name, segment_value)

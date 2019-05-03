@@ -19,7 +19,7 @@ describe ProxyController do
     @test_route = {
       'id' => '1',
       'sourcePath' => '/test',
-      'targetURL' => 'http://localhost:8080/test',
+      'targetUrl' => 'http://localhost:8080/test',
       'requestMethod' => 'get',
       'segments' => []
     }
@@ -59,7 +59,7 @@ describe ProxyController do
     it 'responds with status code 403 when secret key is missing' do
       SiteSetting.disraptor_app_secret_key = ''
 
-      @test_route['targetURL'] = 'http://localhost:8080/test-no-secret-key'
+      @test_route['targetUrl'] = 'http://localhost:8080/test-no-secret-key'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
@@ -68,7 +68,7 @@ describe ProxyController do
       expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
     end
 
-    it 'responds with status code 500 when the targetURL cannot be resolved' do
+    it 'responds with status code 500 when the targetUrl cannot be resolved' do
       SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
@@ -77,10 +77,10 @@ describe ProxyController do
       expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
     end
 
-    it 'responds with status code 404 when targetURL produces a status code 404' do
+    it 'responds with status code 404 when targetUrl produces a status code 404' do
       SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
-      @test_route['targetURL'] = 'http://localhost:8080/test-404'
+      @test_route['targetUrl'] = 'http://localhost:8080/test-404'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
@@ -89,10 +89,10 @@ describe ProxyController do
       expect(::JSON.parse(response.body)).to eq({'failed' => 'FAILED'})
     end
 
-    it 'responds with status code 200 when targetURL produces a status code 200' do
+    it 'responds with status code 200 when targetUrl produces a status code 200' do
       SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
-      @test_route['targetURL'] = 'http://localhost:8080/test-200'
+      @test_route['targetUrl'] = 'http://localhost:8080/test-200'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }
@@ -101,10 +101,10 @@ describe ProxyController do
       expect(response.body).to eq('Actual content')
     end
 
-    it 'responds with status code 303 when targetURL produces a status code 303' do
+    it 'responds with status code 303 when targetUrl produces a status code 303' do
       SiteSetting.disraptor_app_secret_key = 'not-an-empty-string'
 
-      @test_route['targetURL'] = 'http://localhost:8080/test-303'
+      @test_route['targetUrl'] = 'http://localhost:8080/test-303'
       PluginStore.set(Disraptor::PLUGIN_NAME, 'routes', { '1' => @test_route })
 
       get '/test', headers: { 'X-Requested-With' => 'XMLHttpRequest' }

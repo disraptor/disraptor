@@ -15,7 +15,7 @@ describe Disraptor::Route do
         '1' => {
           'id' => '1',
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test',
+          'targetUrl' => 'http://localhost:8080/test',
           'requestMethod' => 'get',
           'segments' => []
         }
@@ -36,7 +36,7 @@ describe Disraptor::Route do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }
@@ -56,7 +56,7 @@ describe Disraptor::Route do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }
@@ -72,7 +72,7 @@ describe Disraptor::Route do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }
@@ -80,7 +80,7 @@ describe Disraptor::Route do
       route_edited = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/new-permalink',
+        'targetUrl' => 'http://localhost:8080/new-permalink',
         'requestMethod' => 'get',
         'segments' => []
       }
@@ -106,7 +106,7 @@ describe Disraptor::Route do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }

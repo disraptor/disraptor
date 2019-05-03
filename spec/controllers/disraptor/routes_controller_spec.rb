@@ -28,7 +28,7 @@ describe Disraptor::RoutesController do
         'route_id' => '1',
         'disraptor/route' => {
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test',
+          'targetUrl' => 'http://localhost:8080/test',
           'requestMethod' => 'get'
         },
         'segments' => []
@@ -39,7 +39,7 @@ describe Disraptor::RoutesController do
       response_payload = ::JSON.parse(response.body)['disraptor/route']
       expect(response_payload['id']).to eq('1')
       expect(response_payload['sourcePath']).to eq('/test')
-      expect(response_payload['targetURL']).to eq('http://localhost:8080/test')
+      expect(response_payload['targetUrl']).to eq('http://localhost:8080/test')
       expect(response_payload['requestMethod']).to eq('get')
 
       get :index
@@ -63,7 +63,7 @@ describe Disraptor::RoutesController do
         'route_id' => '1',
         'disraptor/route' => {
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test',
+          'targetUrl' => 'http://localhost:8080/test',
           'requestMethod' => 'get'
         },
         'segments' => []

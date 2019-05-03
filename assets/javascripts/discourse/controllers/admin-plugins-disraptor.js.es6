@@ -26,35 +26,36 @@ export default Ember.Controller.extend({
   requestMethods: ['get', 'head', 'post', 'put', 'delete', 'options', 'trace'],
   routeRequestMethod: 'get',
   routeSourcePath: '',
+  routeTargetUrl: '',
   routeCreatedMessage: '',
 
-  routeId: Ember.computed('routeSourcePath', 'routeRequestMethod', function () {
-    // Hash the source path (e.g. /example) to obtain a number that can be
-    // used as an ID for the store. This intentionally creates a conflict when
-    // attemtping to create a route for the same path twice.
-    const routeSourcePath = this.get('routeSourcePath');
-    const routeRequestMethod = this.get('routeRequestMethod');
-
-    if (routeRequestMethod === undefined || routeSourcePath === undefined) {
-      return null;
-    }
-
-    return generateRouteId(routeRequestMethod, routeSourcePath);
+  normalizedRequestMethod: Ember.computed('routeRequestMethod', function () {
+    return this.get('routeRequestMethod').trim().toLowerCase();
   }),
 
   normalizedSourcePath: Ember.computed('routeSourcePath', function () {
-    const sourcePath = this.get('routeSourcePath').trim().replace(/\/+/g, '/');
+    return this.normalizePath(this.get('routeSourcePath').trim());
+  }),
 
-    const pathSegments = [];
-    for (const segment of sourcePath.split('/')) {
-      if (segment === '..') {
-        pathSegments.pop();
-      } else {
-        pathSegments.push(segment);
-      }
+  normalizedTargetUrl: Ember.computed('routeTargetUrl', function () {
+    const targetUrl = this.get('routeTargetUrl').trim();
+
+    try {
+      const url = new URL(targetUrl);
+      return url.href + (url.pathname.endsWith('/') ? '' : '/');
+    } catch (_) {
+      return '';
     }
+  }),
 
-    return pathSegments.join('/');
+  routeId: Ember.computed('normalizedRequestMethod', 'normalizedSourcePath', function () {
+    // Hash the source path (e.g. /example) to obtain a number that can be
+    // used as an ID for the store. This intentionally creates a conflict when
+    // attemtping to create a route for the same path twice.
+    const requestMethod = this.get('normalizedRequestMethod');
+    const sourcePath = this.get('normalizedSourcePath');
+
+    return generateRouteId(requestMethod, sourcePath);
   }),
 
   sourcePathIsInvalid: Ember.computed('normalizedSourcePath', function () {
@@ -62,6 +63,25 @@ export default Ember.Controller.extend({
 
     return path.startsWith('/latest') || path.startsWith('/admin');
   }),
+
+  normalizePath(path) {
+    const sourcePath = path.replace(/\/+/g, '/');
+
+    const pathSegments = [];
+    for (const segment of sourcePath.split('/')) {
+      if (segment === '..') {
+        pathSegments.pop();
+      } else if (segment !== '') {
+        pathSegments.push(segment);
+      }
+    }
+
+    if (pathSegments.length === 0) {
+      return '/';
+    }
+
+    return '/' + pathSegments.join('/').replace(/\/$/, '');
+  },
 
   init() {
     this._super();
@@ -113,22 +133,15 @@ export default Ember.Controller.extend({
      * necessary as we need to be able to identify routes by a common property.
      *
      * [1]: https://meta.discourse.org/t/upgrading-our-front-end-models-to-use-a-store/27837
-     *
-     * @param {String} sourcePath The source path of the route (e.g. `/test`)
-     * @param {String} targetURL The target URL of the route (e.g. `http://127.0.0.1:8080/test`)
-     * @param {'GET'|'POST'} requestMethod
      */
-    createRoute(sourcePath, targetURL, requestMethod) {
+    createRoute() {
       const id = this.get('routeId');
-      if (id === null) {
-        return;
-      }
-
-      sourcePath = sourcePath.trim();
-      targetURL = targetURL.trim();
+      const sourcePath = this.get('normalizedSourcePath');
+      const targetUrl = this.get('normalizedTargetUrl');
+      const requestMethod = this.get('normalizedRequestMethod');
 
       this.store
-        .createRecord(this.endPoint, { id, sourcePath, targetURL, requestMethod })
+        .createRecord(this.endPoint, { id, sourcePath, targetUrl, requestMethod })
         .save()
         .then(result => {
           this.addRoute({
@@ -137,7 +150,7 @@ export default Ember.Controller.extend({
             isBeingEdited: false
           });
 
-          const successMessage = `Saved route: ${result.payload.sourcePath} → ${result.payload.targetURL}`;
+          const successMessage = `Saved route: ${result.payload.sourcePath} → ${result.payload.targetUrl}`;
           this.set('routeCreatedMessage', successMessage);
         })
         .catch(popupAjaxError)
@@ -154,7 +167,7 @@ export default Ember.Controller.extend({
     updateRouteRecord(routeRecord) {
       const recordProperties = {
         sourcePath: routeRecord.sourcePath,
-        targetURL: routeRecord.targetURL,
+        targetUrl: routeRecord.targetUrl,
         requestMethod: routeRecord.requestMethod
       };
 
@@ -167,7 +180,7 @@ export default Ember.Controller.extend({
             isBeingEdited: false
           });
 
-          console.log('Updated route', result.payload.sourcePath, '→', result.payload.targetURL);
+          console.log('Updated route', result.payload.sourcePath, '→', result.payload.targetUrl);
         })
         .catch(error => {
           console.error('Failed to update route:', error);

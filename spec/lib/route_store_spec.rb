@@ -15,7 +15,7 @@ describe Disraptor::RouteStore do
         '1' => {
           'id' => '1',
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test',
+          'targetUrl' => 'http://localhost:8080/test',
           'requestMethod' => 'get',
           'segments' => []
         }
@@ -36,7 +36,7 @@ describe Disraptor::RouteStore do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }
@@ -61,7 +61,7 @@ describe Disraptor::RouteStore do
         '1' => {
           'id' => '1',
           'sourcePath' => '/test',
-          'targetURL' => 'http://localhost:8080/test',
+          'targetUrl' => 'http://localhost:8080/test',
           'requestMethod' => 'get',
           'segments' => []
         }
@@ -78,7 +78,7 @@ describe Disraptor::RouteStore do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }
@@ -100,7 +100,7 @@ describe Disraptor::RouteStore do
       route = {
         'id' => '1',
         'sourcePath' => '/test',
-        'targetURL' => 'http://localhost:8080/test',
+        'targetUrl' => 'http://localhost:8080/test',
         'requestMethod' => 'get',
         'segments' => []
       }

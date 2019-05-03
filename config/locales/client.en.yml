@@ -13,10 +13,12 @@ en:
           placeholder: '/disraptor'
           description: 'The source path that, when it gets requested, will be forwarded to the target URL.'
           invalid: 'The source path must not start with either “/latest” or “/admin”.'
+          normalized: 'Normalized path:'
         target_url:
           label: 'Target URL'
           placeholder: 'http://127.0.0.1:8080/'
           description: 'The URL from your web application you want to expose via the source path.'
+          normalized: 'Normalized URL:'
         submit_button:
           label: 'Create'
 
@@ -28,6 +30,8 @@ en:
           route: 'Route'
           request_method: 'Method'
           manage: 'Manage'
+          from: 'From:'
+          to: 'To:'
 
       manage_routes:
         edit: 'Edit'

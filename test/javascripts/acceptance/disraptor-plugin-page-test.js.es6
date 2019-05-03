@@ -12,7 +12,7 @@ acceptance('Disraptor’s plugin page works', {
           {
             'id': '3180226165',
             'sourcePath': '/test',
-            'targetURL': targetHost,
+            'targetUrl': targetHost,
             'requestMethod': 'get'
           }
         ]
@@ -39,7 +39,7 @@ QUnit.test('Creating a route', async assert => {
         disraptor_route: {
           'id': '4096153253',
           'sourcePath': '/test2',
-          'targetURL': `${targetHost}test2`,
+          'targetUrl': `${targetHost}test2`,
           'requestMethod': 'get'
         }
       }

@@ -42,7 +42,7 @@ class Disraptor::RoutesController < ApplicationController
     route_id = params.require(:route_id)
     payload = params.require('disraptor/route')
     source_path = normalize_path(payload['sourcePath'])
-    target_url = normalize_uri(payload['targetURL'])
+    target_url = normalize_uri(payload['targetUrl'])
     request_method = normalize_request_method(payload['requestMethod'])
 
     if !@@allowed_methods.include?(request_method)

@@ -2,7 +2,7 @@
 
 <h3>{{ i18n "disraptor.new_route.title" }}</h3>
 
-<form {{ action "createRoute" routeSourcePath routeTargetURL routeRequestMethod on="submit" }}>
+<form {{ action "createRoute" on="submit" }}>
 
   {{#d-section class="form-horizontal settings"}}
     <div class="row setting">
@@ -33,7 +33,8 @@
         {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.new_route.source_path.placeholder") pattern="^\/(?!(admin|latest)).*" type="text" class="input-setting-string" }}
 
         <div>
-          Normalized path:
+          {{ i18n "disraptor.new_route.source_path.normalized" }}
+
           {{#if normalizedSourcePath}}
             {{ normalizedSourcePath }}
           {{else}}
@@ -61,7 +62,18 @@
       </div>
 
       <div class="setting-value">
-        {{ input id="route-target-url" value=routeTargetURL placeholder=(i18n "disraptor.new_route.target_url.placeholder") type="url" class="input-setting-string" }}
+        {{ input id="route-target-url" value=routeTargetUrl placeholder=(i18n "disraptor.new_route.target_url.placeholder") type="url" class="input-setting-string" }}
+
+        <div>
+          {{ i18n "disraptor.new_route.target_url.normalized" }}
+
+          {{#if normalizedTargetUrl}}
+            {{ normalizedTargetUrl }}
+          {{else}}
+            —
+          {{/if}}
+        </div>
+
         <div class="desc">
           {{ i18n "disraptor.new_route.target_url.description" }}
         </div>
@@ -96,17 +108,17 @@
       {{#each routes as |route|}}
         <tr data-route-id="{{ route.record.id }}">
           <td>
-            From:
+            {{ i18n "disraptor.route_list.table.from" }}
             {{ route.record.sourcePath }}
 
             <br>
 
-            To:
+            {{ i18n "disraptor.route_list.table.to" }}
 
             {{#if route.isBeingEdited}}
-              {{ input value=route.record.targetURL placeholder=(i18n "disraptor.new_route.target_url.placeholder") type="url" required=true }}
+              {{ input value=route.record.targetUrl placeholder=(i18n "disraptor.new_route.target_url.placeholder") type="url" required=true }}
             {{else}}
-              {{ route.record.targetURL }}
+              {{ route.record.targetUrl }}
             {{/if}}
           </td>
 
