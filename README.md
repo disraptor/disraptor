@@ -81,7 +81,7 @@ Any Disraptor application is subject to a set of limitations that are necessary 
 
 ### Introduction
 
-The plugin does two things. *One*, it allows an administrator of a Discourse forum to configure routes from the Discourse instance to your web application. *Two*, it hooks into Discourse’s routing mechanism and redirects all requests to the configured source paths to their target URLs. Disraptor will render documents obtain with such a redirection inside the Discourse instance. In other words, Disraptor effectively turns Discourse in a reverse proxy for your web application.
+The plugin does two things. *One*, it allows an administrator of a Discourse forum to configure routes from the Discourse instance to your web application. *Two*, it hooks into Discourse’s routing mechanism and redirects all requests to the configured source paths to their target URLs. Disraptor will render documents obtained with such a redirection inside the Discourse instance. In other words, Disraptor effectively turns Discourse into a reverse proxy for your web application.
 
 Here are a few examples of possible route configurations:
 
@@ -95,7 +95,7 @@ Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path
 
 ### Authentication
 
-Your web application can make use of Discourse’s own authentication infrastructure. If a user is logged in via Discourse, Disraptor sends a `X-Disraptor-User` header with their user name to your web application. Similarly, the `X-Disraptor-Groups` header contains a list of associated groups. For now, only groups with the prefix `disraptor` are sent.
+Your web application can make use of Discourse’s own authentication infrastructure. If a user is logged in via Discourse, Disraptor sends an `X-Disraptor-User` header with their user name to your web application. Similarly, the `X-Disraptor-Groups` header contains a list of associated groups. For now, only groups with the prefix `disraptor` are sent.
 
 Since Disraptor will only populate these header fields if there is any information to send, you can use the presence of the `X-Disraptor-User` header as the signal that the user is logged in.
 
@@ -105,7 +105,7 @@ Note that Disraptor will also allow authentication via POST requests. Any respon
 
 ### App secret key
 
-Disraptor requires a secret key in order to communicate with your web application. In essence, the secret key is really just a signal that *allows the Discourse instance to send requests to your web application*. Without it, Disraptor will not send requests to your web application. If set up, Disraptor will always send a `X-Disraptor-App-Secret-Key` header with its requests to your web application. **Your web application has to evaluate whether the secret key is correct**.
+Disraptor requires a secret key in order to communicate with your web application. In essence, the secret key is really just a signal that *allows the Discourse instance to send requests to your web application*. Without it, Disraptor will not send requests to your web application. If set it up, Disraptor will always send an `X-Disraptor-App-Secret-Key` header with its requests to your web application. **Your web application has to evaluate whether the secret key is correct**.
 
 
 
@@ -121,20 +121,20 @@ The legacy mode parses your web application’s HTML and injects the contents of
 
 The experimental shadow DOM mode parses the HTML and hooks it into the host document as a shadow tree.
 
-This way, no `head` content needs to be transferred to the host document manually. Also, style isolation between Discourse and Disraptor documents is achieved without the need for prefixing, etc.
+This way, no `head` content needs to be transferred to the host document. Also, style isolation between Discourse and Disraptor documents is achieved without the need for prefixing, etc.
 
 Known issues with the shadow DOM mode:
 
 - [Shadow tree navigation doesn’t go through Ember router](https://meta.discourse.org/t/shadow-tree-navigation-doesn-t-go-through-ember-router/103712): Fixed in the plugin; can be fixed in Discourse.
 - Unstyled document: Occasionally, a document will appear completely unstyled in Firefox until the user opens or closes the developer tools. That’s potentially a browser bug in Firefox.
-- @font-face issue: Loading fonts with the CSS `@font-face` at rule doesn’t work when the rule is inside the shadow DOM. This should be evaluated again in the future.
+- @font-face issue: Loading fonts with the CSS `@font-face` rule doesn’t work when the rule is inside the shadow DOM. This should be evaluated again in the future.
 
 
 
 
 ## To do
 
-- Change semantic of routes to have “targetDomain” and “URL path” instead of “source path” and “target URL”:
+- Change semantics of routes to have “targetDomain” and “URL path” instead of “source path” and “target URL”:
 
   ```
   http://localhost:8080 + /tira9-client-web
