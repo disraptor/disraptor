@@ -7,7 +7,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 ## Content
 
 - [Development](#development)
-  - [Start Discourse](#start-discourse)
+  - [Setup Discourse & Disraptor](setup-discourse--disraptor)
   - [Tests](#tests)
 - [Production](#production)
   - [Getting started](#getting-started)
@@ -24,9 +24,9 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 ### Setup Discourse & Disraptor
 
-[Setup a Discourse development environment (Ubuntu)](docs/setup-a-discourse-development-environment-ubuntu.md)
+To develop your web application with Disraptor, [setup a Discourse development environment (Ubuntu)](docs/setup-a-discourse-development-environment-ubuntu.md) first.
 
-### Start Discourse in development mode
+After this is done, you can start Discourse in development mode:
 
 ```sh
 cd discourse
@@ -57,13 +57,13 @@ bundle exec rake plugin:spec["disraptor"]
 
 ## Production
 
-[Deploy Discourse with Disraptor](docs/deploy-discourse-with-disraptor.md)
+First, you have to [deploy Discourse with Disraptor](docs/deploy-discourse-with-disraptor.md).
 
 
 
 ### Getting started
 
-After deploying Discourse and installing the Disraptor plugin, the following steps need to be performed for Disraptor to operate reliably:
+Next, after deploying Discourse and installing the Disraptor plugin, the following steps need to be performed for Disraptor to operate reliably:
 
 1. Open Discourse’s settings and configure the value for “disraptor app secret key”.
 
