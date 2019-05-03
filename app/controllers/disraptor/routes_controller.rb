@@ -1,6 +1,11 @@
+require 'pathname'
+require 'uri'
+
 # Controller for handling all requests regarding the configuration of Disraptor routes.
 class Disraptor::RoutesController < ApplicationController
   before_action :check_if_disraptor_enabled
+
+  @@allowed_methods = ['get', 'head', 'post', 'put', 'delete', 'options', 'trace']
 
   # Corresponds to requests in the form
   # GET /disraptor/routes
@@ -36,12 +41,19 @@ class Disraptor::RoutesController < ApplicationController
 
     route_id = params.require(:route_id)
     payload = params.require('disraptor/route')
-    source_path = payload['sourcePath']
-    target_url = payload['targetURL']
-    request_method = payload['requestMethod']
+    source_path = normalize_path(payload['sourcePath'])
+    target_url = normalize_uri(payload['targetURL'])
+    request_method = normalize_request_method(payload['requestMethod'])
+
+    if !@@allowed_methods.include?(request_method)
+      error_message = "Route request method was #{request_method} but expected one of these: #{@@allowed_methods.join(', ')}."
+      Rails.logger.error('❌ Disraptor: Error: ' + error_message)
+
+      return render json: { error: error_message }, status: 400
+    end
 
     if source_path != '/' and source_path.end_with?('/')
-      error_message = 'A route’s source path must not end in a slash.'
+      error_message = "Route source path was #{source_path} but it must not end in a slash."
       Rails.logger.error('❌ Disraptor: Error: ' + error_message)
 
       return render json: { error: error_message }, status: 400
@@ -74,5 +86,20 @@ class Disraptor::RoutesController < ApplicationController
     unless SiteSetting.disraptor_enabled
       raise I18n.t('disraptor.errors.not_enabled')
     end
+  end
+
+  def normalize_uri(uri_string)
+    uri = URI(uri_string)
+    uri.path = normalize_path(uri.path)
+
+    return uri.normalize.to_s
+  end
+
+  def normalize_path(path)
+    return Pathname.new(path).cleanpath.to_s
+  end
+
+  def normalize_request_method(request_method)
+    return request_method.downcase
   end
 end

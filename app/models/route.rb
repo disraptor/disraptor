@@ -70,7 +70,7 @@ class Disraptor::Route
         'id' => route_id,
         'sourcePath' => source_path,
         'targetURL' => target_url,
-        'requestMethod' => request_method.downcase.to_sym,
+        'requestMethod' => request_method.to_sym,
         'segments' => get_special_path_segments(source_path)
       }
 
