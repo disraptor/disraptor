@@ -6,7 +6,7 @@ This document describes how to deploy Discourse with Disraptor. You will need ro
 
 
 
-## Prerequesites
+## Prerequisites
 
 1. Get the following things ready:
 
