@@ -24,7 +24,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 
 ### Setup Discourse & Disraptor
 
-To develop your web application with Disraptor, [setup a Discourse development environment (Ubuntu)](docs/setup-a-discourse-development-environment-ubuntu.md) first.
+To develop your web application with Disraptor, [setup a Discourse development environment (Ubuntu)](https://www.disraptor.org/docs/setup-a-discourse-development-environment-ubuntu.html) first.
 
 After this is done, you can start Discourse in development mode:
 
@@ -57,7 +57,7 @@ bundle exec rake plugin:spec["disraptor"]
 
 ## Production
 
-First, you have to [deploy Discourse with Disraptor](docs/deploy-discourse-with-disraptor.md).
+First, you have to [deploy Discourse with Disraptor](https://www.disraptor.org/docs/deploy-discourse-with-disraptor.html).
 
 
 
@@ -85,9 +85,9 @@ The plugin does two things. *One*, it allows an administrator of a Discourse for
 
 Here are a few examples of possible route configurations:
 
-- `/` → `http://192.168.1.1/`
-- `/tasks` → `http://192.168.1.1/tasks/`
-- `/static/*wildcard` → `http://192.168.1.1/static/*wildcard`
+- `/` → `http://example.org/`
+- `/tasks` → `http://example.org/tasks/`
+- `/static/*wildcard` → `http://example.org/static/*wildcard`
 
 Disraptor uses Rails’ route syntax; thus, it’s possible to use [dynamic path segments](https://guides.rubyonrails.org/routing.html#dynamic-segments) and [wildcard path segments](https://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments) when setting up routes as shown in the third route configuration.
 
@@ -137,13 +137,13 @@ Known issues with the shadow DOM mode:
 - Change semantics of routes to have “targetDomain” and “URL path” instead of “source path” and “target URL”:
 
   ```
-  http://localhost:8080 + /tira9-client-web
+  http://example.org + /tira9-client-web
   ```
 
   instead of
 
   ```
-  /tira9-client-web + http://localhost:8080/tira9-client-web
+  /tira9-client-web + http://example.org/tira9-client-web
   ```
 
 - Add user-specific meta data (needs clear specification and use cases → meeting)
