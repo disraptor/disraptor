@@ -42,7 +42,7 @@ export default Ember.Controller.extend({
 
     try {
       const url = new URL(targetUrl);
-      return url.href + (url.pathname.endsWith('/') ? '' : '/');
+      return url.href;
     } catch (_) {
       return '';
     }

@@ -96,7 +96,13 @@ class Disraptor::RoutesController < ApplicationController
   end
 
   def normalize_path(path)
-    return Pathname.new(path).cleanpath.to_s
+    normalized_path = Pathname.new(path).cleanpath.to_s
+
+    if path.end_with?('/') && !normalized_path.end_with?('/')
+      normalized_path += '/'
+    end
+
+    return normalized_path
   end
 
   def normalize_request_method(request_method)
