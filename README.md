@@ -35,6 +35,15 @@ cd discourse
 RAILS_ENV=development bundle exec rails server
 ```
 
+### Update Discourse
+
+```sh
+cd discourse
+git pull
+bundle install
+RAILS_ENV=development bundle exec rake db:migrate
+```
+
 ### Tests
 
 #### Frontend tests
