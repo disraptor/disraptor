@@ -9,6 +9,7 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
 - [Documentation](#documentation)
 - [Development](#development)
   - [Setup Discourse & Disraptor](setup-discourse--disraptor)
+  - [Update Discourse](#update-discourse)
   - [Tests](#tests)
 - [To do](#to-do)
 
