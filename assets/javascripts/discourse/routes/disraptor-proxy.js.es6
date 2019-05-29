@@ -108,6 +108,8 @@ export default Discourse.Route.extend({
             form.addEventListener('submit', performPostRequest.bind(this));
           }
         });
+
+        this.hijackLatestLinks();
       });
     }
   },
@@ -132,6 +134,31 @@ export default Discourse.Route.extend({
         });
       }
     }
+  },
+
+  /**
+   * This is a hack to workaround issue https://github.com/disraptor/disraptor/issues/3.
+   */
+  hijackLatestLinks() {
+    document.querySelectorAll('a[href="/latest"]').forEach(link => {
+      link.addEventListener('click', () => {
+        this.transitionTo('discovery.latest');
+      });
+    });
+
+    const hamburgerMenuToggle = document.getElementById('toggle-hamburger-menu');
+    hamburgerMenuToggle.addEventListener('click', () => {
+      setTimeout(() => {
+        const hamburgerMenu = document.querySelector('.hamburger-panel');
+        const forumLinks = hamburgerMenu.querySelectorAll('a[href="/latest"]');
+        forumLinks.forEach(link => {
+          link.addEventListener('click', () => {
+            history.pushState(null, document.title, '/latest');
+            this.transitionTo('discovery.latest');
+          });
+        });
+      }, 50);
+    });
   },
 
   /**
