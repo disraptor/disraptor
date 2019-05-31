@@ -12,7 +12,8 @@ export default Discourse.Route.extend({
   beforeModel(transition) {
     if (transition.intent.url === this.defaultHomePath) {
       if (window.location.pathname === this.defaultHomePath) {
-        // This ensures that the Discourse forum is available when the user requests `/latest`.
+        // This ensures that the Discourse forum is available when the user requests the default
+        // homepage.
         this.transitionTo(this.defaultHomeRoute);
       } else {
         /*
@@ -113,7 +114,7 @@ export default Discourse.Route.extend({
           }
         });
 
-        this.hijackLatestLinks();
+        this.hijackHomepageLinks();
       });
     }
   },
@@ -143,10 +144,10 @@ export default Discourse.Route.extend({
   /**
    * This is a hack to workaround issue https://github.com/disraptor/disraptor/issues/3.
    */
-  hijackLatestLinks() {
-    document.querySelectorAll('a[href="/latest"]').forEach(link => {
+  hijackHomepageLinks() {
+    document.querySelectorAll(`a[href="${this.defaultHomePath}"]`).forEach(link => {
       link.addEventListener('click', () => {
-        this.transitionTo('discovery.latest');
+        this.transitionTo(this.defaultHomeRoute);
       });
     });
 
@@ -159,11 +160,11 @@ export default Discourse.Route.extend({
           return;
         }
 
-        const forumLinks = hamburgerMenu.querySelectorAll('a[href="/latest"]');
+        const forumLinks = hamburgerMenu.querySelectorAll(`a[href="${this.defaultHomePath}"]`);
         forumLinks.forEach(link => {
           link.addEventListener('click', () => {
-            history.pushState(null, document.title, '/latest');
-            this.transitionTo('discovery.latest');
+            history.pushState(null, document.title, this.defaultHomePath);
+            this.transitionTo(this.defaultHomeRoute);
           });
         });
       }, 50);
