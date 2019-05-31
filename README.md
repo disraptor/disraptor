@@ -71,7 +71,6 @@ bundle exec rake plugin:spec["disraptor"]
 
 - Test whether a Disraptor user can override Discourse routes such as `/admin` or `/latest` if the client-side code doesn’t block it.
 - Document how a Disraptor user can see a list of Discourse routes.
-- Investigate how to add a new main navigation item to Discourse’s top bar.
 - Change semantics of routes to have “targetDomain” and “URL path” instead of “source path” and “target URL”:
 
   ```
