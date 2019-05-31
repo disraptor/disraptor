@@ -150,6 +150,11 @@ export default Discourse.Route.extend({
     hamburgerMenuToggle.addEventListener('click', () => {
       setTimeout(() => {
         const hamburgerMenu = document.querySelector('.hamburger-panel');
+
+        if (hamburgerMenu === null) {
+          return;
+        }
+
         const forumLinks = hamburgerMenu.querySelectorAll('a[href="/latest"]');
         forumLinks.forEach(link => {
           link.addEventListener('click', () => {
