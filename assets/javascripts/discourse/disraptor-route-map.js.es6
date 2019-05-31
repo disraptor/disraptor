@@ -1,3 +1,5 @@
+import { defaultHomepage } from 'discourse/lib/utilities';
+
 /**
  * Maps all paths to Disraptor’s proxy route. This route map targets two routes which both export
  * the implementation of the actual route.
@@ -21,7 +23,8 @@ export default function () {
   https://meta.discourse.org/t/plugin-route-map-loaded-even-when-it-s-disabled/114725
   */
   if (this.site.siteSettings['disraptor_enabled']) {
-    this.route('disraptor-proxy.latest', { path: '/latest' });
+    const defaultHomeRoute = `/${defaultHomepage()}`;
+    this.route('disraptor-proxy.homepage', { path: defaultHomeRoute });
     this.route('disraptor-proxy.single-segment', { path: '/:path' });
     this.route('disraptor-proxy.multi-segment', { path: '/:path/*wildcard' });
   }

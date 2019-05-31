@@ -30,7 +30,7 @@
       </div>
 
       <div class="setting-value">
-        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.new_route.source_path.placeholder") pattern="^\/(?!(admin|latest)).*" type="text" class="input-setting-string" }}
+        {{ input id="route-source-path" value=routeSourcePath placeholder=(i18n "disraptor.new_route.source_path.placeholder") pattern="^\/(?!(admin|latest|new|unread|top|categories)).*" type="text" class="input-setting-string" }}
 
         <div>
           {{ i18n "disraptor.new_route.source_path.normalized" }}
@@ -43,7 +43,7 @@
         </div>
 
         {{#if sourcePathIsInvalid}}
-          {{setting-validation-message message=(i18n "disraptor.new_route.source_path.invalid")}}
+          {{setting-validation-message message=sourcePathInvalidMessage}}
         {{/if}}
 
         <div class="desc">

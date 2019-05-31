@@ -1,15 +1,19 @@
 import DiscourseURL from 'discourse/lib/url';
+import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
 
 /**
  * This is the “disraptor-proxy” route.
  */
 export default Discourse.Route.extend({
+  defaultHomePath: `/${defaultHomepage()}`,
+  defaultHomeRoute: `discovery.${defaultHomepage()}`,
+
   beforeModel(transition) {
-    if (transition.intent.url === '/latest') {
-      if (window.location.pathname === '/latest') {
+    if (transition.intent.url === this.defaultHomePath) {
+      if (window.location.pathname === this.defaultHomePath) {
         // This ensures that the Discourse forum is available when the user requests `/latest`.
-        this.transitionTo('discovery.latest');
+        this.transitionTo(this.defaultHomeRoute);
       } else {
         /*
         We want to continue serving Discourse’s home page *if* there is no root route configured
@@ -26,7 +30,7 @@ export default Discourse.Route.extend({
           })
           .catch(error => {
             if (error.jqXHR.status === 404) {
-              this.transitionTo('discovery.latest');
+              this.transitionTo(this.defaultHomeRoute);
             }
           });
       }
@@ -43,7 +47,7 @@ export default Discourse.Route.extend({
    * @returns {any | Promise<any>}
    */
   model(params, transition) {
-    const proxyUrl = transition.intent.url === '/latest' ? '/' : transition.intent.url;
+    const proxyUrl = transition.intent.url === this.defaultHomePath ? '/' : transition.intent.url;
     return fetch(proxyUrl)
       .then(response => {
         if (!response.ok) {

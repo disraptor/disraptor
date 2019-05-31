@@ -61,7 +61,17 @@ export default Ember.Controller.extend({
   sourcePathIsInvalid: Ember.computed('normalizedSourcePath', function () {
     const path = this.get('normalizedSourcePath');
 
-    return path.startsWith('/latest') || path.startsWith('/admin');
+    if (path.startsWith('/admin')) {
+      return true;
+    }
+
+    for (const homePagePath of this.siteSettings.top_menu.split('|')) {
+      if (path.startsWith(`/${homePagePath}`)) {
+        return true;
+      }
+    }
+
+    return false;
   }),
 
   normalizePath(path) {
@@ -88,6 +98,10 @@ export default Ember.Controller.extend({
 
     this.set('routesLoading', true);
     this.set('routes', []);
+
+    const sourcePathInvalidStart = I18n.t('disraptor.new_route.source_path.invalid')
+    const sourcePathInvalidEnd = this.siteSettings.top_menu.split('|').join(', ') + ', or admin.'
+    this.set('sourcePathInvalidMessage', `${sourcePathInvalidStart} ${sourcePathInvalidEnd}`)
 
     // Populates the list of active routes
     this.store.findAll(this.endPoint)

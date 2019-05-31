@@ -12,7 +12,7 @@ en:
           label: 'Source path'
           placeholder: '/disraptor'
           description: 'The source path that, when it gets requested, will be forwarded to the target URL.'
-          invalid: 'The source path must not start with either “/latest” or “/admin”.'
+          invalid: 'The source path must not start with one of the following:'
           normalized: 'Normalized path:'
         target_url:
           label: 'Target URL'
