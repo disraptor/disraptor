@@ -24,16 +24,6 @@ class Disraptor::Route
         return
       end
 
-      existing_source_path = Discourse::Application.routes.routes.find do |route|
-        route.ast.to_s.start_with?(source_path)
-      end
-
-      if existing_source_path
-        Rails.logger.warn(
-          "⚠ Careful! The route’s '#{source_path}' might interfer with the route for '#{existing_source_path}'."
-        )
-      end
-
       route = create_route_object(route_id, source_path, target_url, request_method)
 
       Disraptor::RouteStore.add_route(route_id, route)
