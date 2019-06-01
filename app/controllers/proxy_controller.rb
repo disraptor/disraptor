@@ -23,6 +23,7 @@ class ProxyController < ApplicationController
     Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
 
     proxy_response = send_proxy_request(request, target_url)
+    response.set_header('X-Disraptor-Proxy', 'yes')
 
     case proxy_response.code
     when '200'
@@ -41,6 +42,7 @@ class ProxyController < ApplicationController
       end
     when '404'
       Rails.logger.info('👻 Disraptor: Status code 404.')
+      Rails.logger.error("❌ Disraptor: #{proxy_response}")
     else
       Rails.logger.warn("❌ Disraptor: Warning: Unhandled status code '#{proxy_response.code}'")
     end
