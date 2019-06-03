@@ -21,6 +21,9 @@ export default function () {
   This check to see whether the plugin is enabled might not be necessary in the future.
   For any updates on this, check:
   https://meta.discourse.org/t/plugin-route-map-loaded-even-when-it-s-disabled/114725
+
+  In particular, the following PR needs to be merged (scheduled for Discourse 2.4):
+  https://github.com/discourse/discourse/pull/7566
   */
   if (this.site.siteSettings['disraptor_enabled']) {
     const defaultHomeRoute = `/${defaultHomepage()}`;

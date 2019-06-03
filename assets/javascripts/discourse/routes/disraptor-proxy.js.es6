@@ -142,15 +142,26 @@ export default Discourse.Route.extend({
   },
 
   /**
-   * This is a hack to workaround issue https://github.com/disraptor/disraptor/issues/3.
+   * This is a hack to work around a conflict between Discourse and Disraptor.
+   *
+   * Disraptor wants to hijack the root route for its own purposes without affecting the forum
+   * routes (like /latest, /top, etc.). Due to the way Discourse’s client-side code treats these
+   * routes, navigating between a Disraptor root route and these forum routes becomes a no-op.
+   * This piece of code tries to hijack these links in order to attach an event handler that forces
+   * a navigation anyway.
+   *
+   * More details: https://github.com/disraptor/disraptor/issues/3.
    */
   hijackHomepageLinks() {
+    // Hijacks all links to the default homepage that are already rendered.
     document.querySelectorAll(`a[href="${this.defaultHomePath}"]`).forEach(link => {
       link.addEventListener('click', () => {
         this.transitionTo(this.defaultHomeRoute);
       });
     });
 
+    // Hijacks all links to the default homepage within Discourse’s hamburger menu once it has been
+    // opened. Only when the toggle is activated will the actual menu be rendered.
     const hamburgerMenuToggle = document.getElementById('toggle-hamburger-menu');
     hamburgerMenuToggle.addEventListener('click', () => {
       setTimeout(() => {
@@ -160,8 +171,8 @@ export default Discourse.Route.extend({
           return;
         }
 
-        const forumLinks = hamburgerMenu.querySelectorAll(`a[href="${this.defaultHomePath}"]`);
-        forumLinks.forEach(link => {
+        const homePathLinks = hamburgerMenu.querySelectorAll(`a[href="${this.defaultHomePath}"]`);
+        homePathLinks.forEach(link => {
           link.addEventListener('click', () => {
             history.pushState(null, document.title, this.defaultHomePath);
             this.transitionTo(this.defaultHomeRoute);
