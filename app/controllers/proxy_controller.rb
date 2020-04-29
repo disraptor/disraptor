@@ -23,6 +23,7 @@ class ProxyController < ApplicationController
     Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
 
     proxy_response = send_proxy_request(request, target_url)
+    Rails.logger.info("Disraptor: Status Code: '#{proxy_response.code}'")
     response.set_header('X-Disraptor-Proxy', 'yes')
 
     case proxy_response.code
@@ -107,9 +108,10 @@ class ProxyController < ApplicationController
   def send_proxy_request(request, target_url)
     target_url = URI.parse(target_url)
 
+    use_ssl = (target_url.scheme == "https")
     proxy_request = build_proxy_request(request, target_url.to_s)
 
-    return Net::HTTP.start(target_url.host, target_url.port) { |http| http.request(proxy_request) }
+    return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl) { |http| http.request(proxy_request) }
   end
 
   # Constructs a new request object to the +target_url+ based on the incoming +request+’s method.
