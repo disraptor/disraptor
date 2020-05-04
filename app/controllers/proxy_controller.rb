@@ -23,7 +23,6 @@ class ProxyController < ApplicationController
     Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
 
     proxy_response = send_proxy_request(request, target_url)
-    Rails.logger.info("Disraptor: Status Code: '#{proxy_response.code}'")
     response.set_header('X-Disraptor-Proxy', 'yes')
 
     case proxy_response.code
@@ -68,6 +67,7 @@ class ProxyController < ApplicationController
     source_path = request_path
     segments_map = {}
 
+    Rails.logger.info("Disraptor: '#{params}'")
     # Construct the source path for lookup
     if params[:segments].kind_of?(Array)
       params[:segments].each do |segment|
@@ -108,7 +108,7 @@ class ProxyController < ApplicationController
   def send_proxy_request(request, target_url)
     target_url = URI.parse(target_url)
 
-    use_ssl = (target_url.scheme == "https")
+    use_ssl = (target_url.scheme == 'https')
     proxy_request = build_proxy_request(request, target_url.to_s)
 
     return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl) { |http| http.request(proxy_request) }
@@ -131,6 +131,8 @@ class ProxyController < ApplicationController
     end
 
     proxy_headers = set_disraptor_headers(proxy_headers)
+
+    Rails.logger.info("Disraptor proxy_headers: '#{proxy_headers}'")
 
     case request.method
     when 'GET'
