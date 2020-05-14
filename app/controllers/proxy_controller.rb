@@ -67,7 +67,6 @@ class ProxyController < ApplicationController
     source_path = request_path
     segments_map = {}
 
-    Rails.logger.info("Disraptor: '#{params}'")
     # Construct the source path for lookup
     if params[:segments].kind_of?(Array)
       params[:segments].each do |segment|
@@ -131,8 +130,6 @@ class ProxyController < ApplicationController
     end
 
     proxy_headers = set_disraptor_headers(proxy_headers)
-
-    Rails.logger.info("Disraptor proxy_headers: '#{proxy_headers}'")
 
     case request.method
     when 'GET'
