@@ -84,3 +84,7 @@ bundle exec rake plugin:spec["disraptor"]
   ```
 
 - Add user-specific meta data (needs clear specification and use cases → meeting)
+
+
+- Add body-styling of proxy to "disraptor-content"-div to prevent styling loss
+    - at `disraptor/assets/javascripts/discourse/routes/disraptor-proxy.js.es6:95`
