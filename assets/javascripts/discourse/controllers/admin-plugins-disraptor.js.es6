@@ -24,15 +24,15 @@ export default Ember.Controller.extend({
   endPoint: 'disraptor/route',
 
   requestMethods: [
-      { name: "get" },
-      { name: "head" },
-      { name: "post" },
-      { name: "put" },
-      { name: "delete" },
-      { name: "options" },
-      { name: "trace" }
+      { name: 'get' },
+      { name: 'head' },
+      { name: 'post' },
+      { name: 'put' },
+      { name: 'delete' },
+      { name: 'options' },
+      { name: 'trace' }
   ],
-  routeRequestMethod: "get",
+  routeRequestMethod: 'get',
   routeSourcePath: '',
   routeTargetUrl: '',
   routeCreatedMessage: '',
