@@ -56,14 +56,12 @@ export default Ember.Route.extend({
             `Disraptor: Route ${proxyUrl} reported: ${response.statusText}`
           );
         }
-
         return response.text();
       })
-      .then(responseBody => {
+      .then(responseBody => { 
         if (!this.siteSettings.disraptor_shadow_dom) {
           injectHeadContent(responseBody);
         }
-
         return this.getDocumentHostNode(responseBody);
       })
       .catch(error => {
@@ -99,24 +97,24 @@ export default Ember.Route.extend({
   renderTemplate() {
     this.render('disraptor-proxy');
 
-    if (this.disraptorRoot !== undefined) {
-      Ember.run.scheduleOnce('afterRender', () => {
-        if (this.siteSettings.disraptor_shadow_dom) {
-          this.disraptorRoot.host.addEventListener('click', interceptClick);
-        } else {
-          this.disraptorRoot = document.querySelector('.disraptor-content');
+    Ember.run.scheduleOnce('afterRender', () => {
+      if (this.siteSettings.disraptor_shadow_dom) {
+        this.disraptorRoot.host.addEventListener('click', interceptClick);
+      } else {
+        this.disraptorRoot = document.querySelector('.disraptor-content');
+      }
+
+      const forms = this.disraptorRoot.querySelectorAll('form');
+      console.log(forms);
+      forms.forEach(form => {
+        if (form.method.toLowerCase() === 'post') {
+//          console.log(performPostRequest;
+          form.addEventListener('submit', performPostRequest.bind(this));
         }
-
-        const forms = this.disraptorRoot.querySelectorAll('form');
-        forms.forEach(form => {
-          if (form.method.toLowerCase() === 'post') {
-            form.addEventListener('submit', performPostRequest.bind(this));
-          }
-        });
-
-        this.hijackHomepageLinks();
       });
-    }
+
+      this.hijackHomepageLinks();
+    });
   },
 
   actions: {
@@ -233,14 +231,27 @@ function interceptClick(event) {
  */
 function injectHeadContent(responseBody) {
   const headContent = extractTagContent('head', responseBody);
+  const bodyContent = extractTagContent('body', responseBody);
 
   injectTagsIntoHead(headContent, 'link');
   injectTagsIntoHead(headContent, 'style');
 
+
   // Special case for scripts. Weird.
   const scriptTags = extractTags(headContent, 'script');
+  const scriptTagsBody = extractTags(bodyContent, 'script');
+
   for (const scriptTag of scriptTags) {
     injectScriptIntoHead(scriptTag.src);
+  }
+
+  for (const scriptTag of scriptTagsBody) {
+    if (scriptTag.src) {
+      injectScriptIntoHead(scriptTag.src);
+    }
+    else {
+      injectScriptIntoBody(scriptTag)
+    }
   }
 }
 
@@ -292,7 +303,14 @@ function injectScriptIntoHead(src) {
   script.async = false;
   script.src = src;
   script.setAttribute('data-disraptor-tag', '');
-  document.head.insertAdjacentElement('beforeend', script);
+  document.head.insertAdjacentElement("beforeend", script);
+}
+
+function injectScriptIntoBody(script) {
+  const scr = document.createElement('script');
+  scr.type = 'text/javascript';
+  scr.setAttribute('data-disraptor-tag', '');
+  document.body.insertAdjacentElement("beforeend", script);
 }
 
 /**
@@ -320,7 +338,11 @@ function performPostRequest(event) {
   fetch(form.action, fetchInit)
     .then(response => {
       if (response.headers.has('X-Disraptor-Location')) {
-        this.transitionTo(response.headers.get('X-Disraptor-Location'));
+        if (this._router.currentURL == response.headers.get('X-Disraptor-Location')) {
+          window.location.reload();
+        } else {
+          this.transitionTo(response.headers.get('X-Disraptor-Location'));
+        }
       }
     })
     .catch(console.error);
