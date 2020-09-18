@@ -105,10 +105,8 @@ export default Ember.Route.extend({
       }
 
       const forms = this.disraptorRoot.querySelectorAll('form');
-      console.log(forms);
       forms.forEach(form => {
         if (form.method.toLowerCase() === 'post') {
-//          console.log(performPostRequest;
           form.addEventListener('submit', performPostRequest.bind(this));
         }
       });
@@ -287,7 +285,7 @@ function extractTags(headContent, tagName) {
   // Use a <template> element to parse a DOM fragment
   const headTemplate = document.createElement('template');
   headTemplate.insertAdjacentHTML('beforeend', headContent);
-  return Array.from(headTemplate.children).filter(el => el.tagName === tagName.toUpperCase());
+  return Array.from(headTemplate.getElementsByTagName('*')).filter(el => el.tagName === tagName.toUpperCase());
 }
 
 /**
@@ -306,10 +304,12 @@ function injectScriptIntoHead(src) {
   document.head.insertAdjacentElement("beforeend", script);
 }
 
-function injectScriptIntoBody(script) {
-  const scr = document.createElement('script');
-  scr.type = 'text/javascript';
-  scr.setAttribute('data-disraptor-tag', '');
+function injectScriptIntoBody(originalScript) {
+  const script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.text = originalScript.text
+  script.setAttribute('data-disraptor-tag', '');
+
   document.body.insertAdjacentElement("beforeend", script);
 }
 
@@ -338,7 +338,7 @@ function performPostRequest(event) {
   fetch(form.action, fetchInit)
     .then(response => {
       if (response.headers.has('X-Disraptor-Location')) {
-        if (this._router.currentURL == response.headers.get('X-Disraptor-Location')) {
+        if (window.location.pathname === response.headers.get('X-Disraptor-Location')) {
           window.location.reload();
         } else {
           this.transitionTo(response.headers.get('X-Disraptor-Location'));
