@@ -110,7 +110,7 @@ class ProxyController < ApplicationController
     use_ssl = (target_url.scheme == 'https')
     proxy_request = build_proxy_request(request, target_url.to_s)
 
-    return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl) { |http| http.request(proxy_request) }
+    return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl, :read_timeout => SiteSetting.disraptor_read_timeout) { |http| http.request(proxy_request) }
   end
 
   # Constructs a new request object to the +target_url+ based on the incoming +request+’s method.
