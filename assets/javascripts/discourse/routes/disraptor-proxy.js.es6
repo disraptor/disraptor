@@ -1,4 +1,5 @@
 import DiscourseURL from 'discourse/lib/url';
+import DiscourseRoute from 'discourse/routes/discourse';
 import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
 
