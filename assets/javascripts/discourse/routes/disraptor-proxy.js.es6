@@ -5,7 +5,7 @@ import { generateRouteId } from '../lib/generate-route-id';
 /**
  * This is the “disraptor-proxy” route.
  */
-export default Ember.Route.extend({
+export default DisraptorRoute.extend({
   defaultHomePath: `/${defaultHomepage()}`,
   defaultHomeRoute: `discovery.${defaultHomepage()}`,
 
