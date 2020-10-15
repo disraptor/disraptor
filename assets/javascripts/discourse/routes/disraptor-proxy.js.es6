@@ -5,7 +5,7 @@ import { generateRouteId } from '../lib/generate-route-id';
 /**
  * This is the “disraptor-proxy” route.
  */
-export default DisraptorRoute.extend({
+export default DiscourseRoute.extend({
   defaultHomePath: `/${defaultHomepage()}`,
   defaultHomeRoute: `discovery.${defaultHomepage()}`,
 
