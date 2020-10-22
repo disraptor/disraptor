@@ -1,3 +1,4 @@
+import { initializeDefaultHomepage } from 'discourse/lib/utilities';
 import { defaultHomepage } from 'discourse/lib/utilities';
 
 /**
@@ -26,6 +27,14 @@ export default function () {
   https://github.com/discourse/discourse/pull/7566
   */
   if (this.site.siteSettings['disraptor_enabled']) {
+    /*
+     * It seems that in some version Discourse changed in what order plugin and Discourse-scripts are executed (or loaded).
+     * because of this now this script executes before the default homepage is set on loading a page.
+     * Later on we run into problems if the homepage is not set and that's why we do it here in case it is not set yet.
+     */ 
+    if (!defaultHomepage()) {
+      initializeDefaultHomepage(this.site.siteSettings);
+    }
     const defaultHomeRoute = `/${defaultHomepage()}`;
     this.route('disraptor-proxy.homepage', { path: defaultHomeRoute });
     this.route('disraptor-proxy.single-segment', { path: '/:path' });
