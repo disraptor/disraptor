@@ -8,3 +8,6 @@ plugins:
   disraptor_app_secret_key:
     default: ''
     secret: true
+  disraptor_read_timeout:
+    default: 120
+    client: true

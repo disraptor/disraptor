@@ -1,11 +1,12 @@
 import DiscourseURL from 'discourse/lib/url';
+import DiscourseRoute from 'discourse/routes/discourse';
 import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
 
 /**
  * This is the “disraptor-proxy” route.
  */
-export default Ember.Route.extend({
+export default DiscourseRoute.extend({
   defaultHomePath: `/${defaultHomepage()}`,
   defaultHomeRoute: `discovery.${defaultHomepage()}`,
 
