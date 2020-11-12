@@ -135,7 +135,24 @@ export default DiscourseRoute.extend({
           element.remove();
         });
       }
-    }
+    },
+
+    /**
+     * This makes sure that after the DOM is rendered all scripts are executed.
+     * By doing so we make sure objects that get changed by javascripts are actually there.
+     *
+     * See [emberjs.com: Route events: didTransition][1].
+     *
+     * [1]: https://api.emberjs.com/ember/3.22/classes/Route/events/didTransition?anchor=didTransition
+     */
+    didTransition() {
+      Ember.run.scheduleOnce('afterRender', this, function () {
+        const scripts = document.body.querySelectorAll('[data-disraptor-tag]');
+        scripts.forEach(script => {
+          eval(script.innerHTML);
+        });
+      });
+    },
   },
 
   /**
@@ -234,7 +251,6 @@ function injectHeadContent(responseBody) {
 
   injectTagsIntoHead(headContent, 'link');
   injectTagsIntoHead(headContent, 'style');
-
 
   // Special case for scripts. Weird.
   const scriptTags = extractTags(headContent, 'script');
