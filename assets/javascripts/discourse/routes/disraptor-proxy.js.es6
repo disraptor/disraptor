@@ -18,9 +18,7 @@ export default DiscourseRoute.extend({
         this.transitionTo(this.defaultHomeRoute);
       } else {
         /*
-        We want to continue serving Discourse’s home page *if* there is no root route configured
-        via Disraptor. Currently, I cannot think of another way than querying the server for
-        whether a route with the key parameters for a root route exists. If such a route doesn’t
+        We want to continue serving Discourse’s home page *if* there is no root route configured via Disraptor. Currently, I cannot think of another way than querying the server for whether a route with the key parameters for a root route exists. If such a route doesn’t
         exist (i.e. the end point responds with a status 404), we transition to Discourse’s home
         page.
         */
@@ -111,7 +109,6 @@ export default DiscourseRoute.extend({
           form.addEventListener('submit', performPostRequest.bind(this));
         }
       });
-
       this.hijackHomepageLinks();
     });
   },
@@ -149,7 +146,11 @@ export default DiscourseRoute.extend({
       Ember.run.scheduleOnce('afterRender', this, function () {
         const scripts = document.body.querySelectorAll('[data-disraptor-tag]');
         scripts.forEach(script => {
-          eval(script.innerHTML);
+          /*
+           * Scripts that have no trouble running have no downtime from this.
+           * However, script which have trouble loading due to prerequisites get recalled in a cyclic way.
+           */
+          timeoutScript(0, script);
         });
       });
     },
@@ -222,6 +223,25 @@ export default DiscourseRoute.extend({
     document.documentElement.classList.remove('disraptor-page', 'disraptor-uses-shadow-dom');
   }
 });
+
+/*
+ * Allows cyclic reloading of scripts, which prerequisites are not loaded yet.
+ * This makes sure every script was executed after some number of seconds.
+ *
+ * TODO: This may be possible to do better, but current implementation of Ember does not seem to provide an option.
+ */
+function timeoutScript(t, script) {
+  setTimeout(() => {
+    try {
+      eval(script.innerHTML);
+    }
+    catch (e) {
+      if (e instanceof ReferenceError){
+        timeoutScript(t + 1, script);
+      }
+    }
+  }, t * 1000);
+}
 
 /**
  * Workaround for [shadow tree navigation not using Ember’s router][1].
