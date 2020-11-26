@@ -10,7 +10,7 @@
 */
 .disraptor-page #main-outlet {
   max-width: none;
-  height: calc(100% - 4.2857em - 3px) !important; /* 1. */
+//  height: calc(100% - 4.2857em - 3px) !important; [> 1. <]
   padding-top: calc(4.2857em + 3px); /* 1. */
 }
 
@@ -18,7 +18,7 @@
 1. Account for Discourse’s header height in shadow DOM rendering mode.
 */
 .disraptor-page.disraptor-uses-shadow-dom #main-outlet {
-  height: calc(100% - 4em) !important; /* 1. */
+//  height: calc(100% - 4em) !important; [> 1. <]
   padding-top: 4em; /* 1. */
 }
 
