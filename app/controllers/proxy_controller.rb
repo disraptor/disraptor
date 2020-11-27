@@ -5,8 +5,6 @@ class ProxyController < ApplicationController
   # Generally, skip the XHR check and respond directly with this controller.
   skip_before_action :check_xhr, :verify_authenticity_token
 
-  protect_from_forgery with: :null_session
-
   def resolve
     Rails.logger.info("👻 Disraptor: Routing '#{request.method} #{request.path}' ...")
 
