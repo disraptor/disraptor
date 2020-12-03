@@ -176,7 +176,6 @@ class ProxyController < ApplicationController
 
     if current_user&.groups and not current_user&.groups.empty?
       disraptor_groups = current_user.groups
-        .select{ |group| group.name.start_with?('disraptor') }
         .map{ |group| group.name }
       proxy_headers['x-disraptor-groups'] = disraptor_groups.join(',')
     end
