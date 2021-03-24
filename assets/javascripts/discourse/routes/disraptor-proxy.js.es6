@@ -127,7 +127,7 @@ export default DiscourseRoute.extend({
       }
 
       if (!this.siteSettings.disraptor_shadow_dom) {
-        const injectedElements = document.head.querySelectorAll('[data-disraptor-tag]');
+        const injectedElements = document.documentElement.querySelectorAll('[data-disraptor-tag]');
         injectedElements.forEach(element => {
           element.remove();
         });
@@ -234,6 +234,7 @@ function timeoutScript(t, script) {
   setTimeout(() => {
     try {
       eval(script.innerHTML);
+      console.log("Earlier failed script successfully reloaded!");
     }
     catch (e) {
       if (e instanceof ReferenceError){
