@@ -150,10 +150,15 @@ export default DiscourseRoute.extend({
            * Scripts that have no trouble running have no downtime from this.
            * However, script which have trouble loading due to prerequisites get recalled in a cyclic way.
            */
-          timeoutScript(0, script);
+          timeoutScript(200, script);
         });
       });
     },
+
+    reload: function() {
+      console.log("Route called reload. Executing this.modelFor(proxyUrl).reload();");
+      this.modelFor(proxyUrl).reload();
+    }
   },
 
   /**
@@ -238,10 +243,10 @@ function timeoutScript(t, script) {
     }
     catch (e) {
       if (e instanceof ReferenceError){
-        timeoutScript(t + 1, script);
+        timeoutScript(t + 200, script);
       }
     }
-  }, t * 1000);
+  }, t);
 }
 
 /**
