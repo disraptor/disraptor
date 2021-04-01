@@ -125,9 +125,16 @@ export default DiscourseRoute.extend({
       if (!transition.targetName.startsWith('disraptor-proxy')) {
         this.leaveDisraptorDocument();
       }
-
+      
+      alert("current URL: " + window.location.href + "\ntarget URL: " + transition.intent.url);
+      if (window.location.href == transition.intent.url) {
+        transition.abort();
+        alert("Refreshing via Ember");
+        this.refresh();
+      }
+      
       if (!this.siteSettings.disraptor_shadow_dom) {
-        const injectedElements = document.documentElement.querySelectorAll('[data-disraptor-tag]');
+        const injectedElements = document.head.querySelectorAll('[data-disraptor-tag]');
         injectedElements.forEach(element => {
           element.remove();
         });
@@ -154,11 +161,6 @@ export default DiscourseRoute.extend({
         });
       });
     },
-
-    reload: function() {
-      console.log("Route called reload. Executing this.modelFor(proxyUrl).reload();");
-      this.modelFor(proxyUrl).reload();
-    }
   },
 
   /**
@@ -239,7 +241,6 @@ function timeoutScript(t, script) {
   setTimeout(() => {
     try {
       eval(script.innerHTML);
-      console.log("Earlier failed script successfully reloaded!");
     }
     catch (e) {
       if (e instanceof ReferenceError){
