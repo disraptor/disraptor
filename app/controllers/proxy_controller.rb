@@ -109,6 +109,7 @@ class ProxyController < ApplicationController
 
     use_ssl = (target_url.scheme == 'https')
     proxy_request = build_proxy_request(request, target_url.to_s)
+    proxy_request.set_debug_output(Logger.new("/src/log/request2.log"))
 
     return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl, :read_timeout => SiteSetting.disraptor_read_timeout) { |http| http.request(proxy_request) }
   end
@@ -138,7 +139,7 @@ class ProxyController < ApplicationController
       return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
-      proxy_request.set_debug_output(Logger.new("/src/request.log"))
+      proxy_request.set_debug_output(Logger.new("/src/log/request.log"))
       proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
