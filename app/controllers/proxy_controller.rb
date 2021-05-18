@@ -138,12 +138,12 @@ class ProxyController < ApplicationController
       return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
+      proxy_request.set_debug_output(Logger.new("/src/request.log"))
       proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
-      proxy_request.set_debug_output(Logger.new("request.log"))
       proxy_headers['Content-Type'] = request.format.to_s
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
