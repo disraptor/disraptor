@@ -20,7 +20,7 @@ class ProxyController < ApplicationController
       return
     end
 
-    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
+    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url} #{request.format.to_s}'")
 
     proxy_response = send_proxy_request(request, target_url)
     response.set_header('X-Disraptor-Proxy', 'yes')
