@@ -20,7 +20,7 @@ class ProxyController < ApplicationController
       return
     end
 
-    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url}'")
+    Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url} #{request.format.to_s}'")
 
     proxy_response = send_proxy_request(request, target_url)
     response.set_header('X-Disraptor-Proxy', 'yes')
@@ -122,6 +122,7 @@ class ProxyController < ApplicationController
   #   - a newly constructed proxy request object
   def build_proxy_request(request, target_url)
     proxy_headers = {}
+    
 
     if request.cookies.any?
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
