@@ -152,13 +152,13 @@ skip_before_action :check_xhr, :verify_authenticity_token
     when 'HEAD'
       return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
-#      proxy_headers['Content-Type'] = request.header['Content-Type']
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
+      proxy_request['Content-Type'] = request.headers['Content-Type']
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'PUT'
-#      proxy_headers['Content-Type'] = request.header['Content-Type']
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
+      proxy_request['Content-Type'] = request.headers['Content-Type']
       proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'DELETE'
