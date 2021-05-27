@@ -114,7 +114,7 @@ class ProxyController < ApplicationController
       request_logger.info("#{key}: #{value}")
     end
     request_logger.info(request.format.to_s)
-    request_logger.info("----------------REQUEST END----------------"
+    request_logger.info("----------------REQUEST END----------------")
     proxy_request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
     end
