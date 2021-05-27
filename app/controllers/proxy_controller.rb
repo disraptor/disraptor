@@ -156,7 +156,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
       Rails.logger.info("Disraptor: CONTENT_TYPE is #{request.headers['CONTENT_TYPE']}")
       proxy_request.set_form_data(request.request_parameters)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
-      Rails.logger.info("Disraptor: CONTENT_TYPE in proxy_request is #{proxy_request.headers['CONTENT_TYPE']}")
+      Rails.logger.info(proxy_request.inspect())
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
