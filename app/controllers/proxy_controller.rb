@@ -154,13 +154,14 @@ skip_before_action :check_xhr, :verify_authenticity_token
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
       Rails.logger.info("Disraptor: CONTENT_TYPE is #{request.headers['CONTENT_TYPE']}")
-      proxy_request['Content-Type'] = request.headers['CONTENT_TYPE']
       proxy_request.set_form_data(request.request_parameters)
+      proxy_request.content_type = request.headers['CONTENT_TYPE']
+      Rails.logger.info("Disraptor: CONTENT_TYPE in proxy_request is #{proxy_request.headers['CONTENT_TYPE']}")
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
-      proxy_request['Content-Type'] = request.headers['CONTENT_TYPE']
       proxy_request.set_form_data(request.request_parameters)
+      proxy_request.content_type = request.headers['CONTENT_TYPE']
       return proxy_request
     when 'DELETE'
       return Net::HTTP::Delete.new(target_url, proxy_headers)
