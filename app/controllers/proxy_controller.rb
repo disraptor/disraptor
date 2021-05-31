@@ -1,6 +1,8 @@
 class ProxyController < ApplicationController
   # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
-  # Instead, wait for an XHR request from the Discourse frontend.  before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents Generally, skip the XHR check and respond directly with this controller.  
+  # Instead, wait for an XHR request from the Discourse frontend.  
+before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents 
+  # Generally, skip the XHR check and respond directly with this controller.  
 skip_before_action :check_xhr, :verify_authenticity_token
 
   def resolve
@@ -114,7 +116,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
     request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
     end
-    request_logger.info(request.body)
+    request_logger.info(request.request_parameters)
     request_logger.info("----------------REQUEST END----------------")
     proxy_request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
@@ -153,13 +155,13 @@ skip_before_action :check_xhr, :verify_authenticity_token
       return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
-      proxy_request.set_form_data(request.request_parameters)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
+      proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'])
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
-      proxy_request.set_form_data(request.request_parameters)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
+      proxy_request.set_form_data(request.request_parameters)
       return proxy_request
     when 'DELETE'
       return Net::HTTP::Delete.new(target_url, proxy_headers)
