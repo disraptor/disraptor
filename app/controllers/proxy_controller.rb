@@ -114,7 +114,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
     request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
     end
-    request_logger.info(request.format.to_s)
+    request_logger.info(request.body)
     request_logger.info("----------------REQUEST END----------------")
     proxy_request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
@@ -153,10 +153,8 @@ skip_before_action :check_xhr, :verify_authenticity_token
       return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
-      Rails.logger.info("Disraptor: CONTENT_TYPE is #{request.headers['CONTENT_TYPE']}")
       proxy_request.set_form_data(request.request_parameters)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
-      Rails.logger.info(proxy_request.inspect())
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
