@@ -15,6 +15,13 @@ skip_before_action :check_xhr, :verify_authenticity_token
 
     target_url = determine_target_url(request.path, params)
 
+    Rails.logger.info("👻 Disraptor: BEGIN params -----------------------------------------------")
+    Rails.logger.info("👻 Disraptor: inspect #{params.inspect()}") 
+    Rails.logger.info("👻 Disraptor: to_s #{params.to_s()}")
+    Rails.logger.info("👻 Disraptor: keys #{params.keys()}")
+    Rails.logger.info("👻 Disraptor: values #{params.values()}")
+    Rails.logger.info("👻 Disraptor: END params -----------------------------------------------")
+
     if target_url.nil?
       render json: failed_json, status: 500
       return
@@ -116,7 +123,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
     request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
     end
-    request_logger.info(request.request_parameters)
+    request_logger.info("request parameters: #{request.request_parameters()}")
     request_logger.info("----------------REQUEST END----------------")
     proxy_request.each_header do |key, value|
       request_logger.info("#{key}: #{value}")
@@ -125,6 +132,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
     if proxy_request.method == 'POST'
       data = proxy_request.body.nil? || proxy_request.body.size == 0 ? nil : proxy_request.body
       request_logger.info("POST Data: #{data}")
+      request_logger.info("POST Data raw: #{proxy_request.raw_post()}")
     end
 
     return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl, :read_timeout => SiteSetting.disraptor_read_timeout) { |http| http.request(proxy_request) }
