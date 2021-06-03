@@ -374,7 +374,6 @@ function performPostRequest(event) {
   const fetchInit = {
     method: 'post',
     headers: {
-      'Content-Type': `${form.enctype}; charset=utf-8`
     },
     body: constructRequestBody(form)
   };
