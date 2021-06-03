@@ -122,7 +122,6 @@ class ProxyController < ApplicationController
   #   - a newly constructed proxy request object
   def build_proxy_request(request, target_url)
     proxy_headers = {}
-    
 
     if request.cookies.any?
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
@@ -139,13 +138,13 @@ class ProxyController < ApplicationController
       return Net::HTTP::Head.new(target_url, proxy_headers)
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
-      proxy_headers['Content-Type'] = request.format.to_s
-      proxy_request.set_form_data(request.request_parameters)
+      proxy_request.content_type = request.headers['CONTENT_TYPE']
+      proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
-      proxy_headers['Content-Type'] = request.format.to_s
-      proxy_request.set_form_data(request.request_parameters)
+      proxy_request.content_type = request.headers['CONTENT_TYPE']
+      proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
       return proxy_request
     when 'DELETE'
       return Net::HTTP::Delete.new(target_url, proxy_headers)
