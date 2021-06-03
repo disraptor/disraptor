@@ -125,14 +125,7 @@ export default DiscourseRoute.extend({
       if (!transition.targetName.startsWith('disraptor-proxy')) {
         this.leaveDisraptorDocument();
       }
-      
-      alert("current URL: " + window.location.href + "\ntarget URL: " + transition.intent.url);
-      if (window.location.href == transition.intent.url) {
-        transition.abort();
-        alert("Refreshing via Ember");
-        this.refresh();
-      }
-      
+
       if (!this.siteSettings.disraptor_shadow_dom) {
         const injectedElements = document.head.querySelectorAll('[data-disraptor-tag]');
         injectedElements.forEach(element => {
@@ -374,7 +367,7 @@ function performPostRequest(event) {
   const fetchInit = {
     method: 'post',
     headers: {
-      //'Content-Type': `${form.enctype}; charset=utf-8`
+      'charset': 'utf-8'
     },
     body: constructRequestBody(form)
   };

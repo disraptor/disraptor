@@ -1,9 +1,9 @@
 class ProxyController < ApplicationController
   # For Disraptor documents (i.e. request content type is HTML), don’t respond directly.
-  # Instead, wait for an XHR request from the Discourse frontend.  
-before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents 
-  # Generally, skip the XHR check and respond directly with this controller.  
-skip_before_action :check_xhr, :verify_authenticity_token
+  # Instead, wait for an XHR request from the Discourse frontend.
+  before_action :check_if_disraptor_enabled, :check_xhr_for_documents, :forgery_protection_for_documents
+  # Generally, skip the XHR check and respond directly with this controller.
+  skip_before_action :check_xhr, :verify_authenticity_token
 
   def resolve
     Rails.logger.info("👻 Disraptor: Routing '#{request.method} #{request.path}' ...")
@@ -14,11 +14,6 @@ skip_before_action :check_xhr, :verify_authenticity_token
     end
 
     target_url = determine_target_url(request.path, params)
-
-    Rails.logger.info("👻 Disraptor: BEGIN params -----------------------------------------------")
-    Rails.logger.info("👻 Disraptor: inspect #{params.inspect()}") 
-    Rails.logger.info("👻 Disraptor: request.header[CONTENT_TYPE] #{request.headers['CONTENT_TYPE']}")
-    Rails.logger.info("👻 Disraptor: END params -----------------------------------------------")
 
     if target_url.nil?
       render json: failed_json, status: 500
@@ -115,23 +110,6 @@ skip_before_action :check_xhr, :verify_authenticity_token
     use_ssl = (target_url.scheme == 'https')
     proxy_request = build_proxy_request(request, target_url.to_s)
 
-    request_logger = Logger.new("/src/log/request.log")
-    request_logger.level = Logger::DEBUG
-    request_logger.info("REQUEST")
-    request.each_header do |key, value|
-      request_logger.info("#{key}: #{value}")
-    end
-    request_logger.info("request parameters: #{request.request_parameters()}")
-    request_logger.info("----------------REQUEST END----------------")
-    proxy_request.each_header do |key, value|
-      request_logger.info("#{key}: #{value}")
-    end
-
-    if proxy_request.method == 'POST'
-      data = proxy_request.body.nil? || proxy_request.body.size == 0 ? nil : proxy_request.body
-      request_logger.info("POST Data: #{data}")
-    end
-
     return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl, :read_timeout => SiteSetting.disraptor_read_timeout) { |http| http.request(proxy_request) }
   end
 
@@ -166,7 +144,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
-      proxy_request.set_form_data(request.request_parameters)
+      proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
       return proxy_request
     when 'DELETE'
       return Net::HTTP::Delete.new(target_url, proxy_headers)
