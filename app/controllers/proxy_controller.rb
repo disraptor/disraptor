@@ -130,7 +130,6 @@ skip_before_action :check_xhr, :verify_authenticity_token
     if proxy_request.method == 'POST'
       data = proxy_request.body.nil? || proxy_request.body.size == 0 ? nil : proxy_request.body
       request_logger.info("POST Data: #{data}")
-      request_logger.info("POST Data raw: #{proxy_request.raw_post()}")
     end
 
     return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl, :read_timeout => SiteSetting.disraptor_read_timeout) { |http| http.request(proxy_request) }
