@@ -17,7 +17,7 @@ skip_before_action :check_xhr, :verify_authenticity_token
 
     Rails.logger.info("👻 Disraptor: BEGIN params -----------------------------------------------")
     Rails.logger.info("👻 Disraptor: inspect #{params.inspect()}") 
-    Rails.logger.info("👻 Disraptor: request.body.string #{request.body.string}")
+#    Rails.logger.info("👻 Disraptor: request.body.string #{request.body.string}")
     Rails.logger.info("👻 Disraptor: request.raw_post #{request.raw_post}")
     Rails.logger.info("👻 Disraptor: request.header[CONTENT_TYPE] #{request.headers['CONTENT_TYPE']}")
     Rails.logger.info("👻 Disraptor: END params -----------------------------------------------")
