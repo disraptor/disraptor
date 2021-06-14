@@ -26,32 +26,32 @@ class ProxyController < ApplicationController
     response.set_header('X-Disraptor-Proxy', 'yes')
 
     case proxy_response.code
-    when '200'
-      Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
-    when '303'
-      Rails.logger.info('👻 Disraptor: Status code 303. Requesting new location.')
+      when '200'
+        Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
+      when '302', '303'
+        Rails.logger.info("👻 Disraptor: Status code #{proxy_response.code}. Requesting new location #{target_url}.")
 
-      if proxy_response.key?('Set-Cookie')
-        response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
+        if proxy_response.key?('Set-Cookie')
+          response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
+        end
+
+        if proxy_response.key?('Location')
+          # Don’t use the “Location” header directly because the front end won’t be able to perform
+          # the redirect via Ember transitions otherwise.
+          response.set_header('X-Disraptor-Location', proxy_response['Location'])
+        end
+      when '404'
+        Rails.logger.info('👻 Disraptor: Status code 404.')
+        Rails.logger.error("❌ Disraptor: #{proxy_response}")
+      else
+        Rails.logger.warn("❌ Disraptor: Warning: Unhandled status code '#{proxy_response.code}'")
       end
 
-      if proxy_response.key?('Location')
-        # Don’t use the “Location” header directly because the front end won’t be able to perform
-        # the redirect via Ember transitions otherwise.
-        response.set_header('X-Disraptor-Location', proxy_response['Location'])
+      if Integer(proxy_response.code) < 400
+        render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
+      else
+        render json: failed_json, status: proxy_response.code
       end
-    when '404'
-      Rails.logger.info('👻 Disraptor: Status code 404.')
-      Rails.logger.error("❌ Disraptor: #{proxy_response}")
-    else
-      Rails.logger.warn("❌ Disraptor: Warning: Unhandled status code '#{proxy_response.code}'")
-    end
-
-    if Integer(proxy_response.code) < 400
-      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
-    else
-      render json: failed_json, status: proxy_response.code
-    end
   end
 
   private
