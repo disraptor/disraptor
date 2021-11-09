@@ -127,6 +127,9 @@ class ProxyController < ApplicationController
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
 
       proxy_headers['Cookie'] = escaped_cookies.join(';')
+      # sets csrftoken cookie for django applications
+      # TODO: Check why the cookie is not set in the first place
+      proxy_headers['Cookie'] = proxy_headers['Cookie'] + ";csrftoken=#{request.headers['X-CSRFToken']}"
     end
 
     proxy_headers = set_disraptor_headers(proxy_headers)
