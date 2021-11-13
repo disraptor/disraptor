@@ -281,14 +281,14 @@ function injectHeadContent(responseBody) {
     // The first one is loaded by Discourse by default.
     // A second one breaks jQuery interactions, especially if a slim build is loaded.
     // NOTE: This check can be removed, if someday Discourse does not use jQuery anymore.
-    if (!(scriptTag.src.includes('jquery') || scriptTag.src.includes('fontawesome'))) {
+    if (!scriptTag.src.includes('jquery')) {
       injectScriptIntoHead(scriptTag.src);
     }
   }
 
   for (const scriptTag of scriptTagsBody) {
     if (scriptTag.src) {
-      if (!(scriptTag.src.includes('jquery') || scriptTag.src.includes('fontawesome'))) {
+      if (!scriptTag.src.includes('jquery')) {
         injectScriptIntoHead(scriptTag.src);
       }
     }
