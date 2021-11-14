@@ -2,7 +2,6 @@ import DiscourseURL from 'discourse/lib/url';
 import DiscourseRoute from 'discourse/routes/discourse';
 import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
-import { iconNode } from 'discourse-common/lib/icon-library';
 
 /**
  * This is the “disraptor-proxy” route.
@@ -62,7 +61,7 @@ export default DiscourseRoute.extend({
         if (!this.siteSettings.disraptor_shadow_dom) {
           injectHeadContent(responseBody);
         }
-        return this.getDocumentHostNode(replaceFontawesome(responseBody));
+        return this.getDocumentHostNode(responseBody);
       })
       .catch(error => {
         console.error(error);
@@ -357,14 +356,6 @@ function injectScriptIntoBody(originalScript) {
   script.setAttribute('data-disraptor-tag', '');
 
   document.body.insertAdjacentElement("beforeend", script);
-}
-
-function replaceFontawesome(htmlContent) {
-  console.log(htmlContent);
-  return htmlContent.replaceAll(
-    /\<i class="(fa.{0,1})\sfa-(.*)"\s*(.*)><\/i>/g,
-    '<svg class="$1 d-icon d-icon-$2 svg-icon svg-node" $3><use xlink:href="#$2"></use></svg>'
-  )
 }
 
 /**

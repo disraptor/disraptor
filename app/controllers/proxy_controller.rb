@@ -34,7 +34,6 @@ class ProxyController < ApplicationController
         if proxy_response.key?('Set-Cookie')
           response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
         end
-
         if proxy_response.key?('Location')
           # Don’t use the “Location” header directly because the front end won’t be able to perform
           # the redirect via Ember transitions otherwise.
@@ -48,7 +47,8 @@ class ProxyController < ApplicationController
       end
 
       if Integer(proxy_response.code) < 400
-        render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
+        render_body = proxy_response.body.gsub(/\<i class="(fa.{0,1})\sfa-(.*)"\s*(.*)><\/i>/, '<svg class="\1 d-icon d-icon-\2 svg-icon svg-node" \3><use xlink:href="#\2"></use></svg>')
+        render body: render_body, status: proxy_response.code, content_type: proxy_response.content_type
       else
         render json: failed_json, status: proxy_response.code
       end
@@ -125,7 +125,6 @@ class ProxyController < ApplicationController
 
     if request.cookies.any?
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
-
       proxy_headers['Cookie'] = escaped_cookies.join(';')
       # sets csrftoken cookie for django applications
       # TODO: Check why the cookie is not set in the first place
