@@ -28,6 +28,11 @@ class ProxyController < ApplicationController
     case proxy_response.code
       when '200'
         Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
+        proxy_response.body.gsub!(/\<i class="(fa.{0,1})\sfa-([a-zA-Z0-9-_]*)"(.*?)><\/i>/, '<svg class="\1 d-icon d-icon-\2 svg-icon svg-node" \3><use xlink:href="#\2"></use></svg>')
+      when '202'
+        # because AJAX stuff seems to be escaped for some reason
+        # TODO: Maybe just unescape \" to "
+        proxy_response.body.gsub!(/<i class=\\"(fa.{0,1})\sfa-([a-zA-Z0-9-_]*)\\"(.*?)><\/i>/, '<svg class=\"\1 d-icon d-icon-\2 svg-icon svg-node\" \3><use xlink:href=\"#\2\"></use></svg>')
       when '302', '303'
         Rails.logger.info("👻 Disraptor: Status code #{proxy_response.code}. Requesting new location #{target_url}.")
 
@@ -47,8 +52,7 @@ class ProxyController < ApplicationController
       end
 
       if Integer(proxy_response.code) < 400
-        render_body = proxy_response.body.gsub(/\<i class="(fa.{0,1})\sfa-(.*)"\s*(.*)><\/i>/, '<svg class="\1 d-icon d-icon-\2 svg-icon svg-node" \3><use xlink:href="#\2"></use></svg>')
-        render body: render_body, status: proxy_response.code, content_type: proxy_response.content_type
+        render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
       else
         render json: failed_json, status: proxy_response.code
       end
@@ -108,7 +112,7 @@ class ProxyController < ApplicationController
     target_url = URI.parse(target_url)
 
     use_ssl = (target_url.scheme == 'https')
-    proxy_request = build_proxy_request(request, target_url.to_s)
+    proxy_request = build_proxy_request(request, target_url)
 
     return Net::HTTP.start(target_url.host, target_url.port, :use_ssl => use_ssl, :read_timeout => SiteSetting.disraptor_read_timeout) { |http| http.request(proxy_request) }
   end
