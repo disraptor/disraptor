@@ -2,6 +2,7 @@ import DiscourseURL from 'discourse/lib/url';
 import DiscourseRoute from 'discourse/routes/discourse';
 import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
+import { iconNode } from 'discourse-common/lib/icon-library';
 
 /**
  * This is the “disraptor-proxy” route.
@@ -61,7 +62,7 @@ export default DiscourseRoute.extend({
         if (!this.siteSettings.disraptor_shadow_dom) {
           injectHeadContent(responseBody);
         }
-        return this.getDocumentHostNode(responseBody);
+        return this.getDocumentHostNode(replaceFontawesome(responseBody));
       })
       .catch(error => {
         console.error(error);
@@ -127,7 +128,7 @@ export default DiscourseRoute.extend({
       }
 
       if (!this.siteSettings.disraptor_shadow_dom) {
-        const injectedElements = document.head.querySelectorAll('[data-disraptor-tag]');
+        const injectedElements = document.querySelectorAll('[data-disraptor-tag]');
         injectedElements.forEach(element => {
           element.remove();
         });
@@ -281,14 +282,14 @@ function injectHeadContent(responseBody) {
     // The first one is loaded by Discourse by default.
     // A second one breaks jQuery interactions, especially if a slim build is loaded.
     // NOTE: This check can be removed, if someday Discourse does not use jQuery anymore.
-    if (!scriptTag.src.includes('jquery')) {
+    if (!(scriptTag.src.includes('jquery') || scriptTag.src.includes('fontawesome'))) {
       injectScriptIntoHead(scriptTag.src);
     }
   }
 
   for (const scriptTag of scriptTagsBody) {
     if (scriptTag.src) {
-      if (!scriptTag.src.includes('jquery')) {
+      if (!(scriptTag.src.includes('jquery') || scriptTag.src.includes('fontawesome'))) {
         injectScriptIntoHead(scriptTag.src);
       }
     }
@@ -358,6 +359,14 @@ function injectScriptIntoBody(originalScript) {
   document.body.insertAdjacentElement("beforeend", script);
 }
 
+function replaceFontawesome(htmlContent) {
+  console.log(htmlContent);
+  return htmlContent.replaceAll(
+    /\<i class="(fa.{0,1})\sfa-(.*)"\s*(.*)><\/i>/g,
+    '<svg class="$1 d-icon d-icon-$2 svg-icon svg-node" $3><use xlink:href="#$2"></use></svg>'
+  )
+}
+
 /**
  * Handles submit events that are about to perform a POST request.
  *
@@ -375,9 +384,9 @@ function performPostRequest(event) {
   const fetchInit = {
     method: 'post',
     headers: {
-      'charset': 'utf-8'
+      'charset': 'utf-8',
     },
-    body: constructRequestBody(form)
+    body: constructRequestBody(form),
   };
 
   fetch(form.action, fetchInit)
