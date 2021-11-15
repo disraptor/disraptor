@@ -28,8 +28,6 @@ class ProxyController < ApplicationController
     case proxy_response.code
       when '200'
         Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
-        Rails.logger.info(proxy_response.body)
-        Rails.logger.info(proxy_response.body.scan(/<i class="(fa.{0,1})\sfa-([a-zA-Z0-9-_]*)(.*?)"\s*(.*?)><\/i>/))
         proxy_response.body.gsub!(/\<i class="(fa.{0,1})\sfa-([a-zA-Z0-9\-_]*)(.*?)"(.*?)><\/i>/, '<svg class="\1 d-icon d-icon-\2 svg-icon svg-node \3" \4><use xlink:href="#\2"></use></svg>')
       when '202'
         # because AJAX stuff seems to be escaped for some reason
