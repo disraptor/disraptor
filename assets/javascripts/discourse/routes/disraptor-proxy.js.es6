@@ -209,8 +209,7 @@ export default DiscourseRoute.extend({
       }
     }
 
-    // This is used to remove some Discourse styles from the main content area when serving a
-    // Disraptor document.
+    /* This is used to remove some Discourse styles from the main content area when serving a Disraptor document. */
     if (!document.documentElement.classList.contains('disraptor-page')) {
       document.documentElement.classList.add('disraptor-page');
     }
@@ -351,7 +350,7 @@ function injectScriptIntoHead(src) {
 
 function injectScriptIntoBody(originalScript) {
   const script = document.createElement('script');
-  script.type = 'text/javascript';
+  script.type = originalScript.type;
   script.text = originalScript.text
   script.setAttribute('data-disraptor-tag', '');
 
