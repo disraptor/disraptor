@@ -179,7 +179,7 @@ class ProxyController < ApplicationController
     proxy_headers['x-disraptor-app-secret-key'] = SiteSetting.disraptor_app_secret_key
 
     if current_user&.id
-      proxy_headers['x-disraptor-user-id'] = current_user.id
+      proxy_headers['x-disraptor-user-id'] = current_user.id.to_s
     end
 
     if current_user&.username
