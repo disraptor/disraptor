@@ -51,9 +51,15 @@ export default DiscourseRoute.extend({
     return fetch(proxyUrl)
       .then(response => {
         if (!response.ok) {
-          throw new Error(
-            `Disraptor: Route ${proxyUrl} reported: ${response.statusText}`
-          );
+          if (this.siteSettings.disraptor_custom_error_pages) {
+            console.error(
+              `Disraptor: Route ${proxyUrl} reported: ${response.statusText}`
+            );
+          } else {
+            throw new Error(
+              `Disraptor: Route ${proxyUrl} reported: ${response.statusText}`
+            );
+          }
         }
         return response.text();
       })

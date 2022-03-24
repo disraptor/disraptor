@@ -11,3 +11,6 @@ plugins:
   disraptor_read_timeout:
     default: 120
     client: true
+  disraptor_custom_error_pages:
+    default: false
+    client: true
