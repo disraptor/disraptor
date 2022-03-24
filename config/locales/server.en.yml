@@ -4,6 +4,7 @@ en:
     disraptor_shadow_dom: 'Enable shadow DOM rendering mode'
     disraptor_app_secret_key: 'Disraptor application secret key'
     disraptor_read_timeout: 'Waiting time for reverse-proxied webservice'
+    disraptor_custom_error_pages: 'Enable this if your webservice has error pages you want to serve. Otherwise a non-informative "Oops! This website does not exist!" page will be shown'
 
   disraptor:
     errors:

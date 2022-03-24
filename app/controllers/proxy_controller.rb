@@ -51,11 +51,7 @@ class ProxyController < ApplicationController
         Rails.logger.warn("❌ Disraptor: Warning: Unhandled status code '#{proxy_response.code}'")
       end
 
-      if Integer(proxy_response.code) < 400
-        render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
-      else
-        render json: failed_json, status: proxy_response.code
-      end
+      render body: proxy_response.body, status: proxy_response.code, content_type: proxy_response.content_type
   end
 
   private
