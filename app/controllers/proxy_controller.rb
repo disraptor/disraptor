@@ -126,10 +126,13 @@ class ProxyController < ApplicationController
     if request.cookies.any?
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
       proxy_headers['Cookie'] = escaped_cookies.join(';')
+      
       # sets csrftoken cookie for django applications but only if not yet set (by form)
       # TODO: Check why the cookie is not set in the first place
       if not proxy_headers['Cookie'].include? 'csrftoken'
         proxy_headers['Cookie'] = proxy_headers['Cookie'] + ";csrftoken=#{request.headers['X-CSRFToken']}"
+      else
+        proxy_headers['X-CSRFToken'] = request.cookies['csrftoken']
       end
     end
 
@@ -143,12 +146,20 @@ class ProxyController < ApplicationController
     when 'POST'
       proxy_request = Net::HTTP::Post.new(target_url, proxy_headers)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
-      proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
+      if proxy_request.content_type == 'application/json'
+        proxy_request.body = request.request_parameters.to_json
+      else
+        proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
+      end
       return proxy_request
     when 'PUT'
       proxy_request = Net::HTTP::Put.new(target_url, proxy_headers)
       proxy_request.content_type = request.headers['CONTENT_TYPE']
-      proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
+      if proxy_request.content_type == 'application/json'
+        proxy_request.body = request.request_parameters.to_json
+      else
+        proxy_request.set_form(request.request_parameters, enctype=request.headers['CONTENT_TYPE'].split(';').first())
+      end
       return proxy_request
     when 'DELETE'
       return Net::HTTP::Delete.new(target_url, proxy_headers)
