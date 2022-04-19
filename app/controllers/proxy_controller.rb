@@ -126,6 +126,8 @@ class ProxyController < ApplicationController
     if request.cookies.any?
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
       proxy_headers['Cookie'] = escaped_cookies.join(';')
+      proxy_headers['X-CSRFToken'] = request.headers['X-CSRFToken']
+
       
       # sets csrftoken cookie for django applications but only if not yet set (by form)
       # TODO: Check why the cookie is not set in the first place
