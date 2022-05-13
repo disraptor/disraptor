@@ -123,11 +123,11 @@ class ProxyController < ApplicationController
   def build_proxy_request(request, target_url)
     proxy_headers = {}
 
+
     if request.cookies.any?
       escaped_cookies = request.cookies.map { |k, v| "#{CGI::escape(k)}=#{CGI::escape(v)}" }
       proxy_headers['Cookie'] = escaped_cookies.join(';')
       proxy_headers['X-CSRFToken'] = request.headers['X-CSRFToken']
-
       
       # sets csrftoken cookie for django applications but only if not yet set (by form)
       # TODO: Check why the cookie is not set in the first place
@@ -136,6 +136,11 @@ class ProxyController < ApplicationController
       else
         proxy_headers['X-CSRFToken'] = request.cookies['csrftoken']
       end
+    end
+
+    if request.request_parameters.key? 'csrfmiddlewaretoken'
+      proxy_headers['X-CSRFToken'] = request.request_parameters['csrfmiddlewaretoken']
+      proxy_headers['Cookie'] = proxy_headers['Cookie'] + ";csrftoken=#{request.request_parameters['csrfmiddlewaretoken']}"
     end
 
     proxy_headers = set_disraptor_headers(proxy_headers)
