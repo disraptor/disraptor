@@ -9,11 +9,16 @@
 1. Account for Discourse’s header height in legacy rendering mode.
 */
 .disraptor-page #main-outlet {
-  overflow-y: auto;
   max-width: none;
+  overflow-y: auto;
   height: calc(100% - 4.2857em - 3px) !important; // [> 1. <]
 //  padding-top: calc(4.2857em + 3px); [> 1. <]
   padding-top: 0;
+}
+
+.disraptor-page #main-outlet-wrapper {
+  max-width: none;
+  height: inherit;
 }
 
 /*
