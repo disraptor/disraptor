@@ -12,9 +12,9 @@ class Disraptor::GroupStore
         group_id = group.id
         group_name = group.name
         
-        if groups.key?(group_id)
+        if trusted_groups.key?(group_id)
           # If you see a group for the second time: do not trust it (As a user might have changed this)
-          ret.append(groups[group_id])
+          ret.append(trusted_groups[group_id])
         else
           # If you see a group for the first time: Trust it (As this is maintained by the system)
           add_group(group_id, group_name)
