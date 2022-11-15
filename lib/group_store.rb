@@ -9,7 +9,7 @@ class Disraptor::GroupStore
       trusted_groups = get_groups()
       
       for group in untrusted_groups do
-        group_id = group.id.to_i
+        group_id = group.id.to_i.to_s
         group_name = group.name.to_s
         
         if trusted_groups.key?(group_id)
