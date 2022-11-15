@@ -9,8 +9,8 @@ class Disraptor::GroupStore
       trusted_groups = get_groups()
       
       for group in untrusted_groups do
-        group_id = group.id
-        group_name = group.name
+        group_id = group.id.to_i
+        group_name = group.name.to_s
         
         if trusted_groups.key?(group_id)
           # If you see a group for the second time: do not trust it (As a user might have changed this)
