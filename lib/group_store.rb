@@ -27,7 +27,7 @@ class Disraptor::GroupStore
     def add_group(group_id, group)
       groups = get_groups()
 
-      if groups.key?(group_id):
+      if groups.key?(group_id)
         return false
       end
       
