@@ -18,6 +18,8 @@ end
 load File.expand_path('../lib/route_store.rb', __FILE__)
 load File.expand_path('../app/models/route.rb', __FILE__)
 
+load File.expand_path('../lib/group_store.rb', __FILE__)
+
 after_initialize do
   load File.expand_path('../app/controllers/disraptor/routes_controller.rb', __FILE__)
   load File.expand_path('../app/controllers/proxy_controller.rb', __FILE__)

@@ -201,8 +201,7 @@ class ProxyController < ApplicationController
     end
 
     if current_user&.groups and not current_user&.groups.empty?
-      disraptor_groups = current_user.groups
-        .map{ |group| group.name }
+      disraptor_groups = Disraptor::GroupStore.translate_groups(current_user.groups)
       proxy_headers['x-disraptor-groups'] = disraptor_groups.join(',')
     end
 
