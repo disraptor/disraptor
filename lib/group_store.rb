@@ -23,6 +23,7 @@ class Disraptor::GroupStore
       end
       
       return ret
+    end
 
     def add_group(group_id, group)
       groups = get_groups()
