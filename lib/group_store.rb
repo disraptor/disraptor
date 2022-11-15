@@ -32,7 +32,7 @@ class Disraptor::GroupStore
         return false
       end
       
-      groups[group_id] = group.name
+      groups[group_id] = group
 
       return PluginStore.set(Disraptor::PLUGIN_NAME, 'groups', groups)
     end
