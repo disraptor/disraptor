@@ -70,7 +70,7 @@ export default DiscourseRoute.extend({
         return this.getDocumentHostNode(responseBody);
       })
       .catch(error => {
-        console.error(error);
+        console.error(proxyUrl, error);
         this.leaveDisraptorDocument();
         return fetch('/404-body')
           .then(response => response.text());
