@@ -29,6 +29,9 @@ class ProxyController < ApplicationController
       when '200'
         Rails.logger.info('👻 Disraptor: Status code 200. Responding with route content.')
         proxy_response.body.gsub!(/\<i class="(fa.{0,1})\sfa-([a-zA-Z0-9\-_]*)(.*?)"(.*?)><\/i>/, '<svg class="\1 d-icon d-icon-\2 svg-icon svg-node \3" \4><use xlink:href="#\2"></use></svg>')
+        if proxy_response.key?('Set-Cookie')
+          response.set_header('Set-Cookie', proxy_response['Set-Cookie'])
+        end
       when '202'
         # because AJAX stuff seems to be escaped for some reason
         # TODO: Maybe just unescape \" to "
