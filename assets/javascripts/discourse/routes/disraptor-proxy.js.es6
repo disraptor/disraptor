@@ -287,14 +287,14 @@ function injectHeadContent(responseBody) {
     // A second one breaks jQuery interactions, especially if a slim build is loaded.
     // NOTE: This check can be removed, if someday Discourse does not use jQuery anymore.
     if (!(scriptTag.src.includes('jquery') || scriptTag.src.includes('fontawesome'))) {
-      injectScriptIntoHead(scriptTag.src);
+      injectScriptIntoHead(scriptTag);
     }
   }
 
   for (const scriptTag of scriptTagsBody) {
     if (scriptTag.src) {
       if (!(scriptTag.src.includes('jquery') || scriptTag.src.includes('fontawesome'))) {
-        injectScriptIntoHead(scriptTag.src);
+        injectScriptIntoHead(scriptTag);
       }
     }
     else {
@@ -344,12 +344,19 @@ function extractTags(headContent, tagName) {
  *
  * [1]: https://www.html5rocks.com/en/tutorials/speed/script-loading/
  *
- * @param {String} src
+ * @param {ScriptTag} originalScriptTag
  */
-function injectScriptIntoHead(src) {
+function injectScriptIntoHead(originalScriptTag) {
   const script = document.createElement('script');
+
+  //Add all properties of the originalScriptTag
+  for (propertyName of originalScriptTag.getAttributeNames()) {
+    script.setAttribute(propertyName, originalScriptTag.getAttribute(propertyName));
+  }
+
+  //ensure that some properties are provided with the default values that we had before
   script.async = false;
-  script.src = src;
+  script.src = originalScriptTag.src;
   script.setAttribute('data-disraptor-tag', '');
   document.head.insertAdjacentElement("beforeend", script);
 }
