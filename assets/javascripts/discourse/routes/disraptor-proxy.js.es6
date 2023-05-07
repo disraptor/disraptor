@@ -350,7 +350,7 @@ function injectScriptIntoHead(originalScriptTag) {
   const script = document.createElement('script');
 
   //Add all properties of the originalScriptTag
-  for (propertyName of originalScriptTag.getAttributeNames()) {
+  for (const propertyName of originalScriptTag.getAttributeNames()) {
     script.setAttribute(propertyName, originalScriptTag.getAttribute(propertyName));
   }
 
