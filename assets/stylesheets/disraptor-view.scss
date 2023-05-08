@@ -1,18 +1,9 @@
-.disraptor-page body,
-.disraptor-page #main,
-.disraptor-page #main > div,
-.disraptor-page .disraptor-content {
-  height: 100% !important;
-}
-
 /*
 1. Account for Discourse’s header height in legacy rendering mode.
 */
 .disraptor-page #main-outlet {
   max-width: none;
   overflow-y: auto;
-  height: calc(100% - 4.2857em - 3px) !important; // [> 1. <]
-//  padding-top: calc(4.2857em + 3px); [> 1. <]
   padding-top: 0;
 }
 
