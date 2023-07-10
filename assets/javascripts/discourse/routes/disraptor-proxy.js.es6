@@ -82,7 +82,7 @@ export default DiscourseRoute.extend({
    */
   urlPointsToDefaultHomePage(url) {
     return url === this.defaultHomePath || url === (this.defaultHomePath + '/') || url.split('?')[0] === this.defaultHomePath || url.split('?')[0] === (this.defaultHomePath + '/')
-  }
+  },
 
   /**
    * Injects the Disraptor document.
