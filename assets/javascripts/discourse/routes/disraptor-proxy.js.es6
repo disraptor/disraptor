@@ -47,7 +47,7 @@ export default DiscourseRoute.extend({
    * @returns {any | Promise<any>}
    */
   model(params, transition) {
-    const proxyUrl = transition.intent.url === this.defaultHomePath ? '/' : transition.intent.url;
+    const proxyUrl = this.urlPointsToDefaultHomePage(transition.intent.url) ? '/' : transition.intent.url;
     return fetch(proxyUrl)
       .then(response => {
         if (!response.ok) {
@@ -76,6 +76,13 @@ export default DiscourseRoute.extend({
           .then(response => response.text());
       });
   },
+
+  /**
+   * URL points to the default home page?
+   */
+  urlPointsToDefaultHomePage(url) {
+    return url === this.defaultHomePath || url === (this.defaultHomePath + '/') || url.split('?')[0] === this.defaultHomePath || url.split('?')[0] === (this.defaultHomePath + '/')
+  }
 
   /**
    * Injects the Disraptor document.
