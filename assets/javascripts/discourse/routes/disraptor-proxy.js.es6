@@ -140,6 +140,13 @@ export default DiscourseRoute.extend({
       }
 
       if (!this.siteSettings.disraptor_shadow_dom) {
+        for (let i=0; i< 4; i++) {
+            const disraptorRoot = document.querySelector('.disraptor-content');
+            if (disraptorRoot && disraptorRoot.childNodes) {
+                disraptorRoot.childNodes.forEach(element => {element.remove();});
+            }
+        }
+      
         const injectedElements = document.querySelectorAll('[data-disraptor-tag]');
         injectedElements.forEach(element => {
           element.remove();
