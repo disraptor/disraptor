@@ -67,7 +67,7 @@ class ProxyController < ApplicationController
   # * *Returns*:
   #   - the target URL for the outgoing request
   def determine_target_url(request_path, params)
-    source_path = request_path
+    source_path = request_path.gsub(/\s+/, '').gsub(/%20/, '')
     segments_map = {}
 
     # Construct the source path for lookup
@@ -86,16 +86,6 @@ class ProxyController < ApplicationController
     Rails.logger.info("👻 Disraptor: Found source path '#{source_path}'")
 
     route = Disraptor::Route.find_by_path(source_path)
-
-    if route.nil?
-      Rails.logger.info("👻 Disraptor: Second try using source path '#{source_path.gsub(/\s+/, '')}'")
-      route = Disraptor::Route.find_by_path(source_path.gsub(/\s+/, ''))
-    end
-
-    if route.nil?
-      Rails.logger.info("👻 Disraptor: Third try using source path '#{source_path.gsub(/\s+/, '').gsub(/%20/, '')}'")
-      route = Disraptor::Route.find_by_path(source_path.gsub(/\s+/, '').gsub(/%20/, ''))
-    end
 
     if route.nil?
       error_message = "Couldn’t find route for source path '#{source_path}'."
