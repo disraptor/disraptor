@@ -88,10 +88,12 @@ class ProxyController < ApplicationController
     route = Disraptor::Route.find_by_path(source_path)
 
     if route.nil?
+      Rails.logger.info("👻 Disraptor: Second try using source path '#{source_path.gsub(/\s+/, '')}'")
       route = Disraptor::Route.find_by_path(source_path.gsub(/\s+/, ''))
     end
 
     if route.nil?
+      Rails.logger.info("👻 Disraptor: Third try using source path '#{source_path.gsub(/\s+/, '').gsub(/%20/, '')}'")
       route = Disraptor::Route.find_by_path(source_path.gsub(/\s+/, '').gsub(/%20/, ''))
     end
 
