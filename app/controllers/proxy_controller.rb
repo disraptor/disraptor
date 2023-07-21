@@ -76,7 +76,7 @@ class ProxyController < ApplicationController
         segment_name = segment.sub(/^[:*]/, '')
 
         if params.has_key?(segment_name)
-          segment_value = params[segment_name]
+          segment_value = params[segment_name].gsub(/\s+/, '').gsub(/%20/, '')
           segments_map[segment] = segment_value
           source_path.sub!(segment_value, segment)
         end
