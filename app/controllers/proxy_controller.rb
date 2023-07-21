@@ -88,6 +88,12 @@ class ProxyController < ApplicationController
     route = Disraptor::Route.find_by_path(source_path)
 
     if route.nil?
+      route = Disraptor::Route.find_by_path(source_path.gsub(/\s+/, ''))
+
+    if route.nil?
+      route = Disraptor::Route.find_by_path(source_path.gsub(/\s+/, '').gsub(/%20/, ''))
+
+    if route.nil?
       error_message = "Couldn’t find route for source path '#{source_path}'."
       Rails.logger.error('❌ Disraptor: Error: ' + error_message)
       return nil
