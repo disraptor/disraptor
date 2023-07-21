@@ -67,7 +67,7 @@ class ProxyController < ApplicationController
   # * *Returns*:
   #   - the target URL for the outgoing request
   def determine_target_url(request_path, params)
-    source_path = request_path.gsub(/\s+/, '').gsub(/%20/, '')
+    source_path = request_path.gsub(/\s+/, '%20')
     segments_map = {}
 
     # Construct the source path for lookup
@@ -76,9 +76,9 @@ class ProxyController < ApplicationController
         segment_name = segment.sub(/^[:*]/, '')
 
         if params.has_key?(segment_name)
-          segment_value = params[segment_name]
+          segment_value = params[segment_name].gsub(/\s+/, '%20')
           segments_map[segment] = segment_value
-          source_path.sub!(segment_value.gsub(/\s+/, '').gsub(/%20/, ''), segment)
+          source_path.sub!(segment_value, segment)
         end
       end
     end
