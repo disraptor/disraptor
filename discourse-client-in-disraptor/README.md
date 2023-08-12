@@ -1,6 +1,6 @@
-# A Lightweight Discourse Client for Disraptor
+# A Lightweight Discourse Client for Disraptor Apps
 
-Simple access to the discourse API required to use [Disraptor](www.disraptor.org).
+Simple access to the discourse API required to use [Disraptor](https://www.disraptor.org).
 
 Install via:
 

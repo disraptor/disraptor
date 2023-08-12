@@ -1,6 +1,21 @@
 import requests
 import json
 import secrets
+from discourse_client_in_disraptor.third_party_integrations import responseNotAllowed, extractHeader
+import os
+
+
+_DISRAPTOR_APP_SECRET_KEY = os.getenv("DISRAPTOR_APP_SECRET_KEY")
+
+def check_disraptor_token(func):
+    @wraps(func)
+    def func_wrapper(auth, request, *args, **kwargs):
+        if extractHeader(request, 'X-Disraptor-App-Secret-Key', None) != _DISRAPTOR_APP_SECRET_KEY:
+            return responseNotAllowed('Access forbidden.')
+
+        return func(auth, request, *args, **kwargs)
+
+    return func_wrapper
 
 class DiscourseApiClient():
     """An API client for discourse behind disraptor."""
