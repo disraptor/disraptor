@@ -17,6 +17,18 @@ def check_disraptor_token(func):
 
     return func_wrapper
 
+def __extract_discourse_groups(request, app, sep):
+    if not request or not app or not sep or not hasattr(request, 'headers'):
+        return []
+    ret = extractHeader(request, 'X-Disraptor-Groups', "None").split(",")
+    return set([i.split(app + sep)[1] for i in ret if i and len(i.split(sep)) == 2 and len(i.split(app + sep)) == 2 and i.startswith(app+sep)])
+
+
+def request_is_in_group(request, group, app, sep='___'):
+    groups = __extract_discourse_groups(request, app, sep)
+    print(groups)
+    return  group in groups
+
 class DiscourseApiClient():
     """An API client for discourse behind disraptor."""
     def __init__(self, api_key, url):
