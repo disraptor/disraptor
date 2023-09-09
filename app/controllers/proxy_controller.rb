@@ -20,14 +20,11 @@ class ProxyController < ApplicationController
       return
     end
 
-    Rails.logger.info("👻 Disraptor: '#{request.query_string}'")
-    Rails.logger.info("👻 Disraptor: '#{request.query_string.nil?}'")
     Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url} #{request.format.to_s}'")
 
-    if request.query_string != nil
-      tmp_target_url = target_url
-      tmp_target_url = tmp_target_url + request.query_string
-      Rails.logger.info("👻 Disraptor: test of expanding the url yields '#{tmp_target_url}'")
+    if request.query_string != nil && request.query_string != ''
+      target_url = target_url + '?' + request.query_string
+      Rails.logger.info("👻 Disraptor: Expanding the URL with query string to '#{tmp_target_url}'")
     end
 
     proxy_response = send_proxy_request(request, target_url)
