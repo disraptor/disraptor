@@ -103,7 +103,9 @@ export default DiscourseRoute.extend({
     }
 
     const bodyContent = extractTagContent('body', responseBody);
-    return `<div class="disraptor-content">${bodyContent}</div>`;
+    const ret = `<div class="disraptor-content">${bodyContent}</div>`;
+    
+    return new DOMParser().parseFromString(ret, 'text/html').querySelector('.disraptor-content')
   },
 
   renderTemplate() {
