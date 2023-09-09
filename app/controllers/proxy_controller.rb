@@ -24,7 +24,7 @@ class ProxyController < ApplicationController
 
     if request.query_string != nil && request.query_string != ''
       target_url = target_url + '?' + request.query_string
-      Rails.logger.info("👻 Disraptor: Expanding the URL with query string to '#{tmp_target_url}'")
+      Rails.logger.info("👻 Disraptor: Expanding the URL with query string to '#{target_url}'")
     end
 
     proxy_response = send_proxy_request(request, target_url)
