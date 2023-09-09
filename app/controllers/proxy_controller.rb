@@ -20,7 +20,15 @@ class ProxyController < ApplicationController
       return
     end
 
+    Rails.logger.info("👻 Disraptor: '#{request.query}'")
+    Rails.logger.info("👻 Disraptor: '#{request.query.nil?}'")
     Rails.logger.info("👻 Disraptor: Preparing request '#{request.method} #{target_url} #{request.format.to_s}'")
+
+    if request.query != nil
+      tmp_target_url = target_url
+      tmp_target_url = tmp_target_url + request.query
+      Rails.logger.info("👻 Disraptor: test of expanding the url yields '#{tmp_target_url}'")
+    end
 
     proxy_response = send_proxy_request(request, target_url)
     response.set_header('X-Disraptor-Proxy', 'yes')
