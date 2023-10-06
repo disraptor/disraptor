@@ -10,7 +10,7 @@ _DISRAPTOR_APP_SECRET_KEY = os.getenv("DISRAPTOR_APP_SECRET_KEY")
 
 def check_disraptor_token(func):
     @wraps(func)
-    def func_wrapper(auth, request, *args, **kwargs):
+    def func_wrapper(request, *args, **kwargs):
         if extractHeader(request, 'X-Disraptor-App-Secret-Key', None) != _DISRAPTOR_APP_SECRET_KEY:
             return responseNotAllowed('Access forbidden.')
 
