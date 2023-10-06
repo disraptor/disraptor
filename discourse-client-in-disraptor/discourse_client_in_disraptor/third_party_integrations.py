@@ -11,7 +11,7 @@ try:
         return HttpResponseNotAllowed(message)
 
     def extractHeaderDjango(request, header, default):
-        return request.headers.get(header, default)
+        return request.headers.get(header, default) if request and request.headers else default
 
     responseNotAllowed = responseNotAllowedDjango
     extractHeader = extractHeaderDjango
