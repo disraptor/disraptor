@@ -1,4 +1,4 @@
-VERSION=0.0.5
+VERSION=0.0.6
 
 build-pypi-package:
 	python3 -m build --sdist .

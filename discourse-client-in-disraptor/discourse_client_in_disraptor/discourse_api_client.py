@@ -14,7 +14,7 @@ def check_disraptor_token(func):
         if extractHeader(request, 'X-Disraptor-App-Secret-Key', None) != _DISRAPTOR_APP_SECRET_KEY:
             return responseNotAllowed('Access forbidden.')
 
-        return func(auth, request, *args, **kwargs)
+        return func(request, *args, **kwargs)
 
     return func_wrapper
 
