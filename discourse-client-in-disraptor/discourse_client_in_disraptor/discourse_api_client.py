@@ -7,6 +7,7 @@ import os
 
 
 _DISRAPTOR_APP_SECRET_KEY = os.getenv("DISRAPTOR_APP_SECRET_KEY")
+_DISRAPTOR_UNAUTHENTICATED_GUEST_USER = os.getenv("DISRAPTOR_UNAUTHENTICATED_GUEST_USER", 'unauthenticated-guest-user')
 
 def check_disraptor_token(func):
     @wraps(func)
@@ -25,9 +26,15 @@ def __extract_discourse_groups(request, app, sep):
     return set([i.split(app + sep)[1] for i in ret if i and len(i.split(sep)) == 2 and len(i.split(app + sep)) == 2 and i.startswith(app+sep)])
 
 
+def get_disraptor_user(request, allow_unauthenticated_user):
+    ret = extractHeader(request, 'X-Disraptor-User', _DISRAPTOR_UNAUTHENTICATED_GUEST_USER)
+    if ret == _DISRAPTOR_UNAUTHENTICATED_GUEST_USER and not allow_unauthenticated_user:
+        return responseNotAllowed('Access forbidden.')
+    
+    return ret
+
 def request_is_in_group(request, group, app, sep='___'):
     groups = __extract_discourse_groups(request, app, sep)
-    print(groups)
     return  group in groups
 
 class DiscourseApiClient():
