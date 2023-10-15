@@ -6,7 +6,7 @@ from functools import wraps
 import os
 
 
-_DISRAPTOR_APP_SECRET_KEY = os.getenv("DISRAPTOR_APP_SECRET_KEY")
+_DISRAPTOR_APP_SECRET_KEY = os.getenv("DISRAPTOR_APP_SECRET_KEY", 'no-secret-key')
 _DISRAPTOR_UNAUTHENTICATED_GUEST_USER = os.getenv("DISRAPTOR_UNAUTHENTICATED_GUEST_USER", 'unauthenticated-guest-user')
 
 def check_disraptor_token(func):
