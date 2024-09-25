@@ -2,6 +2,7 @@ import DiscourseURL from 'discourse/lib/url';
 import DiscourseRoute from 'discourse/routes/discourse';
 import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
+import { scheduleOnce } from '@ember/runloop';
 
 /**
  * This is the “disraptor-proxy” route.
@@ -111,7 +112,7 @@ export default DiscourseRoute.extend({
   renderTemplate() {
     this.render('disraptor-proxy');
 
-    Ember.run.scheduleOnce('afterRender', () => {
+    scheduleOnce('afterRender', () => {
       if (this.siteSettings.disraptor_shadow_dom) {
         this.disraptorRoot.host.addEventListener('click', interceptClick);
       } else {
@@ -165,7 +166,7 @@ export default DiscourseRoute.extend({
      * [1]: https://api.emberjs.com/ember/3.22/classes/Route/events/didTransition?anchor=didTransition
      */
     didTransition() {
-      Ember.run.scheduleOnce('afterRender', this, function () {
+      scheduleOnce('afterRender', this, function () {
         const scripts = document.body.querySelectorAll('[data-disraptor-tag]');
         scripts.forEach(script => {
           /*

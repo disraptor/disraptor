@@ -1,3 +1,6 @@
+import Controller from '@ember/controller';
+import { computed, set } from '@ember/object';
+
 import { popupAjaxError } from 'discourse/lib/ajax-error';
 import { generateRouteId } from '../lib/generate-route-id';
 
@@ -6,7 +9,7 @@ import { generateRouteId } from '../lib/generate-route-id';
  *
  * Responsible for configuring Disraptor routes and transferring them to the back end.
  */
-export default Ember.Controller.extend({
+export default Controller.extend({
   /**
    * Needs to match the filename of `assets/javascripts/discourse/models/disraptor/route.js.es6`.
    *
@@ -37,15 +40,15 @@ export default Ember.Controller.extend({
   routeTargetUrl: '',
   routeCreatedMessage: '',
 
-  normalizedRequestMethod: Ember.computed('routeRequestMethod', function () {
+  normalizedRequestMethod: computed('routeRequestMethod', function () {
     return this.get('routeRequestMethod').trim().toLowerCase();
   }),
 
-  normalizedSourcePath: Ember.computed('routeSourcePath', function () {
+  normalizedSourcePath: computed('routeSourcePath', function () {
     return this.normalizePath(this.get('routeSourcePath').trim());
   }),
 
-  normalizedTargetUrl: Ember.computed('routeTargetUrl', function () {
+  normalizedTargetUrl: computed('routeTargetUrl', function () {
     const targetUrl = this.get('routeTargetUrl').trim();
 
     try {
@@ -56,7 +59,7 @@ export default Ember.Controller.extend({
     }
   }),
 
-  routeId: Ember.computed('normalizedRequestMethod', 'normalizedSourcePath', function () {
+  routeId: computed('normalizedRequestMethod', 'normalizedSourcePath', function () {
     // Hash the source path (e.g. /example) to obtain a number that can be
     // used as an ID for the store. This intentionally creates a conflict when
     // attemtping to create a route for the same path twice.
@@ -66,7 +69,7 @@ export default Ember.Controller.extend({
     return generateRouteId(requestMethod, sourcePath);
   }),
 
-  sourcePathIsInvalid: Ember.computed('normalizedSourcePath', function () {
+  sourcePathIsInvalid: computed('normalizedSourcePath', function () {
     const path = this.get('normalizedSourcePath');
 
     if (path.startsWith('/admin')) {
@@ -233,7 +236,7 @@ export default Ember.Controller.extend({
      * @param {*} route Route to toggle the editing state for
      */
     toggleEditingRoute(route) {
-      Ember.set(route, 'isBeingEdited', !route.isBeingEdited);
+      set(route, 'isBeingEdited', !route.isBeingEdited);
     }
   }
 });
