@@ -19,25 +19,15 @@ import { defaultHomepage } from 'discourse/lib/utilities';
  */
 export default function () {
   /*
-  This check to see whether the plugin is enabled might not be necessary in the future.
-  For any updates on this, check:
-  https://meta.discourse.org/t/plugin-route-map-loaded-even-when-it-s-disabled/114725
-
-  In particular, the following PR needs to be merged (scheduled for Discourse 2.4):
-  https://github.com/discourse/discourse/pull/7566
-  */
-  if (this.site.siteSettings['disraptor_enabled']) {
-    /*
-     * It seems that in some version Discourse changed in what order plugin and Discourse-scripts are executed (or loaded).
-     * because of this now this script executes before the default homepage is set on loading a page.
-     * Later on we run into problems if the homepage is not set and that's why we do it here in case it is not set yet.
-     */ 
-    if (!defaultHomepage()) {
-      initializeDefaultHomepage(this.site.siteSettings);
-    }
-    const defaultHomeRoute = `/${defaultHomepage()}`;
-    this.route('disraptor-proxy.homepage', { path: defaultHomeRoute });
-    this.route('disraptor-proxy.single-segment', { path: '/:path' });
-    this.route('disraptor-proxy.multi-segment', { path: '/:path/*wildcard' });
+   * It seems that in some version Discourse changed in what order plugin and Discourse-scripts are executed (or loaded).
+   * because of this now this script executes before the default homepage is set on loading a page.
+   * Later on we run into problems if the homepage is not set and that's why we do it here in case it is not set yet.
+   */ 
+  if (!defaultHomepage()) {
+    initializeDefaultHomepage(this.site.siteSettings);
   }
+  const defaultHomeRoute = `/${defaultHomepage()}`;
+  this.route('disraptor-proxy.homepage', { path: defaultHomeRoute });
+  this.route('disraptor-proxy.single-segment', { path: '/:path' });
+  this.route('disraptor-proxy.multi-segment', { path: '/:path/*wildcard' });
 }

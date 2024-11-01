@@ -3,25 +3,31 @@ import DiscourseRoute from 'discourse/routes/discourse';
 import { defaultHomepage } from 'discourse/lib/utilities';
 import { generateRouteId } from '../lib/generate-route-id';
 import { scheduleOnce } from '@ember/runloop';
+import { action } from '@ember/object';
+import { service } from '@ember/service';
 
 /**
  * This is the “disraptor-proxy” route.
  */
-export default DiscourseRoute.extend({
-  defaultHomePath: `/${defaultHomepage()}`,
-  defaultHomeRoute: `discovery.${defaultHomepage()}`,
+export default class ProxyRoute extends DiscourseRoute {
+  @service router;
+
+  defaultHomePath = `/${defaultHomepage()}`
+  defaultHomeRoute = `discovery.${defaultHomepage()}`
 
   beforeModel(transition) {
-    if (transition.intent.url === this.defaultHomePath) {
+    // Using the URL class to remove the query string from the path. Removing the protocol spec would be a malformed URL
+    // so I added arbitrary text there.
+    if (new URL(`doesntmatter:${transition.intent.url}`).pathname == this.defaultHomePath) {
       if (window.location.pathname === this.defaultHomePath) {
-        // This ensures that the Discourse forum is available when the user requests the default
-        // homepage.
-        this.transitionTo(this.defaultHomeRoute);
+        // This ensures that the Discourse forum is available when the user requests the default homepage.
+        this.router.transitionTo(this.defaultHomeRoute);
       } else {
         /*
-        We want to continue serving Discourse’s home page *if* there is no root route configured via Disraptor. Currently, I cannot think of another way than querying the server for whether a route with the key parameters for a root route exists. If such a route doesn’t
-        exist (i.e. the end point responds with a status 404), we transition to Discourse’s home
-        page.
+        We want to continue serving Discourse’s home page *if* there is no root route configured via Disraptor.
+        Currently, I cannot think of another way than querying the server for whether a route with the key parameters
+        for a root route exists. If such a route doesn’t exist (i.e. the end point responds with a status 404), we
+        transition to Discourse’s home page.
         */
         const rootRouteId = generateRouteId('get', '/');
 
@@ -31,14 +37,14 @@ export default DiscourseRoute.extend({
           })
           .catch(error => {
             if (error.jqXHR.status === 404) {
-              this.transitionTo(this.defaultHomeRoute);
+              this.router.transitionTo(this.defaultHomeRoute);
             }
           });
       }
     } else {
       this.enterDisraptorDocument();
     }
-  },
+  }
 
   /**
    * Retrieves the Disraptor document with an asynchronous request to the transition URL.
@@ -64,7 +70,7 @@ export default DiscourseRoute.extend({
         }
         return response.text();
       })
-      .then(responseBody => { 
+      .then(responseBody => {
         if (!this.siteSettings.disraptor_shadow_dom) {
           injectHeadContent(responseBody);
         }
@@ -76,14 +82,16 @@ export default DiscourseRoute.extend({
         return fetch('/404-body')
           .then(response => response.text());
       });
-  },
+    //const ret = `<div class="disraptor-content">TestBlah</div>`;
+    //return new DOMParser().parseFromString(ret, 'text/html').querySelector('.disraptor-content')
+  }
 
   /**
    * URL points to the default home page?
    */
   urlPointsToDefaultHomePage(url) {
     return url === this.defaultHomePath || url === (this.defaultHomePath + '/') || url.split('?')[0] === this.defaultHomePath || url.split('?')[0] === (this.defaultHomePath + '/')
-  },
+  }
 
   /**
    * Injects the Disraptor document.
@@ -105,11 +113,11 @@ export default DiscourseRoute.extend({
 
     const bodyContent = extractTagContent('body', responseBody);
     const ret = `<div class="disraptor-content">${bodyContent}</div>`;
-    
-    return new DOMParser().parseFromString(ret, 'text/html').querySelector('.disraptor-content')
-  },
 
-  renderTemplate() {
+    return new DOMParser().parseFromString(ret, 'text/html').querySelector('.disraptor-content')
+  }
+
+  renderTemplate() { /** REMOVED **/
     this.render('disraptor-proxy');
 
     scheduleOnce('afterRender', () => {
@@ -127,57 +135,57 @@ export default DiscourseRoute.extend({
       });
       this.hijackHomepageLinks();
     });
-  },
+  }
 
-  actions: {
-    /**
-     * See [emberjs.com: Route events: willTransition][1].
-     *
-     * [1]: https://www.emberjs.com/api/ember/3.5/classes/Route/events/willTransition?anchor=willTransition
-     *
-     * @param {any} transition
-     */
-    willTransition(transition) {
-      if (!transition.targetName.startsWith('disraptor-proxy')) {
-        this.leaveDisraptorDocument();
-      }
+  /**
+   * See [emberjs.com: Route events: willTransition][1].
+   *
+   * [1]: https://www.emberjs.com/api/ember/3.5/classes/Route/events/willTransition?anchor=willTransition
+   *
+   * @param {any} transition
+   */
+  @action
+  willTransition(transition) {
+    if (!transition.targetName.startsWith('disraptor-proxy')) {
+      this.leaveDisraptorDocument();
+    }
 
-      if (!this.siteSettings.disraptor_shadow_dom) {
-        for (let i=0; i< 4; i++) {
-            const disraptorRoot = document.querySelector('.disraptor-content');
-            if (disraptorRoot && disraptorRoot.childNodes) {
-                disraptorRoot.childNodes.forEach(element => {element.remove();});
-            }
+    if (!this.siteSettings.disraptor_shadow_dom) {
+      for (let i = 0; i < 4; i++) {
+        const disraptorRoot = document.querySelector('.disraptor-content');
+        if (disraptorRoot && disraptorRoot.childNodes) {
+          disraptorRoot.childNodes.forEach(element => { element.remove(); });
         }
-      
-        const injectedElements = document.querySelectorAll('[data-disraptor-tag]');
-        injectedElements.forEach(element => {
-          element.remove();
-        });
       }
-    },
 
-    /**
-     * This makes sure that after the DOM is rendered all scripts are executed.
-     * By doing so we make sure objects that get changed by javascripts are actually there.
-     *
-     * See [emberjs.com: Route events: didTransition][1].
-     *
-     * [1]: https://api.emberjs.com/ember/3.22/classes/Route/events/didTransition?anchor=didTransition
-     */
-    didTransition() {
-      scheduleOnce('afterRender', this, function () {
-        const scripts = document.body.querySelectorAll('[data-disraptor-tag]');
-        scripts.forEach(script => {
-          /*
-           * Scripts that have no trouble running have no downtime from this.
-           * However, script which have trouble loading due to prerequisites get recalled in a cyclic way.
-           */
-          timeoutScript(0, script);
-        });
+      const injectedElements = document.querySelectorAll('[data-disraptor-tag]');
+      injectedElements.forEach(element => {
+        element.remove();
       });
-    },
-  },
+    }
+  }
+
+  /**
+   * This makes sure that after the DOM is rendered all scripts are executed.
+   * By doing so we make sure objects that get changed by javascripts are actually there.
+   *
+   * See [emberjs.com: Route events: didTransition][1].
+   *
+   * [1]: https://api.emberjs.com/ember/3.22/classes/Route/events/didTransition?anchor=didTransition
+   */
+  @action
+  didTransition() {
+    scheduleOnce('afterRender', this, function () {
+      const scripts = document.body.querySelectorAll('[data-disraptor-tag]');
+      scripts.forEach(script => {
+        /*
+         * Scripts that have no trouble running have no downtime from this.
+         * However, script which have trouble loading due to prerequisites get recalled in a cyclic way.
+         */
+        timeoutScript(0, script);
+      });
+    });
+  }
 
   /**
    * This is a hack to work around a conflict between Discourse and Disraptor.
@@ -194,7 +202,7 @@ export default DiscourseRoute.extend({
     // Hijacks all links to the default homepage that are already rendered.
     document.querySelectorAll(`a[href="${this.defaultHomePath}"]`).forEach(link => {
       link.addEventListener('click', () => {
-        this.transitionTo(this.defaultHomeRoute);
+        this.router.transitionTo(this.defaultHomeRoute);
       });
     });
 
@@ -218,7 +226,7 @@ export default DiscourseRoute.extend({
         });
       }, 50);
     });
-  },
+  }
 
   /**
    * Setup when entering a Disraptor route.
@@ -236,7 +244,7 @@ export default DiscourseRoute.extend({
     if (!document.documentElement.classList.contains('disraptor-page')) {
       document.documentElement.classList.add('disraptor-page');
     }
-  },
+  }
 
   /**
    * Cleans up when leaving a Disraptor route.
@@ -244,7 +252,7 @@ export default DiscourseRoute.extend({
   leaveDisraptorDocument() {
     document.documentElement.classList.remove('disraptor-page', 'disraptor-uses-shadow-dom');
   }
-});
+}
 
 /*
  * Allows cyclic reloading of scripts, which prerequisites are not loaded yet.
@@ -258,7 +266,7 @@ function timeoutScript(t, script) {
       eval(script.innerHTML);
     }
     catch (e) {
-      if (e instanceof ReferenceError){
+      if (e instanceof ReferenceError) {
         timeoutScript(t + 1, script);
       }
     }
