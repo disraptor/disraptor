@@ -31,6 +31,8 @@ export default class ProxyRoute extends DiscourseRoute {
         */
         const rootRouteId = generateRouteId('get', '/');
 
+        // FIXME: there is a severe race condition here: since this.store.find is *asynchronous*, beforeModel returns
+        // before the result is known and model() can be called before enterDisraptorDocument or transitionTo(...)!
         this.store.find('disraptor/route', rootRouteId)
           .then(() => {
             this.enterDisraptorDocument();
@@ -74,6 +76,21 @@ export default class ProxyRoute extends DiscourseRoute {
         if (!this.siteSettings.disraptor_shadow_dom) {
           injectHeadContent(responseBody);
         }
+        scheduleOnce('afterRender', () => {
+          if (this.siteSettings.disraptor_shadow_dom) {
+            this.disraptorRoot.host.addEventListener('click', interceptClick);
+          } else {
+            this.disraptorRoot = document.querySelector('.disraptor-content');
+          }
+    
+          const forms = this.disraptorRoot.querySelectorAll('form');
+          forms.forEach(form => {
+            if (form.method.toLowerCase() === 'post') {
+              form.addEventListener('submit', performPostRequest.bind(this));
+            }
+          });
+          this.hijackHomepageLinks();
+        });
         return this.getDocumentHostNode(responseBody);
       })
       .catch(error => {
@@ -82,8 +99,6 @@ export default class ProxyRoute extends DiscourseRoute {
         return fetch('/404-body')
           .then(response => response.text());
       });
-    //const ret = `<div class="disraptor-content">TestBlah</div>`;
-    //return new DOMParser().parseFromString(ret, 'text/html').querySelector('.disraptor-content')
   }
 
   /**
@@ -115,26 +130,6 @@ export default class ProxyRoute extends DiscourseRoute {
     const ret = `<div class="disraptor-content">${bodyContent}</div>`;
 
     return new DOMParser().parseFromString(ret, 'text/html').querySelector('.disraptor-content')
-  }
-
-  renderTemplate() { /** REMOVED **/
-    this.render('disraptor-proxy');
-
-    scheduleOnce('afterRender', () => {
-      if (this.siteSettings.disraptor_shadow_dom) {
-        this.disraptorRoot.host.addEventListener('click', interceptClick);
-      } else {
-        this.disraptorRoot = document.querySelector('.disraptor-content');
-      }
-
-      const forms = this.disraptorRoot.querySelectorAll('form');
-      forms.forEach(form => {
-        if (form.method.toLowerCase() === 'post') {
-          form.addEventListener('submit', performPostRequest.bind(this));
-        }
-      });
-      this.hijackHomepageLinks();
-    });
   }
 
   /**
