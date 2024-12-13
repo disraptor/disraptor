@@ -52,13 +52,6 @@ class Disraptor::RoutesController < ApplicationController
       return render json: { error: error_message }, status: 400
     end
 
-    if source_path != '/' and source_path.end_with?('/')
-      error_message = "Route source path was #{source_path} but it must not end in a slash."
-      Rails.logger.error('❌ Disraptor: Error: ' + error_message)
-
-      return render json: { error: error_message }, status: 400
-    end
-
     route = Disraptor::Route.edit(route_id, source_path, target_url, request_method)
 
     Rails.application.reload_routes!

@@ -94,22 +94,17 @@ export default class FrontendController extends Controller {
   }
 
   normalizePath(path) {
-    const sourcePath = path.replace(/\/+/g, '/');
+    const sourcePath = ('/' + path).replace(/\/+/g, '/');
 
     const pathSegments = [];
     for (const segment of sourcePath.split('/')) {
       if (segment === '..') {
         pathSegments.pop();
-      } else if (segment !== '') {
+      } else {
         pathSegments.push(segment);
       }
     }
-
-    if (pathSegments.length === 0) {
-      return '/';
-    }
-
-    return '/' + pathSegments.join('/').replace(/\/$/, '');
+    return pathSegments.join('/');
   }
 
   init() {
