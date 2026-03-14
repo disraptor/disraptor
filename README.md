@@ -13,14 +13,6 @@ Disraptor is a plugin for Discourse. It aims at offering Discourse’s core func
   - [Tests](#tests)
 - [To do](#to-do)
 
-## Prototyping
-
-Pototyping new JS Applications behind discourse/disraptor: 
-
-- https://www.tira.io/web-ui-prototyping/ forwards to https://files.webis.de/data-in-progress/data-research/web-search/tira-web-ui-prototyping/
-
-I.e., just place the application that you want to try out in /mnt/ceph/storage/web/files/data-in-progress/data-research/web-search/tira-web-ui-prototyping. For instance, https://www.tira.io/web-ui-prototyping/talmud-ui/index.html
-
 ## Documentation
 
 Disraptor’s documentation is available at [disraptor.org/docs](https://www.disraptor.org/docs).
@@ -71,6 +63,15 @@ cd discourse
 bundle exec rake plugin:spec["disraptor"]
 ```
 
+
+
+## Prototyping For TIRA Deployments
+
+Pototyping new JS Applications behind discourse/disraptor: 
+
+- https://www.tira.io/web-ui-prototyping/ forwards to https://files.webis.de/data-in-progress/data-research/web-search/tira-web-ui-prototyping/
+
+I.e., just place the application that you want to try out in /mnt/ceph/storage/web/files/data-in-progress/data-research/web-search/tira-web-ui-prototyping. For instance, https://www.tira.io/web-ui-prototyping/talmud-ui/index.html
 
 
 ## To do
